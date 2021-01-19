@@ -143,18 +143,19 @@ public class BanListener extends ListenerAdapter {
 
 		final DiscordGuild dcGuild = dcGuildOpt.get();
 		final User bannedUser = ban.getUser();
+		final String banReason = ban.getReason() == null ? "Unknown reason!" : ban.getReason();
 		final Optional<DiscordUser> bannedDiscordUserOpt = discordUserRepo.findById(bannedUser.getIdLong());
 		bannedDiscordUserOpt.ifPresentOrElse(
-				bannedDiscordUser -> saveBan(DiscordBan.createDiscordBan(actorId, ban.getReason(), dcGuild, bannedDiscordUser)),
+				bannedDiscordUser -> saveBan(DiscordBan.createDiscordBan(actorId, banReason, dcGuild, bannedDiscordUser)),
 				() -> {
 					DiscordUser bannedDiscordUser = DiscordUser.createDiscordUser(bannedUser.getIdLong());
 					discordUserRepo.save(bannedDiscordUser);
-					saveBan(DiscordBan.createDiscordBan(actorId, ban.getReason(), dcGuild, bannedDiscordUser));
+					saveBan(DiscordBan.createDiscordBan(actorId, banReason, dcGuild, bannedDiscordUser));
 				}
 		);
 
 		LogUtil.logInfo("\"" + ban.getUser().getAsTag() + "\" (" + ban.getUser().getId() +
-				") got banned for \"" + ban.getReason() + "\"");
+				") got banned for \"" + banReason + "\"");
 	}
 
 	/**
