@@ -56,3 +56,4 @@ RwLog
 
 ### Text files ###
 *.txt
+!banner.txt
