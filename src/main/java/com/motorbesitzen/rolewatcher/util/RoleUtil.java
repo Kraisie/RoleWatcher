@@ -50,15 +50,18 @@ public final class RoleUtil {
 	 * @param allForumRoles    A list of all forum roles.
 	 */
 	private static void handleDuplicateNamedRoles(List<ForumRole> memberForumRoles, Iterable<ForumRole> allForumRoles) {
+		List<ForumRole> dupRoles = new ArrayList<>();
 		for (ForumRole memberRole : memberForumRoles) {
 			for (ForumRole forumRole : allForumRoles) {
 				if (memberRole.getRoleName().equalsIgnoreCase(forumRole.getRoleName()) && memberRole.getRoleId() != forumRole.getRoleId()) {
 					if (!memberForumRoles.contains(forumRole)) {
-						memberForumRoles.add(forumRole);
+						dupRoles.add(forumRole);
 					}
 				}
 			}
 		}
+
+		memberForumRoles.addAll(dupRoles);
 	}
 
 	/**
