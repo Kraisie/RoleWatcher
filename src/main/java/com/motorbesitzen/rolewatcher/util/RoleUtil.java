@@ -42,23 +42,19 @@ public final class RoleUtil {
 	}
 
 	/**
-	 * If there are two roles with the same name but different IDs then just add both to the users' roles.
-	 * So the role does not get removed in Discord as{@code guild.modifyMemberRoles(...)} removes the role
+	 * If there are two roles with the same name but different IDs then just add that role to the users' roles.
+	 * So the role does not get removed in Discord as {@code guild.modifyMemberRoles(...)} removes the role
 	 * if it is present in the add and remove list.
 	 *
 	 * @param memberForumRoles The roles of the member.
 	 * @param allForumRoles    A list of all forum roles.
 	 */
 	private static void handleDuplicateNamedRoles(List<ForumRole> memberForumRoles, Iterable<ForumRole> allForumRoles) {
-		for (ForumRole forumRole : allForumRoles) {
-			for (ForumRole dupForumRole : allForumRoles) {
-				if (forumRole.getRoleName().equalsIgnoreCase(dupForumRole.getRoleName())) {
+		for (ForumRole memberRole : memberForumRoles) {
+			for (ForumRole forumRole : allForumRoles) {
+				if (memberRole.getRoleName().equalsIgnoreCase(forumRole.getRoleName()) && memberRole.getRoleId() != forumRole.getRoleId()) {
 					if (!memberForumRoles.contains(forumRole)) {
 						memberForumRoles.add(forumRole);
-					}
-
-					if (!memberForumRoles.contains(dupForumRole)) {
-						memberForumRoles.add(dupForumRole);
 					}
 				}
 			}
