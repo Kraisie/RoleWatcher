@@ -1,0 +1,86 @@
+# setting values happens from top to bottom. if profiles are used they add to the standard settings.
+# if some profile has other settings for a specific option than one higher up it will overwrite that setting.
+
+# production profile (always set)
+spring:
+  devtools:
+    add-properties: false
+  jpa:
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
+  datasource:
+    url: jdbc:h2:file:./data/${DB_DATABASE:database};DB_CLOSE_ON_EXIT=FALSE;IFEXISTS=FALSE;DB_CLOSE_DELAY=-1
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+  # Spring can use x threads to handle scheduled events
+  task:
+    scheduling:
+      pool:
+        size: 5
+  h2:
+    console:
+      enabled: false
+logging:
+  file:
+    name: "RwLog"
+  level:
+    org:
+      apache: warn
+  logback:
+    # keep 7 days of logs, each file can be 50MB
+    rollingpolicy:
+      max-file-size: 50MB
+      file-name-pattern: ${LOG_FILE}_%d{yyyy-MM-dd}_%i.log
+server:
+  port: ${WEB_API_OPEN_PORT:8080}
+---
+# additionally turn on (or overwrite) if first start profile ("firststart")
+spring:
+  config:
+    activate:
+      on-profile: firststart
+  jpa:
+    hibernate:
+      ddl-auto: create
+---
+# additionally turn on (or overwrite) if development profile ("dev")
+spring:
+  config:
+    activate:
+      on-profile: dev
+  devtools:
+    add-properties: true
+  jpa:
+    hibernate:
+      ddl-auto: create-drop   # none = (default) DB does not get changed, create = creates DB, create-drop = creates DB and drops on shutdown, update = DB gets updated to match code entities
+    #    show-sql: true            # prints the used SQL statement
+    #    properties:
+    #      hibernate:
+    #        format_sql: true      # formats the used SQL statement
+    # generate_statistics: true   # generates statistics (access times, lanes, etc). mostly not needed
+  h2:
+    console:
+      enabled: true
+      path: /h2
+  datasource:
+    initialization-mode: always # always import data
+    data: classpath:/data.sql   # location with the sample data to import
+# logging for hibernate activities
+logging:
+  level:
+    com:
+      motorbesitzen:
+        rolewatcher:
+          debug
+    #    org:
+    #      hibernate:
+    #        stat: debug
+    #        type: trace
+    web:
+      debug
+  logback:
+    # keep 1 day of logs, each file can be 50MB
+    rollingpolicy:
+      max-history: 1
+      clean-history-on-start: true

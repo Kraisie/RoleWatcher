@@ -1,0 +1,74 @@
+plugins {
+    id 'org.springframework.boot' version '2.4.0'
+    id 'io.spring.dependency-management' version '1.0.10.RELEASE'
+    id 'java'
+}
+
+group = 'com.motorbesitzen'
+version = '0.3.0'
+sourceCompatibility = '11'
+targetCompatibility = '11'
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+    jcenter()           // JDA repo
+}
+
+dependencies {
+    // development
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+
+    // runtime
+    implementation 'net.dv8tion:JDA:4.2.0_227'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.apache.httpcomponents:httpclient:4.5.13'
+    runtimeOnly 'com.h2database:h2'
+
+    // test
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.assertj:assertj-core:3.11.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.6.0'
+    testImplementation 'org.mockito:mockito-core:3.3.3'
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+}
+
+// create a manifest in the jar file
+jar {
+    manifest {
+        attributes(
+                'Main-Class': group + '.rolewatcher.RolewatcherApplication'
+        )
+    }
+}
+
+bootRun {
+    file('.env').readLines().each() {
+        if (!it.isEmpty() && !it.startsWith("#")) {
+            def pos = it.indexOf("=")
+            def key = it.substring(0, pos).trim()
+            def value = it.substring(pos + 1).trim()
+            if(value.startsWith("\"") && value.endsWith("\"")) {
+                value = value.substring(1, value.length() - 1)
+            }
+
+            if (System.getenv(key) == null) {
+                environment key, value
+            }
+        }
+    }
+}
