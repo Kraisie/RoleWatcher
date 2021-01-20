@@ -195,8 +195,9 @@ public class RoleUpdater {
 	private void banMember(ForumUser forumUser, Member member) {
 		member.ban(0, "User has banned role on the forum. Might be a temporary ban.").queue(
 				(ban) -> LogUtil.logInfo(
-						"Banned member " + member.getUser().getAsTag() + " (" + member.getId() + ") linked to " +
-								forumUser.toString() + " due to having the banned role."
+						"Banned member " + member.getUser().getAsTag() + " (" + member.getId() + ")  from \"" +
+								member.getGuild().getName() + "\" (" + member.getGuild().getId() + ") " +
+								"due to having the banned role. User is linked to " + forumUser.toString() + "."
 				),
 				throwable -> LogUtil.logError("Could not ban " + forumUser.toString() + " on \"" + member.getGuild().getName() + "\".", throwable)
 		);
@@ -219,7 +220,7 @@ public class RoleUpdater {
 	}
 
 	/**
-	 * Checks if the user should be kicked.
+	 * Checks if the user should be kicked and kicks the user accordingly.
 	 *
 	 * @param member The member to check.
 	 */
