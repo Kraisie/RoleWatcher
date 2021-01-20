@@ -89,6 +89,8 @@ public class RoleUpdater {
 
 	/**
 	 * Schedules all guilds by settings the delay between guilds based on the member count and the set base delay.
+	 * If there are no guilds the bot is a member of or there are no members increase the delay to 60 seconds
+	 * until the next run.
 	 */
 	private void doRoleUpdates() {
 		final List<Guild> guilds = jda.getGuilds();
@@ -105,6 +107,10 @@ public class RoleUpdater {
 		}
 
 		long nextRunDelay = (long) memberQueueCount * delayMs + delayMs;
+		if (nextRunDelay == delayMs) {
+			nextRunDelay = 60000;
+		}
+
 		scheduler.schedule(this::run, nextRunDelay, TimeUnit.MILLISECONDS);
 	}
 
