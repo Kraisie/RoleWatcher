@@ -45,11 +45,6 @@ public class ImportBans extends CommandImpl {
 			return;
 		}
 
-		if (mentionedGuildId == event.getGuild().getIdLong()) {
-			sendErrorMessage(channel, "Please do not provide your own guild ID.");
-			return;
-		}
-
 		final Optional<DiscordGuild> discordGuildOpt = discordGuildRepo.findById(mentionedGuildId);
 		discordGuildOpt.ifPresentOrElse(
 				discordGuild -> importBans(event, discordGuild),
