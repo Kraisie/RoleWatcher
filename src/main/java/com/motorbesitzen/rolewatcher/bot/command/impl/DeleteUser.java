@@ -37,19 +37,20 @@ public class DeleteUser extends CommandImpl {
 	@Override
 	public void execute(final GuildMessageReceivedEvent event) {
 		final TextChannel channel = event.getChannel();
-		final long id = DiscordMessageUtil.getMentionedMemberId(event.getMessage());
-		if (id == -1) {
+		final long memberId = DiscordMessageUtil.getMentionedMemberId(event.getMessage());
+		if (memberId == -1) {
 			sendErrorMessage(channel, "Please provide a mention or an ID for the delete command.");
 			return;
 		}
 
-		Optional<ForumUser> forumUser = forumUserRepo.findByForumIdOrLinkedDiscordUser_DiscordId(id, id);
+		Optional<ForumUser> forumUser = forumUserRepo.findByForumIdOrLinkedDiscordUser_DiscordId(memberId, memberId);
 		forumUser.ifPresentOrElse(user -> deleteUser(event, user), () -> sendErrorMessage(channel, "User not found! Make sure the given ID exists."));
 	}
 
 	/**
 	 * Deletes the user from the database and logs the delete action. Sends a success message after deletion.
-	 * Does not remove Discord roles of the deleted user if the user is whitelisted.
+	 * Does not remove Discord roles of the deleted user if the user is whitelisted. Informs caller if the user
+	 * to unlink is banned on this guild.
 	 *
 	 * @param event The event provided by JDA that a guild message got received.
 	 * @param user  The user to delete from the database.
@@ -58,6 +59,13 @@ public class DeleteUser extends CommandImpl {
 		// saving needed data, because hibernate nulls the user after deletion from the database
 		long discordId = user.getLinkedDiscordUser().getDiscordId();
 		boolean whitelisted = user.getLinkedDiscordUser().isWhitelisted();
+
+		event.getGuild().retrieveBanById(discordId).queue(
+				ban -> {
+					final String banReason = ban.getReason();
+					sendMessage(event.getChannel(), "The user you are unlinking is banned for \"" + banReason + "\" on this guild!");
+				}
+		);
 
 		user.setLinkedDiscordUser(null);
 		forumUserRepo.save(user);    // unlinking from discord user, otherwise won't delete entry
