@@ -177,7 +177,7 @@ public class BanListener extends ListenerAdapter {
 		Guild guild = event.getGuild();
 		User unbannedUser = event.getUser();
 
-		Optional<DiscordBan> banOpt = discordBanRepo.findDiscordBanByBannedUser_DiscordIdAndGuild_GuildId(guild.getIdLong(), unbannedUser.getIdLong());
+		Optional<DiscordBan> banOpt = discordBanRepo.findDiscordBanByBannedUser_DiscordIdAndGuild_GuildId(unbannedUser.getIdLong(), guild.getIdLong());
 		banOpt.ifPresentOrElse(
 				ban -> removeBan(event, ban),
 				() -> LogUtil.logWarning("\"" + unbannedUser.getAsTag() + "\" got unbanned on \"" +
