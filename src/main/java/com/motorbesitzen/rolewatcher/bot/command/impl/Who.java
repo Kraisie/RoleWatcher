@@ -93,7 +93,7 @@ public class Who extends CommandImpl {
 	 * @param dcUser The Discord user to show info about.
 	 */
 	private void setDiscordInfo(final Guild guild, final EmbedBuilder eb, final DiscordUser dcUser) {
-		final Member member = guild.getMemberById(dcUser.getDiscordId());
+		final Member member = guild.retrieveMemberById(dcUser.getDiscordId()).complete();
 		if (member != null) {
 			User user = member.getUser();
 			eb.setAuthor("Found user!", null, user.getAvatarUrl());
