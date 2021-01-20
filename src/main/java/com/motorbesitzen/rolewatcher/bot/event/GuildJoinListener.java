@@ -75,6 +75,7 @@ public class GuildJoinListener extends ListenerAdapter {
 	 */
 	private void handleBanList(final Guild guild, final DiscordGuild dcGuild, final List<Guild.Ban> bans) {
 		for (Guild.Ban ban : bans) {
+			LogUtil.logDebug("Checking audit logs for ban of \"" + ban.getUser().getAsTag() + "\" (" + ban.getUser().getId() + ")...");
 			guild.retrieveAuditLogs()
 					.type(ActionType.BAN)
 					.forEachAsync(entry -> findBan(dcGuild, ban, entry));
