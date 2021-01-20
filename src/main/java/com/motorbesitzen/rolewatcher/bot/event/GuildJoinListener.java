@@ -93,6 +93,7 @@ public class GuildJoinListener extends ListenerAdapter {
 	 */
 	private boolean findBan(final DiscordGuild dcGuild, final Guild.Ban ban, final AuditLogEntry entry) {
 		if (entry.getTargetId().equals(ban.getUser().getId())) {
+			LogUtil.logDebug("Trying to import ban for \"" + ban.getUser().getAsTag() + "\" (" + ban.getUser().getId() + ")...");
 			importBan(dcGuild, ban, entry);
 			return false;
 		}
@@ -118,6 +119,7 @@ public class GuildJoinListener extends ListenerAdapter {
 		if (discordBanRepo.existsByBannedUser_DiscordIdAndGuild_GuildId(bannedUserId, dcGuild.getGuildId())) {
 			// if user got banned multiple times and the latest is already in the database skip older
 			// bans as the audit log is ordered by new to old.
+			LogUtil.logDebug("Database already contains a ban for \"" + bannedUser.getAsTag() + "\" on guild with ID " + dcGuild.getGuildId());
 			return;
 		}
 
@@ -130,5 +132,6 @@ public class GuildJoinListener extends ListenerAdapter {
 					discordBanRepo.save(DiscordBan.createDiscordBan(actorId, reason, dcGuild, dcUser));
 				}
 		);
+		LogUtil.logDebug("Imported ban for \"" + ban.getUser().getAsTag() + "\" (" + ban.getUser().getId() + ").");
 	}
 }
