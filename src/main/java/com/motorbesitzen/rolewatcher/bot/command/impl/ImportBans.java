@@ -45,6 +45,11 @@ public class ImportBans extends CommandImpl {
 			return;
 		}
 
+		if (mentionedGuildId == event.getGuild().getIdLong()) {
+			sendErrorMessage(channel, "Please do not provide your own guild ID.");
+			return;
+		}
+
 		final Optional<DiscordGuild> discordGuildOpt = discordGuildRepo.findById(mentionedGuildId);
 		discordGuildOpt.ifPresentOrElse(
 				discordGuild -> importBans(event, discordGuild),
@@ -77,9 +82,7 @@ public class ImportBans extends CommandImpl {
 		LogUtil.logInfo("\"" + guild.getName() + "\" (" + guild.getId() + ") imported " + importedBans.size() + " bans " +
 				"from guild with ID " + discordGuild.getGuildId() + ".");
 
-		if (guild.getIdLong() != discordGuild.getGuildId()) {
-			banMembers(channel, importedBans);
-		}
+		banMembers(channel, importedBans);
 	}
 
 	/**
