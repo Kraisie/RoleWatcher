@@ -65,7 +65,8 @@ public class UpdateUser extends CommandImpl {
 	private void updateRoles(final TextChannel channel, final ForumUser forumUser) {
 		final Guild guild = channel.getGuild();
 		guild.retrieveMemberById(forumUser.getLinkedDiscordUser().getDiscordId()).queue(
-				member -> updateMemberRoles(channel, forumUser, member)
+				member -> updateMemberRoles(channel, forumUser, member),
+				throwable -> sendErrorMessage(channel, "Member not found, make sure the user is in your guild!")
 		);
 	}
 
