@@ -227,7 +227,8 @@ public class RoleUpdater {
 		if (shouldKick(member)) {
 			member.kick("Autokick due to being unlinked.").queue();
 			LogUtil.logInfo(
-					"Kicked member " + member.getUser().getAsTag() + " (" + member.getId() + ") due to being unlinked."
+					"Kicked member " + member.getUser().getAsTag() + " (" + member.getId() + ") from " +
+							"\"" + member.getGuild().getName() + "\" (" + member.getGuild().getId() + ") due to being unlinked."
 			);
 		}
 	}
