@@ -82,7 +82,9 @@ public class ImportBans extends CommandImpl {
 		LogUtil.logInfo("\"" + guild.getName() + "\" (" + guild.getId() + ") imported " + importedBans.size() + " bans " +
 				"from guild with ID " + discordGuild.getGuildId() + ".");
 
-		banMembers(channel, importedBans);
+		if (guild.getIdLong() != discordGuild.getGuildId()) {
+			banMembers(channel, importedBans);
+		}
 	}
 
 	/**
