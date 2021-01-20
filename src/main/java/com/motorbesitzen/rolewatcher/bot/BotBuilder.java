@@ -1,6 +1,8 @@
 package com.motorbesitzen.rolewatcher.bot;
 
 import com.motorbesitzen.rolewatcher.util.LogUtil;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
@@ -13,6 +15,7 @@ public class BotBuilder implements ApplicationListener<ApplicationReadyEvent> {
 
 	private final RoleUpdater updater;
 
+	@Autowired
 	public BotBuilder(final RoleUpdater updater) {
 		this.updater = updater;
 	}
@@ -24,7 +27,7 @@ public class BotBuilder implements ApplicationListener<ApplicationReadyEvent> {
 	 * @param event Provided by Spring when the Spring application is ready.
 	 */
 	@Override
-	public void onApplicationEvent(final ApplicationReadyEvent event) {
+	public void onApplicationEvent(final @NotNull ApplicationReadyEvent event) {
 		LogUtil.logInfo("Application ready, starting role updater...");
 		updater.start();
 	}

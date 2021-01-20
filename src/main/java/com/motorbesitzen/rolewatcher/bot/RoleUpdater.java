@@ -1,9 +1,11 @@
 package com.motorbesitzen.rolewatcher.bot;
 
 import com.motorbesitzen.rolewatcher.data.dao.DiscordGuild;
+import com.motorbesitzen.rolewatcher.data.dao.DiscordUser;
 import com.motorbesitzen.rolewatcher.data.dao.ForumRole;
 import com.motorbesitzen.rolewatcher.data.dao.ForumUser;
 import com.motorbesitzen.rolewatcher.data.repo.DiscordGuildRepo;
+import com.motorbesitzen.rolewatcher.data.repo.DiscordUserRepo;
 import com.motorbesitzen.rolewatcher.data.repo.ForumRoleRepo;
 import com.motorbesitzen.rolewatcher.data.repo.ForumUserRepo;
 import com.motorbesitzen.rolewatcher.util.EnvironmentUtil;
@@ -15,6 +17,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.exceptions.HierarchyException;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -32,14 +35,17 @@ import java.util.concurrent.TimeUnit;
 public class RoleUpdater {
 
 	private final JDA jda;
+	private final DiscordUserRepo discordUserRepo;
 	private final ForumUserRepo forumUserRepo;
 	private final ForumRoleRepo forumRoleRepo;
 	private final DiscordGuildRepo guildRepo;
 	private final ScheduledExecutorService scheduler;
 	private final int delayMs;
 
-	public RoleUpdater(final JDA jda, final ForumUserRepo forumUserRepo, final ForumRoleRepo forumRoleRepo, final DiscordGuildRepo guildRepo) {
+	@Autowired
+	public RoleUpdater(final JDA jda, final DiscordUserRepo discordUserRepo, final ForumUserRepo forumUserRepo, final ForumRoleRepo forumRoleRepo, final DiscordGuildRepo guildRepo) {
 		this.jda = jda;
+		this.discordUserRepo = discordUserRepo;
 		this.forumUserRepo = forumUserRepo;
 		this.forumRoleRepo = forumRoleRepo;
 		this.guildRepo = guildRepo;
@@ -242,6 +248,13 @@ public class RoleUpdater {
 		final DiscordGuild dcGuild = dcGuildOpt.get();
 		if (!dcGuild.canAutokick()) {
 			return false;
+		}
+
+		Optional<DiscordUser> dcUserOpt = discordUserRepo.findById(member.getIdLong());
+		if (dcUserOpt.isPresent()) {
+			if (dcUserOpt.get().isWhitelisted()) {
+				return false;
+			}
 		}
 
 		if (member.getUser().isBot()) {
