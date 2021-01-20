@@ -1,7 +1,8 @@
-# Rolewatcher
+# RoleWatcher
 
 This is a Discord bot which can sync roles between a Discord and a forum. That's useful if you offer a Discord server
-for the members of your forum that has changing roles due to memberships or other changing permission sets.
+for the members of a forum that has changing roles due to memberships or other changing permission sets but that does
+not grant database access.
 
 ## Setup
 
@@ -16,10 +17,9 @@ It might be not that easy otherwise, especially if you need to code the
 
 #### Forum IDs
 
-Your forum needs to have user IDs that are numeric and start by 1. Your highest possible ID should be 2<sup>63</sup>-1.
-If your forum uses so called "Snowflakes" as IDs there might be issues as Discord uses that ID system too. While
-duplicates between forum IDs and Discord IDs are very unlikely they can happen if your forum uses them as well. \
-Any role ID has to be in the Java Integer range.
+Your forum needs to have user and role IDs that are numeric and start by 1. Your highest possible ID should be 2<sup>
+63</sup>-1. If your forum uses so called "Snowflakes" as IDs there might be issues as Discord uses that ID system too.
+While duplicates between forum IDs and Discord IDs are very unlikely they can happen if your forum uses them as well. \
 
 #### Forum user name
 
@@ -58,7 +58,7 @@ and add a new application by clicking on the "New Application" button. \
 After creating the application you should see general information about your application. If not please select your
 application in the list of applications. Now switch to the "Bot" tab on the left and click the
 "Add Bot" button that shows up. \
-You should now see information about the bot you created and a button called "Copy" under a header that says "Token".
+You should now see information about the bot you created, and a button called "Copy" under a header that says "Token".
 Click that button to copy the token of your bot. You will need this token in the
 [Environment section](#environment). \
 Never give this token to anyone as that is all one needs to control your bot!
@@ -99,17 +99,19 @@ name as your bot) above all roles that are linked to your forum, so the bot can 
 just navigate to your guild in Discord, open the server settings, select "Roles" and drag-and-drop the bot role above
 the highest forum role. \
 You can give the bot the administrator permission but keep in mind that it literally means the bot can do anything. That
-means if anyone has access to your token to control the bot he can do pretty much anything to your server.
+means if anyone has access to your token to control the bot he can do pretty much anything to your server. However, even
+without the administrator permission the bot has enough permissions to interfere a lot with your server so even if you
+do not give the bot the administrator permissions you need to keep your token very secure.
 
 #### Additional information about the bot
 
 * The bot can only kick or ban people if the highest role of that user is below the highest role of the bot. It can not
-  kick or ban the owner at all.
+  kick or ban the server owner at all.
 * The bot can only assign roles lower than its own.
 * The bot can only update permissions of channels it can access.
 * Not granting the bot the needed permissions might lead to unknown behaviour.
 * Commands can only be used in channels the bot has access to.
-* The help command will onl show commands your guild can use with the given permissions.
+* The help command will only show commands your guild can use with the given permissions.
 
 ### Environment
 
@@ -171,7 +173,7 @@ https://127.0.0.1:8080/users?key=123
 
 #### DB_DATABASE
 
-This settings defines the name of the database. If you do not set a value the default name "database" will be chosen. If
+This setting defines the name of the database. If you do not set a value the default name "database" will be chosen. If
 you change that value later on and do not rename the files in `/data/` accordingly the program will create a new
 database!
 
@@ -196,7 +198,7 @@ This is the place for the Discord token mentioned in
 This is the prefix the bot needs to react to a command. If this value is set to `?` the bot will only perform the "help"
 command if a user writes
 `?help`. If no value is set the bot has no prefix, so it only reacts to a message that starts with the actual command
-like `help`. Do not use a space in the prefix!
+like `help`. Do not use spaces in the prefix!
 
 #### EMBED_COLOR_R
 
@@ -208,14 +210,14 @@ and [EMBED_COLOR_B](#embed_color_b) also have no value set.
 #### EMBED_COLOR_G
 
 This value represents the **G**reen part of the color. Please use a value between 0-255, otherwise results may vary. If
-this value is not set it defaults to 105 which results in an orange color if [EMBED_COLOR_G](#embed_color_g)
+this value is not set it defaults to 105 which results in an orange color if [EMBED_COLOR_R](#embed_color_r)
 and [EMBED_COLOR_B](#embed_color_b) also have no value set.
 
 #### EMBED_COLOR_B
 
 This value represents the **B**lue part of the color. Please use a value between 0-255, otherwise results may vary. If
-this value is not set it defaults to 12 which results in an orange color if [EMBED_COLOR_G](#embed_color_g)
-and [EMBED_COLOR_B](#embed_color_b) also have no value set.
+this value is not set it defaults to 12 which results in an orange color if [EMBED_COLOR_R](#embed_color_r)
+and [EMBED_COLOR_G](#embed_color_g) also have no value set.
 
 #### BOT_ACTIVITY
 
@@ -256,14 +258,14 @@ A link to your forum role API as described in the
 [Forum role API](#forum-role-api) section. Also needs to include the query parameters so if your query parameter for the
 user ID is `uid`
 an example URL would be `https://example.com/roleapi?uid=`. Any authorization your API requires needs to happen via
-query parameters so a resulting url would be
+query parameters, so a resulting url would be
 `https://example.com/roleapi?authkey=1234abc890&uid=`. Keep in mind that the users' ID will be appended to the end, so
 the query parameter for the user ID has to be the last one! \
-If this value is not set or an invalid URL role synchronisation will not work.
+Role synchronisation will not work if this value is not set or an invalid URL.
 
 #### FORUM_ROLE_API_DELAY_MS
 
-The delay between requests to the role API in milliseconds. Has to be at least 100 and defaults to 5000 (50000
+The delay between requests to the role API in milliseconds. Has to be at least 100 and defaults to 5000 (5000
 milliseconds -> 5 seconds) if no value is set. If you set a value below 100 it will still work but will use a delay of
 100ms.
 
