@@ -38,7 +38,10 @@ public final class RoleUtil {
 			}
 		}
 
-		guild.modifyMemberRoles(member, rolesToAdd, rolesToRemove).queue();
+		guild.modifyMemberRoles(member, rolesToAdd, rolesToRemove).queue(
+				p -> LogUtil.logDebug("Updated roles of \"" + member.getUser().getAsTag() + "\"."),
+				throwable -> LogUtil.logDebug("Could not update member roles due to \"" + throwable.getMessage() + "\"")
+		);
 	}
 
 	/**
