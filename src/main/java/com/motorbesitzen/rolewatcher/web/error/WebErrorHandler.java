@@ -6,6 +6,7 @@ import com.motorbesitzen.rolewatcher.web.entity.validation.ValidApiKey;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -33,6 +34,19 @@ public class WebErrorHandler {
 		return ResponseEntity.
 				status(HttpStatus.INTERNAL_SERVER_ERROR).
 				body("Internal server error, please inform the forum or Discord staff about this message!");
+	}
+
+	/**
+	 * Handles the exception if a route does not support the used request method.
+	 *
+	 * @return A response with the status code 404.
+	 */
+	@ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+	public ResponseEntity<?> handleRequestMethodNotSupported(HttpServletRequest request) {
+		LogUtil.logDebug("Request method \"" + request.getMethod() + "\" not supported for query: " + request.getQueryString());
+		return ResponseEntity.
+				status(HttpStatus.NOT_FOUND).
+				body("Not found.");
 	}
 
 	/**
