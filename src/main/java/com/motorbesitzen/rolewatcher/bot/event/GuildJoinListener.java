@@ -68,6 +68,7 @@ public class GuildJoinListener extends ListenerAdapter {
 
 	/**
 	 * Iterate over all bans and search for information in the guilds audit logs. Import information if found.
+	 * Can only check the audit log 90 days back due to a Discord API limitation!
 	 *
 	 * @param guild   The guild the bot got added to.
 	 * @param dcGuild The database representation of the guild.
@@ -78,7 +79,8 @@ public class GuildJoinListener extends ListenerAdapter {
 			LogUtil.logDebug("Checking audit logs for ban of \"" + ban.getUser().getAsTag() + "\" (" + ban.getUser().getId() + ")...");
 			guild.retrieveAuditLogs()
 					.type(ActionType.BAN)
-					.forEachAsync(entry -> findBan(dcGuild, ban, entry));
+					.forEachRemainingAsync(entry -> findBan(dcGuild, ban, entry))
+					.thenRunAsync(verifyBanSave(dcGuild, ban));
 		}
 	}
 
@@ -90,7 +92,7 @@ public class GuildJoinListener extends ListenerAdapter {
 	 * @param ban     The ban representing a banned user in the guild.
 	 * @param entry   An audit log entry.
 	 * @return {@code true} if the audit log entry does not fit the ban details so the next entry needs to get checked,
-	 * {@code false}
+	 * {@code false} otherwise to indicate that a fitting audit log entry has been found.
 	 */
 	private boolean findBan(final DiscordGuild dcGuild, final Guild.Ban ban, final AuditLogEntry entry) {
 		if (entry.getTargetId().equals(ban.getUser().getId())) {
@@ -134,5 +136,35 @@ public class GuildJoinListener extends ListenerAdapter {
 				}
 		);
 		LogUtil.logDebug("Imported ban for \"" + ban.getUser().getAsTag() + "\" (" + ban.getUser().getId() + ").");
+	}
+
+	/**
+	 * If a ban did not get saved before (e.g. when it is older than 90 days and thus the bot can not access the audit
+	 * log it will not get saved in {@link #findBan(DiscordGuild, Guild.Ban, AuditLogEntry)}. To make sure all bans get
+	 * imported this Runnable saves the ban without additional information from the audit log, thus without the actor of
+	 * the ban if the ban did not get added by {@link #findBan(DiscordGuild, Guild.Ban, AuditLogEntry)},
+	 *
+	 * @param dcGuild The database representation of the guild.
+	 * @param ban     The ban representing a banned user in the guild.
+	 * @return The Runnable handling the unknown actor bans.
+	 */
+	private Runnable verifyBanSave(DiscordGuild dcGuild, Guild.Ban ban) {
+		return () -> {
+			final User bannedUser = ban.getUser();
+			final long bannedUserId = bannedUser.getIdLong();
+			final String reason = ban.getReason() == null ? "No reason given." : ban.getReason();
+			if (!discordBanRepo.existsByBannedUser_DiscordIdAndGuild_GuildId(bannedUserId, dcGuild.getGuildId())) {
+				Optional<DiscordUser> dcBannedUserOpt = discordUserRepo.findById(bannedUserId);
+				dcBannedUserOpt.ifPresentOrElse(
+						dcBannedUser -> discordBanRepo.save(DiscordBan.withUnknownActor(reason, dcGuild, dcBannedUser)),
+						() -> {
+							DiscordUser dcUser = DiscordUser.createDiscordUser(bannedUserId);
+							discordUserRepo.save(dcUser);
+							discordBanRepo.save(DiscordBan.withUnknownActor(reason, dcGuild, dcUser));
+						}
+				);
+				LogUtil.logDebug("Imported ban for \"" + ban.getUser().getAsTag() + "\" (" + ban.getUser().getId() + ") with unknown actor.");
+			}
+		};
 	}
 }
