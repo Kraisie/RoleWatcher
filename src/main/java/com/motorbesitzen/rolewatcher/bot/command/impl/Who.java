@@ -8,7 +8,10 @@ import com.motorbesitzen.rolewatcher.data.repo.ForumUserRepo;
 import com.motorbesitzen.rolewatcher.util.DiscordMessageUtil;
 import com.motorbesitzen.rolewatcher.util.EnvironmentUtil;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
 import java.util.Optional;
@@ -58,53 +61,103 @@ public class Who extends CommandImpl {
 	/**
 	 * Sends an embedded message with info about the Discord and/or forum user.
 	 *
-	 * @param channel   The channel where the command got triggered and the bot will reply in.
+	 * @param channel   The channel where the command got triggered.
 	 * @param fUserOpt  An {@code Optional} that may contain a forum user if found in the database for an ID.
 	 * @param dcUserOpt An {@code Optional} that may contain a Discord user if found in the database for an ID.
 	 */
 	private void sendInfoMessage(final TextChannel channel, final Optional<ForumUser> fUserOpt, final Optional<DiscordUser> dcUserOpt) {
-		final MessageEmbed embed = buildEmbedMessage(channel, fUserOpt, dcUserOpt);
-		answer(channel, embed);
-	}
-
-	/**
-	 * Builds an embedded message with info about the Discord and/or forum user.
-	 *
-	 * @param channel   The channel where the command got triggered.
-	 * @param fUserOpt  An {@code Optional} that may contain a forum user if found in the database for an ID.
-	 * @param dcUserOpt An {@code Optional} that may contain a Discord user if found in the database for an ID.
-	 * @return The {@code MessageEmbed} to send in a channel.
-	 */
-	private MessageEmbed buildEmbedMessage(final TextChannel channel, final Optional<ForumUser> fUserOpt, final Optional<DiscordUser> dcUserOpt) {
 		final EmbedBuilder eb = new EmbedBuilder();
 		eb.setTitle("User information: ");
 		eb.setColor(getEmbedColor());
-		dcUserOpt.ifPresentOrElse(dcUser -> setDiscordInfo(channel.getGuild(), eb, dcUser), () -> eb.addField("Discord user:", "UNKNOWN", true));
-		eb.addBlankField(false);
-		fUserOpt.ifPresentOrElse(fUser -> setForumInfo(eb, fUser), () -> eb.addField("Forum user:", "UNKNOWN (not linked)", true));
-		return eb.build();
+		dcUserOpt.ifPresentOrElse(
+				dcUser -> setUserInfo(channel, eb, dcUser, fUserOpt),
+				() -> setUnknownUserInfo(eb)
+		);
 	}
 
 	/**
-	 * Sets the discord info for a user to the info embed message.
+	 * Adds the info for a user to the info embed message.
 	 *
-	 * @param guild  The guild where the command got requested
+	 * @param channel  The channel where the command got requested in.
+	 * @param eb       The EmbedBuilder for the message.
+	 * @param dcUser   The Discord user to show info about.
+	 * @param fUserOpt An {@code Optional} that may contain a forum user if found in the database for an ID.
+	 */
+	private void setUserInfo(final TextChannel channel, final EmbedBuilder eb, final DiscordUser dcUser, final Optional<ForumUser> fUserOpt) {
+		channel.getGuild().retrieveMemberById(dcUser.getDiscordId()).queue(
+				member -> {
+					setMemberInfo(eb, dcUser, member);
+					eb.addBlankField(false);
+					setForumUserInfo(eb, fUserOpt);
+					answer(channel, eb.build());
+				},
+				throwable -> {
+					setDefaultInfo(eb, dcUser);
+					eb.addBlankField(false);
+					setForumUserInfo(eb, fUserOpt);
+					answer(channel, eb.build());
+				}
+		);
+	}
+
+	/**
+	 * Adds Discord member information to the embed.
+	 *
+	 * @param eb     The EmbedBuilder for the message.
+	 * @param member The Discord member for the given ID.
+	 * @param dcUser The Discord user to show info about.
+	 */
+	private void setMemberInfo(final EmbedBuilder eb, final DiscordUser dcUser, final Member member) {
+		User user = member.getUser();
+		eb.setAuthor("Found user!", null, user.getAvatarUrl());
+		eb.addField("Discord user:", member.getAsMention(), true);
+		setWhitelistInfo(eb, dcUser);
+	}
+
+	/**
+	 * Adds default information to the embed if the user is not in the guild.
+	 *
 	 * @param eb     The EmbedBuilder for the message.
 	 * @param dcUser The Discord user to show info about.
 	 */
-	private void setDiscordInfo(final Guild guild, final EmbedBuilder eb, final DiscordUser dcUser) {
-		final Member member = guild.retrieveMemberById(dcUser.getDiscordId()).complete();
-		if (member != null) {
-			User user = member.getUser();
-			eb.setAuthor("Found user!", null, user.getAvatarUrl());
-			eb.addField("Discord user:", member.getAsMention(), true);
-		} else {
-			// if no default avatar url is provided use none by giving the author field a null URL thus not showing any avatar
-			String iconUrl = EnvironmentUtil.getEnvironmentVariable("DEFAULT_AVATAR_URL");
-			eb.setAuthor("Found user!", null, iconUrl);
-			eb.addField("Discord user:", "<@" + dcUser.getDiscordId() + ">", true);
-		}
+	private void setDefaultInfo(final EmbedBuilder eb, final DiscordUser dcUser) {
+		String iconUrl = EnvironmentUtil.getEnvironmentVariable("DEFAULT_AVATAR_URL");
+		eb.setAuthor("Found user!", null, iconUrl);
+		eb.addField("Discord user:", "<@" + dcUser.getDiscordId() + ">", true);
+		setWhitelistInfo(eb, dcUser);
+	}
+
+	/**
+	 * Adds information to the embed on whether or not the user is whitelisted.
+	 *
+	 * @param eb     The EmbedBuilder for the message.
+	 * @param dcUser The Discord user to show info about.
+	 */
+	private void setWhitelistInfo(final EmbedBuilder eb, final DiscordUser dcUser) {
 		eb.addField("Whitelisted?", dcUser.isWhitelisted() ? "Yes" : "No", true);
+	}
+
+	/**
+	 * Adds information that the Discord user is unknown.
+	 *
+	 * @param eb The EmbedBuilder for the message.
+	 */
+	private void setUnknownUserInfo(final EmbedBuilder eb) {
+		eb.addField("Discord user:", "UNKNOWN", true);
+	}
+
+	/**
+	 * Adds information about the linked forum user for a Discord user if given. Otherwise adds
+	 * the info that the forum user is unknown.
+	 *
+	 * @param eb       The EmbedBuilder for the message.
+	 * @param fUserOpt An {@code Optional} that may contain a forum user if found in the database for an ID.
+	 */
+	private void setForumUserInfo(final EmbedBuilder eb, final Optional<ForumUser> fUserOpt) {
+		fUserOpt.ifPresentOrElse(
+				fUser -> setForumInfo(eb, fUser),
+				() -> eb.addField("Forum user:", "UNKNOWN (not linked)", true)
+		);
 	}
 
 	/**
