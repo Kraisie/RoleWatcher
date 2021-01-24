@@ -1,4 +1,4 @@
-package com.motorbesitzen.rolewatcher.bot;
+package com.motorbesitzen.rolewatcher.bot.service;
 
 import com.motorbesitzen.rolewatcher.util.EnvironmentUtil;
 import com.motorbesitzen.rolewatcher.util.LogUtil;
@@ -8,14 +8,14 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-@Component
+@Service
 public class StartUpChecker implements ApplicationListener<ApplicationStartedEvent> {
 
 	private final ApplicationContext context;

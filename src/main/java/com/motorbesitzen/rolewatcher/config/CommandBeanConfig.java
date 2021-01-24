@@ -1,7 +1,7 @@
 package com.motorbesitzen.rolewatcher.config;
 
-import com.motorbesitzen.rolewatcher.bot.ForumRoleApiRequest;
 import com.motorbesitzen.rolewatcher.bot.command.impl.*;
+import com.motorbesitzen.rolewatcher.bot.service.ForumRoleApiRequest;
 import com.motorbesitzen.rolewatcher.data.repo.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

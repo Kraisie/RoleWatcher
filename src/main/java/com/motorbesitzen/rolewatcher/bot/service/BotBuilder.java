@@ -1,4 +1,4 @@
-package com.motorbesitzen.rolewatcher.bot;
+package com.motorbesitzen.rolewatcher.bot.service;
 
 import com.motorbesitzen.rolewatcher.util.LogUtil;
 import org.jetbrains.annotations.NotNull;

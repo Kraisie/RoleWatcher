@@ -1,7 +1,7 @@
 package com.motorbesitzen.rolewatcher.bot.command.impl;
 
-import com.motorbesitzen.rolewatcher.bot.ForumRoleApiRequest;
 import com.motorbesitzen.rolewatcher.bot.command.CommandImpl;
+import com.motorbesitzen.rolewatcher.bot.service.ForumRoleApiRequest;
 import com.motorbesitzen.rolewatcher.data.dao.ForumRole;
 import com.motorbesitzen.rolewatcher.data.dao.ForumUser;
 import com.motorbesitzen.rolewatcher.data.repo.ForumRoleRepo;

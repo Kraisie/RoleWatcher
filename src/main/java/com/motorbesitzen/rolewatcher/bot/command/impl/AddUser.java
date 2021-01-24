@@ -1,7 +1,8 @@
 package com.motorbesitzen.rolewatcher.bot.command.impl;
 
-import com.motorbesitzen.rolewatcher.bot.ForumRoleApiRequest;
 import com.motorbesitzen.rolewatcher.bot.command.CommandImpl;
+import com.motorbesitzen.rolewatcher.bot.service.ForumRoleApiRequest;
+import com.motorbesitzen.rolewatcher.bot.service.RoleUpdater;
 import com.motorbesitzen.rolewatcher.data.dao.DiscordUser;
 import com.motorbesitzen.rolewatcher.data.dao.ForumRole;
 import com.motorbesitzen.rolewatcher.data.dao.ForumUser;
@@ -151,7 +152,7 @@ public class AddUser extends CommandImpl {
 
 	/**
 	 * Assigns the forum roles to the member who got added to the database.
-	 * Every other guild the user and the bot are in will only update via {@link com.motorbesitzen.rolewatcher.bot.RoleUpdater}.
+	 * Every other guild the user and the bot are in will only update via {@link RoleUpdater}.
 	 *
 	 * @param channel The channel the command got triggered in.
 	 * @param newUser The user that got added.

@@ -1,6 +1,6 @@
 package com.motorbesitzen.rolewatcher.bot.event;
 
-import com.motorbesitzen.rolewatcher.bot.ForumRoleApiRequest;
+import com.motorbesitzen.rolewatcher.bot.service.ForumRoleApiRequest;
 import com.motorbesitzen.rolewatcher.data.dao.DiscordBan;
 import com.motorbesitzen.rolewatcher.data.dao.ForumRole;
 import com.motorbesitzen.rolewatcher.data.dao.ForumUser;

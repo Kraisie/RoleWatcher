@@ -1,4 +1,4 @@
-package com.motorbesitzen.rolewatcher.bot;
+package com.motorbesitzen.rolewatcher.bot.service;
 
 import com.motorbesitzen.rolewatcher.data.dao.DiscordGuild;
 import com.motorbesitzen.rolewatcher.data.dao.DiscordUser;
