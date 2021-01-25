@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public final class RoleUtil {
@@ -38,10 +39,12 @@ public final class RoleUtil {
 			}
 		}
 
-		guild.modifyMemberRoles(member, rolesToAdd, rolesToRemove).queue(
-				p -> LogUtil.logDebug("Updated roles of \"" + member.getUser().getAsTag() + "\"."),
-				throwable -> LogUtil.logDebug("Could not update member roles due to \"" + throwable.getMessage() + "\"")
-		);
+		LogUtil.logDebug("CurrentRoles: " + Arrays.toString(member.getRoles().toArray()));
+		LogUtil.logDebug("RolesAdd: " + Arrays.toString(rolesToAdd.toArray()));
+		LogUtil.logDebug("RolesRemove: " + Arrays.toString(rolesToRemove.toArray()));
+
+		addRoles(member, rolesToAdd);
+		removeRoles(member, rolesToRemove);
 	}
 
 	/**
@@ -56,15 +59,81 @@ public final class RoleUtil {
 		List<ForumRole> dupRoles = new ArrayList<>();
 		for (ForumRole memberRole : memberForumRoles) {
 			for (ForumRole forumRole : allForumRoles) {
-				if (memberRole.getRoleName().equalsIgnoreCase(forumRole.getRoleName()) && memberRole.getRoleId() != forumRole.getRoleId()) {
-					if (!memberForumRoles.contains(forumRole)) {
-						dupRoles.add(forumRole);
-					}
+				if (isDuplicateRoleName(memberForumRoles, memberRole, forumRole)) {
+					dupRoles.add(forumRole);
 				}
 			}
 		}
 
 		memberForumRoles.addAll(dupRoles);
+	}
+
+	/**
+	 * Checks if a member has a role that has the same name as one of his roles.
+	 *
+	 * @param memberForumRoles The roles of the member.
+	 * @param memberRole       The role of the member to check.
+	 * @param forumRole        The forum role to compare to.
+	 * @return {@code true} if the {@param forumRole} is none of the members' roles, has the same name as one of the
+	 * members' roles but another role ID.
+	 */
+	private static boolean isDuplicateRoleName(final List<ForumRole> memberForumRoles, final ForumRole memberRole, final ForumRole forumRole) {
+		if (memberRole.getRoleName().equalsIgnoreCase(forumRole.getRoleName()) && memberRole.getRoleId() != forumRole.getRoleId()) {
+			return !memberForumRoles.contains(forumRole);
+		}
+
+		return false;
+	}
+
+	/**
+	 * Adds roles to a Discord member if he does not have it already.
+	 *
+	 * @param member The member to update the roles of.
+	 * @param roles  The roles to add to the member.
+	 */
+	private static void addRoles(final Member member, final List<Role> roles) {
+		Guild guild = member.getGuild();
+		for (Role role : roles) {
+			if (member.getRoles().contains(role)) {
+				continue;
+			}
+
+			guild.addRoleToMember(member, role).queue(
+					v -> LogUtil.logDebug(
+							"Added role \"" + role.getName() + "\" to member \"" +
+									member.getUser().getAsTag() + "\" (" + member.getId() + ")."
+					),
+					throwable -> LogUtil.logDebug(
+							"Could not add role \"" + role.getName() + "\" to member \"" +
+									member.getUser().getAsTag() + "\" (" + member.getId() + ")  due to \"" + throwable.getMessage() + "\"."
+					)
+			);
+		}
+	}
+
+	/**
+	 * Removes roles from a Discord member if he has it assigned.
+	 *
+	 * @param member The member to update the roles of.
+	 * @param roles  The roles to remove from the member.
+	 */
+	private static void removeRoles(final Member member, final List<Role> roles) {
+		Guild guild = member.getGuild();
+		for (Role role : roles) {
+			if (!member.getRoles().contains(role)) {
+				continue;
+			}
+
+			guild.removeRoleFromMember(member, role).queue(
+					v -> LogUtil.logDebug("Removed role \"" + role.getName() + "\" from member \"" +
+							member.getUser().getAsTag() + "\" (" + member.getId() + ")."
+					),
+					throwable -> LogUtil.logDebug(
+							"Could not remove role \"" + role.getName() + "\" from member \"" +
+									member.getUser().getAsTag() + "\" (" + member.getId() + ")  due to \"" + throwable.getMessage() + "\"."
+					)
+			);
+		}
 	}
 
 	/**
@@ -75,13 +144,13 @@ public final class RoleUtil {
 	 * @return {@code true} if the user has the banned role on the forum, {@code false} if there is no
 	 * banned role ID set, the user does not have the banned role or if the ID exceeds Integer range.
 	 */
-	public static boolean hasBannedRole(List<ForumRole> forumRoles) {
-		String bannedRoleIdStr = EnvironmentUtil.getEnvironmentVariableOrDefault("FORUM_BANNED_ROLE_ID", "");
+	public static boolean hasBannedRole(final List<ForumRole> forumRoles) {
+		final String bannedRoleIdStr = EnvironmentUtil.getEnvironmentVariableOrDefault("FORUM_BANNED_ROLE_ID", "");
 		if (bannedRoleIdStr.isBlank()) {
 			return false;
 		}
 
-		long bannedRoleId = ParseUtil.safelyParseStringToLong(bannedRoleIdStr);
+		final long bannedRoleId = ParseUtil.safelyParseStringToLong(bannedRoleIdStr);
 		if (bannedRoleId == -1) {
 			LogUtil.logWarning("Invalid banned role ID! Please set a valid ID or remove the environment variable completely.");
 			return false;
