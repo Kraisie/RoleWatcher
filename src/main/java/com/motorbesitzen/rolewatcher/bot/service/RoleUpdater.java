@@ -40,16 +40,19 @@ public class RoleUpdater {
 	private final ForumRoleRepo forumRoleRepo;
 	private final DiscordGuildRepo guildRepo;
 	private final ScheduledExecutorService scheduler;
+	private final ForumRoleApiRequest apiRequest;
 	private final int delayMs;
 
 	@Autowired
-	public RoleUpdater(final JDA jda, final DiscordUserRepo discordUserRepo, final ForumUserRepo forumUserRepo, final ForumRoleRepo forumRoleRepo, final DiscordGuildRepo guildRepo) {
+	public RoleUpdater(final JDA jda, final DiscordUserRepo discordUserRepo, final ForumUserRepo forumUserRepo,
+					   final ForumRoleRepo forumRoleRepo, final DiscordGuildRepo guildRepo, final ForumRoleApiRequest apiRequest) {
 		this.jda = jda;
 		this.discordUserRepo = discordUserRepo;
 		this.forumUserRepo = forumUserRepo;
 		this.forumRoleRepo = forumRoleRepo;
 		this.guildRepo = guildRepo;
 		this.scheduler = Executors.newScheduledThreadPool(3);
+		this.apiRequest = apiRequest;
 		this.delayMs = getDelay();
 	}
 
@@ -61,7 +64,7 @@ public class RoleUpdater {
 	 * @return The delay between each member in milliseconds.
 	 */
 	private int getDelay() {
-		String delayStr = EnvironmentUtil.getEnvironmentVariableOrDefault("FORUM_ROLE_API_DELAY_MS", "5000");
+		final String delayStr = EnvironmentUtil.getEnvironmentVariableOrDefault("FORUM_ROLE_API_DELAY_MS", "5000");
 		return Math.max(100, ParseUtil.safelyParseStringToInt(delayStr));
 	}
 
@@ -122,7 +125,7 @@ public class RoleUpdater {
 	 */
 	private boolean hasRoleSyncPerms(final Guild guild) {
 		final long guildId = guild.getIdLong();
-		Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
+		final Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
 		if (dcGuildOpt.isEmpty()) {
 			return false;
 		}
@@ -136,7 +139,7 @@ public class RoleUpdater {
 	 * @param guild The guild to update the member roles of.
 	 * @return A {@code Runnable} for the summarised task.
 	 */
-	private Runnable updateGuildMembers(Guild guild) {
+	private Runnable updateGuildMembers(final Guild guild) {
 		LogUtil.logDebug("Updating guild \"" + guild.getName() + "\"...");
 		return () -> guild.loadMembers().onSuccess(members -> scheduler.execute(() -> {
 			for (int i = 0; i < members.size(); i++) {
@@ -152,7 +155,7 @@ public class RoleUpdater {
 	 * @param member The member to update the roles of.
 	 * @return A {@code Runnable} for the summarised task.
 	 */
-	private Runnable updateMember(Member member) {
+	private Runnable updateMember(final Member member) {
 		return () -> {
 			LogUtil.logDebug("Updating member \"" + member.getUser().getAsTag() + "\" (" + member.getId() + ") on \"" + member.getGuild().getName() + "\"...");
 			final long discordId = member.getIdLong();
@@ -170,13 +173,12 @@ public class RoleUpdater {
 	 * @param forumUser The matching forum user to the member.
 	 * @param member    The member to update the roles of.
 	 */
-	private void updateMemberRoles(ForumUser forumUser, Member member) {
+	private void updateMemberRoles(final ForumUser forumUser, final Member member) {
 		if (forumUser.getLinkedDiscordUser().isWhitelisted()) {
 			return;
 		}
 
-		final ForumRoleApiRequest apiRequest = new ForumRoleApiRequest(forumRoleRepo);
-		List<ForumRole> forumRoles;
+		final List<ForumRole> forumRoles;
 		try {
 			forumRoles = apiRequest.getRolesOfForumUser(forumUser);
 		} catch (IOException e) {
@@ -198,7 +200,7 @@ public class RoleUpdater {
 	 * @param forumUser The matching forum user to the member.
 	 * @param member    The member to ban.
 	 */
-	private void banMember(ForumUser forumUser, Member member) {
+	private void banMember(final ForumUser forumUser, final Member member) {
 		member.ban(0, "User has banned role on the forum. Might be a temporary ban.").queue(
 				(ban) -> LogUtil.logInfo(
 						"Banned member " + member.getUser().getAsTag() + " (" + member.getId() + ")  from \"" +
@@ -215,7 +217,7 @@ public class RoleUpdater {
 	 * @param member     The member to update the roles of.
 	 * @param forumRoles The list of roles the member has on the forum.
 	 */
-	private void updateRoles(Member member, List<ForumRole> forumRoles) {
+	private void updateRoles(final Member member, final List<ForumRole> forumRoles) {
 		try {
 			RoleUtil.updateRoles(member, forumRoles, forumRoleRepo.findAll());
 		} catch (InsufficientPermissionException e) {
@@ -230,7 +232,7 @@ public class RoleUpdater {
 	 *
 	 * @param member The member to check.
 	 */
-	private void checkForKick(Member member) {
+	private void checkForKick(final Member member) {
 		if (shouldKick(member)) {
 			member.kick("Autokick due to being unlinked.").queue();
 			LogUtil.logInfo(
@@ -247,7 +249,7 @@ public class RoleUpdater {
 	 * @return {@code true} if the guild has autokick permissions, the member isn't a bot or the owner and if the user
 	 * joined x hours ago, {@code false} otherwise.
 	 */
-	private boolean shouldKick(Member member) {
+	private boolean shouldKick(final Member member) {
 		final Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(member.getGuild().getIdLong());
 		if (dcGuildOpt.isEmpty()) {
 			return false;
@@ -258,7 +260,7 @@ public class RoleUpdater {
 			return false;
 		}
 
-		Optional<DiscordUser> dcUserOpt = discordUserRepo.findById(member.getIdLong());
+		final Optional<DiscordUser> dcUserOpt = discordUserRepo.findById(member.getIdLong());
 		if (dcUserOpt.isPresent()) {
 			if (dcUserOpt.get().isWhitelisted()) {
 				return false;
