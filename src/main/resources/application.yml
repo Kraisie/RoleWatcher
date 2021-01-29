@@ -35,7 +35,7 @@ logging:
 server:
   port: ${WEB_API_OPEN_PORT:8080}
 ---
-# additionally turn on (or overwrite) if first start profile ("debug")
+# additionally turn on (or overwrite) if first start profile ("debug") -> debug in production for rare errors
 spring:
   config:
     activate:

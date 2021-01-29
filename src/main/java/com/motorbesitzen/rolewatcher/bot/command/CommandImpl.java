@@ -26,7 +26,7 @@ public class CommandImpl implements Command {
 	@Override
 	public void execute(GuildMessageReceivedEvent event) {
 		// Perform tasks in subclasses, not here!
-		LogUtil.logDebug("");
+		LogUtil.logWarning("Tried to execute default command: " + event.toString());
 	}
 
 	/**

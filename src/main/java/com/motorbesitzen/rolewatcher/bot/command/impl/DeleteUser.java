@@ -64,7 +64,8 @@ public class DeleteUser extends CommandImpl {
 				ban -> {
 					final String banReason = ban.getReason();
 					sendMessage(event.getChannel(), "The user you are unlinking is banned for \"" + banReason + "\" on this guild!");
-				}
+				},
+				throwable -> LogUtil.logDebug("Deleted user is not banned in guild.")
 		);
 
 		user.setLinkedDiscordUser(null);
@@ -87,7 +88,8 @@ public class DeleteUser extends CommandImpl {
 	 */
 	private void removeForumRoles(final Guild guild, final long discordId) {
 		guild.retrieveMemberById(discordId).queue(
-				member -> RoleUtil.updateRoles(member, new ArrayList<>(), forumRoleRepo.findAll())
+				member -> RoleUtil.updateRoles(member, new ArrayList<>(), forumRoleRepo.findAll()),
+				throwable -> LogUtil.logDebug("Can not remove roles from deleted user as user is not in the guild.")
 		);
 	}
 
