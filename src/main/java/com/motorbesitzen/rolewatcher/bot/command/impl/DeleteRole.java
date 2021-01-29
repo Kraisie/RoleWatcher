@@ -4,14 +4,18 @@ import com.motorbesitzen.rolewatcher.bot.command.CommandImpl;
 import com.motorbesitzen.rolewatcher.data.repo.ForumRoleRepo;
 import com.motorbesitzen.rolewatcher.util.DiscordMessageUtil;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * Deletes a forum role from the database.
  */
+@Service("delrole")
 public class DeleteRole extends CommandImpl {
 
 	private final ForumRoleRepo forumRoleRepo;
 
+	@Autowired
 	public DeleteRole(final ForumRoleRepo forumRoleRepo) {
 		this.forumRoleRepo = forumRoleRepo;
 	}

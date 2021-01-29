@@ -30,7 +30,7 @@ public class GuildJoinListener extends ListenerAdapter {
 	private final DiscordUserRepo discordUserRepo;
 
 	@Autowired
-	public GuildJoinListener(DiscordGuildRepo discordGuildRepo, DiscordBanRepo discordBanRepo, DiscordUserRepo discordUserRepo) {
+	public GuildJoinListener(final DiscordGuildRepo discordGuildRepo, final DiscordBanRepo discordBanRepo, final DiscordUserRepo discordUserRepo) {
 		this.discordGuildRepo = discordGuildRepo;
 		this.discordBanRepo = discordBanRepo;
 		this.discordUserRepo = discordUserRepo;
@@ -113,11 +113,11 @@ public class GuildJoinListener extends ListenerAdapter {
 	 * @param entry   The audit log entry for the ban.
 	 */
 	private void importBan(final DiscordGuild dcGuild, final Guild.Ban ban, final AuditLogEntry entry) {
-		User actor = entry.getUser();
-		User bannedUser = ban.getUser();
-		long bannedUserId = bannedUser.getIdLong();
-		long actorId = actor == null ? 0 : actor.getIdLong();
-		String reason = entry.getReason() == null ? "No reason given." : entry.getReason();
+		final User actor = entry.getUser();
+		final User bannedUser = ban.getUser();
+		final long bannedUserId = bannedUser.getIdLong();
+		final long actorId = actor == null ? 0 : actor.getIdLong();
+		final String reason = entry.getReason() == null ? "No reason given." : entry.getReason();
 
 		if (discordBanRepo.existsByBannedUser_DiscordIdAndGuild_GuildId(bannedUserId, dcGuild.getGuildId())) {
 			// if user got banned multiple times and the latest is already in the database skip older
@@ -126,11 +126,11 @@ public class GuildJoinListener extends ListenerAdapter {
 			return;
 		}
 
-		Optional<DiscordUser> dcBannedUserOpt = discordUserRepo.findById(bannedUserId);
+		final Optional<DiscordUser> dcBannedUserOpt = discordUserRepo.findById(bannedUserId);
 		dcBannedUserOpt.ifPresentOrElse(
 				dcBannedUser -> discordBanRepo.save(DiscordBan.createDiscordBan(actorId, reason, dcGuild, dcBannedUser)),
 				() -> {
-					DiscordUser dcUser = DiscordUser.createDiscordUser(bannedUserId);
+					final DiscordUser dcUser = DiscordUser.createDiscordUser(bannedUserId);
 					discordUserRepo.save(dcUser);
 					discordBanRepo.save(DiscordBan.createDiscordBan(actorId, reason, dcGuild, dcUser));
 				}
@@ -148,13 +148,13 @@ public class GuildJoinListener extends ListenerAdapter {
 	 * @param ban     The ban representing a banned user in the guild.
 	 * @return The Runnable handling the unknown actor bans.
 	 */
-	private Runnable verifyBanSave(DiscordGuild dcGuild, Guild.Ban ban) {
+	private Runnable verifyBanSave(final DiscordGuild dcGuild, final Guild.Ban ban) {
 		return () -> {
 			final User bannedUser = ban.getUser();
 			final long bannedUserId = bannedUser.getIdLong();
 			final String reason = ban.getReason() == null ? "No reason given." : ban.getReason();
 			if (!discordBanRepo.existsByBannedUser_DiscordIdAndGuild_GuildId(bannedUserId, dcGuild.getGuildId())) {
-				Optional<DiscordUser> dcBannedUserOpt = discordUserRepo.findById(bannedUserId);
+				final Optional<DiscordUser> dcBannedUserOpt = discordUserRepo.findById(bannedUserId);
 				dcBannedUserOpt.ifPresentOrElse(
 						dcBannedUser -> discordBanRepo.save(DiscordBan.withUnknownActor(reason, dcGuild, dcBannedUser)),
 						() -> {

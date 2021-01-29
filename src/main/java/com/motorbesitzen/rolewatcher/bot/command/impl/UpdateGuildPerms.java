@@ -7,16 +7,20 @@ import com.motorbesitzen.rolewatcher.util.DiscordMessageUtil;
 import com.motorbesitzen.rolewatcher.util.LogUtil;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 /**
  * Updates a guilds' permission via command in Discord.
  */
+@Service(value = "updateperms")
 public class UpdateGuildPerms extends CommandImpl {
 
 	private final DiscordGuildRepo guildRepo;
 
+	@Autowired
 	public UpdateGuildPerms(final DiscordGuildRepo guildRepo) {
 		this.guildRepo = guildRepo;
 	}
@@ -91,7 +95,7 @@ public class UpdateGuildPerms extends CommandImpl {
 		setPermission(dcGuild, permissionName, permissionState);
 		guildRepo.save(dcGuild);
 
-		String answerText =
+		final String answerText =
 				permissionState ?
 						"Enabled the \"" + permissionName + "\" permission for the guild with the ID " + dcGuild.getGuildId() + "." :
 						"Disabled the \"" + permissionName + "\" permission for the guild with the ID " + dcGuild.getGuildId() + ".";

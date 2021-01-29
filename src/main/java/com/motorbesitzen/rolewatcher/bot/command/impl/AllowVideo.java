@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.MissingAccessException;
 import net.dv8tion.jda.api.requests.restaction.PermissionOverrideAction;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -16,6 +17,7 @@ import java.util.List;
  * Does not remove the override even if all the permissions are the same as normal. Might lead to a lot of
  * 'dead' overrides that do not override anything anymore.
  */
+@Service("allowvideo")
 public class AllowVideo extends CommandImpl {
 
 	/**
@@ -90,7 +92,7 @@ public class AllowVideo extends CommandImpl {
 	 */
 	private void allowMemberVideoPermission(final GuildChannel channel, final Member member) {
 		try {
-			PermissionOverrideAction override = channel.putPermissionOverride(member);
+			final PermissionOverrideAction override = channel.putPermissionOverride(member);
 			override.clear(Permission.VOICE_STREAM).queue();
 		} catch (MissingAccessException e) {
 			// bot should not need access to everything, it should only update all channels it has access to

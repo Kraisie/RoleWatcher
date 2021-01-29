@@ -66,7 +66,7 @@ public class GuildMemberJoinListener extends ListenerAdapter {
 	 * @param forumUser The information about the matching forum user in the database.
 	 */
 	private void assignForumRoles(final Member member, final ForumUser forumUser) {
-		List<ForumRole> forumRoles;
+		final List<ForumRole> forumRoles;
 		try {
 			forumRoles = forumRoleApiRequest.getRolesOfForumUser(forumUser);
 		} catch (IOException e) {

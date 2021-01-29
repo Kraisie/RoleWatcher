@@ -13,17 +13,21 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 /**
  * Sends information about a forum/Discord user if available.
  */
+@Service("who")
 public class Who extends CommandImpl {
 
 	private final DiscordUserRepo dcUserRepo;
 	private final ForumUserRepo fUserRepo;
 
+	@Autowired
 	public Who(final DiscordUserRepo dcUserRepo, final ForumUserRepo fUserRepo) {
 		this.dcUserRepo = dcUserRepo;
 		this.fUserRepo = fUserRepo;
@@ -108,7 +112,7 @@ public class Who extends CommandImpl {
 	 * @param dcUser The Discord user to show info about.
 	 */
 	private void setMemberInfo(final EmbedBuilder eb, final DiscordUser dcUser, final Member member) {
-		User user = member.getUser();
+		final User user = member.getUser();
 		eb.setAuthor("Found user!", null, user.getAvatarUrl());
 		eb.addField("Discord user:", member.getAsMention(), true);
 		setWhitelistInfo(eb, dcUser);
@@ -121,7 +125,7 @@ public class Who extends CommandImpl {
 	 * @param dcUser The Discord user to show info about.
 	 */
 	private void setDefaultInfo(final EmbedBuilder eb, final DiscordUser dcUser) {
-		String iconUrl = EnvironmentUtil.getEnvironmentVariable("DEFAULT_AVATAR_URL");
+		final String iconUrl = EnvironmentUtil.getEnvironmentVariable("DEFAULT_AVATAR_URL");
 		eb.setAuthor("Found user!", null, iconUrl);
 		eb.addField("Discord user:", "<@" + dcUser.getDiscordId() + ">", true);
 		setWhitelistInfo(eb, dcUser);
@@ -167,7 +171,7 @@ public class Who extends CommandImpl {
 	 * @param fUser The forum user to show info about.
 	 */
 	private void setForumInfo(final EmbedBuilder eb, final ForumUser fUser) {
-		String link =
+		final String link =
 				EnvironmentUtil.getEnvironmentVariable("FORUM_MEMBER_PROFILE_URL") == null ?
 						"Forum link not set!" :
 						EnvironmentUtil.getEnvironmentVariable("FORUM_MEMBER_PROFILE_URL") + fUser.getForumId();

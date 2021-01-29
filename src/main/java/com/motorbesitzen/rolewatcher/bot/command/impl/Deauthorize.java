@@ -7,17 +7,21 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 /**
  * Used to deauthorize Discord text channels and Discord roles to use bot commands.
  */
+@Service("deauthorize")
 public class Deauthorize extends CommandImpl {
 
 	private final AuthedChannelRepo channelRepo;
 	private final AuthedRoleRepo roleRepo;
 
+	@Autowired
 	public Deauthorize(final AuthedChannelRepo channelRepo, final AuthedRoleRepo roleRepo) {
 		this.channelRepo = channelRepo;
 		this.roleRepo = roleRepo;

@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,6 +14,7 @@ import java.util.Optional;
 /**
  * Command to send an announcement via the bot in a specific channel.
  */
+@Service("announce")
 public class Announce extends CommandImpl {
 
 	/**

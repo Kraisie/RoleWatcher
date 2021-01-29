@@ -1,6 +1,5 @@
 package com.motorbesitzen.rolewatcher.bot.command;
 
-import com.motorbesitzen.rolewatcher.config.CommandBeanConfig;
 import com.motorbesitzen.rolewatcher.data.dao.AuthedChannel;
 import com.motorbesitzen.rolewatcher.data.dao.AuthedRole;
 import com.motorbesitzen.rolewatcher.data.dao.DiscordGuild;
@@ -32,8 +31,6 @@ public class CommandListener extends ListenerAdapter {
 
 	/**
 	 * Contains all Command subclasses (and CommandImpl itself) which are registered as a Bean
-	 *
-	 * @see CommandBeanConfig
 	 */
 	private final Map<String, Command> commandMap;
 	private final DiscordGuildRepo guildRepo;
@@ -44,9 +41,8 @@ public class CommandListener extends ListenerAdapter {
 	 * Private constructor to be used by Spring autowiring.
 	 *
 	 * @param commandMap A {@code Map} of Beans that implement the {@link Command}
-	 *                   interface. The map contains the name of the Bean from
-	 *                   {@link CommandBeanConfig} as {@code String} (key) and the
-	 *                   implementation (value).
+	 *                   interface. The map contains the name of the Bean  as {@code String}
+	 *                   (key) and the implementation (value).
 	 */
 	@Autowired
 	private CommandListener(final Map<String, Command> commandMap, final DiscordGuildRepo guildRepo, final AuthedChannelRepo channelRepo, final AuthedRoleRepo roleRepo) {
@@ -279,11 +275,7 @@ public class CommandListener extends ListenerAdapter {
 		}
 
 		// if command needs write permission, but guild does not have it
-		if (command.needsWritePerms() && !dcGuild.hasWritePerm()) {
-			return false;
-		}
-
-		return true;
+		return !command.needsWritePerms() || dcGuild.hasWritePerm();
 	}
 
 	private boolean isCallerBotOwner(Member caller) {

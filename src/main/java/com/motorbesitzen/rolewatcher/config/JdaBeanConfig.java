@@ -1,16 +1,12 @@
 package com.motorbesitzen.rolewatcher.config;
 
-import com.motorbesitzen.rolewatcher.bot.command.CommandListener;
-import com.motorbesitzen.rolewatcher.bot.event.AuthedDeletionListener;
-import com.motorbesitzen.rolewatcher.bot.event.BanListener;
-import com.motorbesitzen.rolewatcher.bot.event.GuildJoinListener;
-import com.motorbesitzen.rolewatcher.bot.event.GuildMemberJoinListener;
 import com.motorbesitzen.rolewatcher.util.EnvironmentUtil;
 import com.motorbesitzen.rolewatcher.util.LogUtil;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ApplicationContext;
@@ -18,6 +14,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import javax.security.auth.login.LoginException;
+import java.util.Map;
 
 /**
  * Provides beans for any JDA related class.
@@ -28,19 +25,14 @@ public class JdaBeanConfig {
 	/**
 	 * Provides the JDA object by starting the bot. If the bot can not be started the application gets stopped.
 	 *
-	 * @param cmdListener             The class that handles bot commands for the bot.
-	 * @param banListener             The class that handles ban and unban events for the bot.
-	 * @param authedDeletionListener  The class that handles role and channel deletions for the bot.
-	 * @param guildMemberJoinListener The class that handles member join events for the bot.
-	 * @param guildJoinListener       The class that handles joining a guild for the bot.
-	 * @param applicationContext      The Spring application context.
+	 * @param eventListeners     A list of event listeners.
+	 * @param applicationContext The Spring application context.
 	 * @return The 'core object' of the bot, the JDA.
 	 */
 	@Bean
-	JDA startBot(final CommandListener cmdListener, final BanListener banListener, final AuthedDeletionListener authedDeletionListener,
-				 final GuildMemberJoinListener guildMemberJoinListener, final GuildJoinListener guildJoinListener, final ApplicationContext applicationContext) {
+	JDA startBot(final Map<String, ? extends ListenerAdapter> eventListeners, final ApplicationContext applicationContext) {
 		final String discordToken = getToken(applicationContext);
-		final JDABuilder jdaBuilder = buildBot(discordToken, cmdListener, banListener, authedDeletionListener, guildJoinListener, guildMemberJoinListener);
+		final JDABuilder jdaBuilder = buildBot(discordToken, eventListeners);
 		final JDA jda = botLogin(jdaBuilder);
 		if (jda == null) {
 			shutdown(applicationContext);
@@ -76,21 +68,22 @@ public class JdaBeanConfig {
 	/**
 	 * Initializes the bot with the needed information.
 	 *
-	 * @param discordToken            The Discord token of the bot.
-	 * @param cmdListener             The part of the application handling commands.
-	 * @param banListener             The part of the application handling bans and unbans.
-	 * @param authedDeletionListener  The part of the application handling role and channel deletions.
-	 * @param guildJoinListener       The part of the application handling joins to guilds.
-	 * @param guildMemberJoinListener The part of the application handling member joining the guild.
+	 * @param discordToken   The Discord token of the bot.
+	 * @param eventListeners A list of event listeners.
 	 * @return A <a href="https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/JDA.html">JDA instance</a> of the bot.
 	 */
-	private JDABuilder buildBot(String discordToken, CommandListener cmdListener, BanListener banListener, AuthedDeletionListener authedDeletionListener, GuildJoinListener guildJoinListener, GuildMemberJoinListener guildMemberJoinListener) {
-		Activity activity = getBotActivity();
-		return JDABuilder.createDefault(discordToken)
+	private JDABuilder buildBot(final String discordToken, final Map<String, ? extends ListenerAdapter> eventListeners) {
+		final Activity activity = getBotActivity();
+		final JDABuilder builder = JDABuilder.createDefault(discordToken)
 				.enableIntents(GatewayIntent.GUILD_MEMBERS)
 				.setStatus(OnlineStatus.ONLINE)
-				.setActivity(activity)
-				.addEventListeners(cmdListener, banListener, authedDeletionListener, guildJoinListener, guildMemberJoinListener);
+				.setActivity(activity);
+
+		for (Map.Entry<String, ? extends ListenerAdapter> eventListener : eventListeners.entrySet()) {
+			builder.addEventListeners(eventListener.getValue());
+		}
+
+		return builder;
 	}
 
 	/**

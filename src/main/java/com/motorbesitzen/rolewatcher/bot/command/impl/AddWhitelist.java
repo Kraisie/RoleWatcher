@@ -7,16 +7,20 @@ import com.motorbesitzen.rolewatcher.util.DiscordMessageUtil;
 import com.motorbesitzen.rolewatcher.util.LogUtil;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 /**
  * Whitelists a Discord user either by Discord ID or by forum ID.
  */
+@Service("addwhitelist")
 public class AddWhitelist extends CommandImpl {
 
 	private final DiscordUserRepo dcUserRepo;
 
+	@Autowired
 	public AddWhitelist(final DiscordUserRepo dcUserRepo) {
 		this.dcUserRepo = dcUserRepo;
 	}
@@ -30,8 +34,8 @@ public class AddWhitelist extends CommandImpl {
 	 */
 	@Override
 	public void execute(final GuildMessageReceivedEvent event) {
-		TextChannel channel = event.getChannel();
-		long id = DiscordMessageUtil.getMentionedMemberId(event.getMessage());
+		final TextChannel channel = event.getChannel();
+		final long id = DiscordMessageUtil.getMentionedMemberId(event.getMessage());
 		if (id == -1) {
 			sendErrorMessage(channel, "Please mention a user or provide a user ID to whitelist.");
 			return;

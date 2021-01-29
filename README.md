@@ -508,12 +508,31 @@ the following line:
 SPRING_PROFILES_ACTIVE=dev
 ```
 
-### Adding commands
+### Adding commands and event listeners
 
-To add a command to the bot there are a few steps to perform. First add a new entry ot the `CommandInfo` class. The next
-step is to create the command class in `com.motorbesitzen.rolewatcher.bot.command.impl`. The command class needs to
-extend `CommandImpl`. Afterwards add a method to `CommandBeanConfig` to provide a bean of the command. All classes
-provide more information on what is needed so read them before performing any steps.
+To add a command to the bot there are a few steps to perform. First add a new entry to the `CommandInfo` class. The next
+step is to create the command class in
+`com.motorbesitzen.rolewatcher.bot.command.impl`. The command class needs to extend `CommandImpl`. The command needs to
+be a `@Service` and needs to have its command set as a value in lowercase. So a command like `help` would be the
+following:
+
+```java
+
+@Service("help")
+public class Help extends CommandImpl {
+	// ...
+}
+```
+
+The same applies for event listeners although they do not need a name and thus no value:
+
+```java
+
+@Service
+public class SomeEventListener extends ListenerAdapter {
+	// ...
+}
+```
 
 ### Decisions
 

@@ -32,7 +32,7 @@ public class BanListener extends ListenerAdapter {
 	private final DiscordUserRepo discordUserRepo;
 
 	@Autowired
-	public BanListener(DiscordBanRepo discordBanRepo, DiscordGuildRepo discordGuildRepo, DiscordUserRepo discordUserRepo) {
+	public BanListener(final DiscordBanRepo discordBanRepo, final DiscordGuildRepo discordGuildRepo, final DiscordUserRepo discordUserRepo) {
 		this.discordBanRepo = discordBanRepo;
 		this.discordGuildRepo = discordGuildRepo;
 		this.discordUserRepo = discordUserRepo;
@@ -174,10 +174,10 @@ public class BanListener extends ListenerAdapter {
 	 */
 	@Override
 	public void onGuildUnban(final GuildUnbanEvent event) {
-		Guild guild = event.getGuild();
-		User unbannedUser = event.getUser();
+		final Guild guild = event.getGuild();
+		final User unbannedUser = event.getUser();
 
-		Optional<DiscordBan> banOpt = discordBanRepo.findDiscordBanByBannedUser_DiscordIdAndGuild_GuildId(unbannedUser.getIdLong(), guild.getIdLong());
+		final Optional<DiscordBan> banOpt = discordBanRepo.findDiscordBanByBannedUser_DiscordIdAndGuild_GuildId(unbannedUser.getIdLong(), guild.getIdLong());
 		banOpt.ifPresentOrElse(
 				ban -> removeBan(event, ban),
 				() -> LogUtil.logWarning("\"" + unbannedUser.getAsTag() + "\" got unbanned on \"" +

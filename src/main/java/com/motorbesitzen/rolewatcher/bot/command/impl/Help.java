@@ -9,6 +9,8 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,10 +18,12 @@ import java.util.Optional;
 /**
  * Sends a help message with information about all available commands to the channel where the help was requested.
  */
+@Service("help")
 public class Help extends CommandImpl {
 
 	private final DiscordGuildRepo discordGuildRepo;
 
+	@Autowired
 	public Help(final DiscordGuildRepo discordGuildRepo) {
 		this.discordGuildRepo = discordGuildRepo;
 	}
@@ -85,7 +89,7 @@ public class Help extends CommandImpl {
 				continue;
 			}
 
-			String title = prefix + command.getUsage();
+			final String title = prefix + command.getUsage();
 			eb.addField(title, command.getDescription(), false);
 		}
 	}

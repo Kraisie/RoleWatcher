@@ -7,16 +7,20 @@ import com.motorbesitzen.rolewatcher.util.DiscordMessageUtil;
 import com.motorbesitzen.rolewatcher.util.LogUtil;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 /**
  * Removes a Discord user from the whitelist.
  */
+@Service("removewhitelist")
 public class RemoveWhitelist extends CommandImpl {
 
 	private final DiscordUserRepo dcUserRepo;
 
+	@Autowired
 	public RemoveWhitelist(final DiscordUserRepo dcUserRepo) {
 		this.dcUserRepo = dcUserRepo;
 	}

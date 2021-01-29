@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.MissingAccessException;
 import net.dv8tion.jda.api.requests.restaction.PermissionOverrideAction;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -14,6 +15,7 @@ import java.util.List;
  * Overrides the Discord permissions to block the mentioned members from streaming screen content or via webcam in
  * all voice channels the bot can access.
  */
+@Service("blockvideo")
 public class BlockVideo extends CommandImpl {
 
 	/**

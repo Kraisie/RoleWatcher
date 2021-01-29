@@ -14,6 +14,8 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.List;
@@ -22,12 +24,14 @@ import java.util.Optional;
 /**
  * Manually force a role update of a Discord member.
  */
+@Service("update")
 public class UpdateUser extends CommandImpl {
 
 	private final ForumUserRepo forumUserRepo;
 	private final ForumRoleRepo forumRoleRepo;
 	private final ForumRoleApiRequest forumRoleApiRequest;
 
+	@Autowired
 	public UpdateUser(final ForumUserRepo forumUserRepo, final ForumRoleRepo forumRoleRepo, final ForumRoleApiRequest forumRoleApiRequest) {
 		this.forumUserRepo = forumUserRepo;
 		this.forumRoleRepo = forumRoleRepo;
@@ -79,7 +83,7 @@ public class UpdateUser extends CommandImpl {
 	 * @param member    The matching member of the {@param forumUser}.
 	 */
 	private void updateMemberRoles(final TextChannel channel, final ForumUser forumUser, final Member member) {
-		List<ForumRole> forumRoles;
+		final List<ForumRole> forumRoles;
 		try {
 			forumRoles = forumRoleApiRequest.getRolesOfForumUser(forumUser);
 		} catch (IOException e) {

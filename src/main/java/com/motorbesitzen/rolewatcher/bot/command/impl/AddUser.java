@@ -17,6 +17,8 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.List;
@@ -25,6 +27,7 @@ import java.util.Optional;
 /**
  * A command to manually add a link between a Discord and a forum user.
  */
+@Service("adduser")
 public class AddUser extends CommandImpl {
 
 	private final DiscordUserRepo discordUserRepo;
@@ -32,6 +35,7 @@ public class AddUser extends CommandImpl {
 	private final ForumRoleRepo forumRoleRepo;
 	private final ForumRoleApiRequest forumRoleApiRequest;
 
+	@Autowired
 	public AddUser(final DiscordUserRepo discordUserRepo, final ForumUserRepo forumUserRepo, final ForumRoleRepo forumRoleRepo, final ForumRoleApiRequest forumRoleApiRequest) {
 		this.discordUserRepo = discordUserRepo;
 		this.forumUserRepo = forumUserRepo;
@@ -160,7 +164,7 @@ public class AddUser extends CommandImpl {
 	 *                of {@param newUser}.
 	 */
 	private void assignMemberRoles(final TextChannel channel, final ForumUser newUser, final Member member) {
-		List<ForumRole> forumRoles;
+		final List<ForumRole> forumRoles;
 		try {
 			forumRoles = forumRoleApiRequest.getRolesOfForumUser(newUser);
 		} catch (IOException e) {

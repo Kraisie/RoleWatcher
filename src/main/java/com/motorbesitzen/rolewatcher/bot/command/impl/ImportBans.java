@@ -10,6 +10,8 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
@@ -19,10 +21,12 @@ import java.util.Set;
 /**
  * Imports bans of another guild to the list of bans the calling guild has.
  */
+@Service("importbans")
 public class ImportBans extends CommandImpl {
 
 	private final DiscordGuildRepo discordGuildRepo;
 
+	@Autowired
 	public ImportBans(final DiscordGuildRepo discordGuildRepo) {
 		this.discordGuildRepo = discordGuildRepo;
 	}
@@ -102,7 +106,7 @@ public class ImportBans extends CommandImpl {
 				reason = reason.substring(reason.indexOf(':')).trim(); // "[IB123456789012345678]: reason"
 			}
 
-			DiscordBan newBan = DiscordBan.createDiscordBan(
+			final DiscordBan newBan = DiscordBan.createDiscordBan(
 					ban.getActorDiscordId(),
 					"[IB" + discordGuild.getGuildId() + "]: " + reason,
 					callerDcGuild,

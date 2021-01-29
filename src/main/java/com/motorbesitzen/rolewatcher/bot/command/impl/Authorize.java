@@ -11,6 +11,8 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,12 +20,14 @@ import java.util.Optional;
 /**
  * Used to authorize Discord text channels and Discord roles to use bot commands.
  */
+@Service("authorize")
 public class Authorize extends CommandImpl {
 
 	private final AuthedChannelRepo channelRepo;
 	private final AuthedRoleRepo roleRepo;
 	private final DiscordGuildRepo discordGuildRepo;
 
+	@Autowired
 	public Authorize(final AuthedChannelRepo channelRepo, final AuthedRoleRepo roleRepo, final DiscordGuildRepo discordGuildRepo) {
 		this.channelRepo = channelRepo;
 		this.roleRepo = roleRepo;
@@ -86,7 +90,7 @@ public class Authorize extends CommandImpl {
 				continue;
 			}
 
-			AuthedChannel authedChannel = new AuthedChannel(channel.getIdLong(), guild);
+			final AuthedChannel authedChannel = new AuthedChannel(channel.getIdLong(), guild);
 			channelRepo.save(authedChannel);
 		}
 	}
@@ -103,7 +107,7 @@ public class Authorize extends CommandImpl {
 				continue;
 			}
 
-			AuthedRole authedRole = new AuthedRole(role.getIdLong(), guild);
+			final AuthedRole authedRole = new AuthedRole(role.getIdLong(), guild);
 			roleRepo.save(authedRole);
 		}
 	}

@@ -10,6 +10,8 @@ import com.motorbesitzen.rolewatcher.data.repo.DiscordGuildRepo;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 import java.util.Set;
@@ -17,12 +19,14 @@ import java.util.Set;
 /**
  * Sends basic data of the guild and its settings.
  */
+@Service("info")
 public class Info extends CommandImpl {
 
 	private final DiscordGuildRepo guildRepo;
 	private final AuthedChannelRepo channelRepo;
 	private final AuthedRoleRepo roleRepo;
 
+	@Autowired
 	public Info(final DiscordGuildRepo guildRepo, final AuthedChannelRepo channelRepo, final AuthedRoleRepo roleRepo) {
 		this.guildRepo = guildRepo;
 		this.channelRepo = channelRepo;

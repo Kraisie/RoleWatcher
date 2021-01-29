@@ -6,16 +6,20 @@ import com.motorbesitzen.rolewatcher.data.repo.ForumRoleRepo;
 import com.motorbesitzen.rolewatcher.util.DiscordMessageUtil;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 /**
  * Add a forum role to the database.
  */
+@Service("addrole")
 public class AddRole extends CommandImpl {
 
 	private final ForumRoleRepo forumRoleRepo;
 
+	@Autowired
 	public AddRole(final ForumRoleRepo forumRoleRepo) {
 		this.forumRoleRepo = forumRoleRepo;
 	}
@@ -68,7 +72,7 @@ public class AddRole extends CommandImpl {
 	 * @param roleName The role name.
 	 */
 	private void saveRole(final GuildMessageReceivedEvent event, final long roleId, final String roleName) {
-		ForumRole forumRole = ForumRole.of(roleId, roleName);
+		final ForumRole forumRole = ForumRole.of(roleId, roleName);
 		forumRoleRepo.save(forumRole);
 		answer(event.getChannel(), "Added role to database.");
 	}

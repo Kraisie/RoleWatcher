@@ -33,7 +33,7 @@ public class AuthedDeletionListener extends ListenerAdapter {
 	 */
 	@Override
 	public void onTextChannelDelete(final TextChannelDeleteEvent event) {
-		TextChannel deletedChannel = event.getChannel();
+		final TextChannel deletedChannel = event.getChannel();
 		if (authedChannelRepo.existsById(deletedChannel.getIdLong())) {
 			authedChannelRepo.deleteById(deletedChannel.getIdLong());
 		}
@@ -46,7 +46,7 @@ public class AuthedDeletionListener extends ListenerAdapter {
 	 */
 	@Override
 	public void onRoleDelete(final RoleDeleteEvent event) {
-		Role role = event.getRole();
+		final Role role = event.getRole();
 		if (authedRoleRepo.existsById(role.getIdLong())) {
 			authedRoleRepo.deleteById(role.getIdLong());
 		}

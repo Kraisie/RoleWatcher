@@ -10,6 +10,8 @@ import com.motorbesitzen.rolewatcher.util.RoleUtil;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -17,11 +19,13 @@ import java.util.Optional;
 /**
  * Deletes a forum user entry and by that the link between Discord and forum user from the database.
  */
+@Service("deluser")
 public class DeleteUser extends CommandImpl {
 
 	private final ForumRoleRepo forumRoleRepo;
 	private final ForumUserRepo forumUserRepo;
 
+	@Autowired
 	public DeleteUser(final ForumRoleRepo forumRoleRepo, final ForumUserRepo forumUserRepo) {
 		this.forumRoleRepo = forumRoleRepo;
 		this.forumUserRepo = forumUserRepo;
@@ -43,7 +47,7 @@ public class DeleteUser extends CommandImpl {
 			return;
 		}
 
-		Optional<ForumUser> forumUser = forumUserRepo.findByForumIdOrLinkedDiscordUser_DiscordId(memberId, memberId);
+		final Optional<ForumUser> forumUser = forumUserRepo.findByForumIdOrLinkedDiscordUser_DiscordId(memberId, memberId);
 		forumUser.ifPresentOrElse(user -> deleteUser(event, user), () -> sendErrorMessage(channel, "User not found! Make sure the given ID exists."));
 	}
 
@@ -57,8 +61,8 @@ public class DeleteUser extends CommandImpl {
 	 */
 	private void deleteUser(final GuildMessageReceivedEvent event, final ForumUser user) {
 		// saving needed data, because hibernate nulls the user after deletion from the database
-		long discordId = user.getLinkedDiscordUser().getDiscordId();
-		boolean whitelisted = user.getLinkedDiscordUser().isWhitelisted();
+		final long discordId = user.getLinkedDiscordUser().getDiscordId();
+		final boolean whitelisted = user.getLinkedDiscordUser().isWhitelisted();
 
 		event.getGuild().retrieveBanById(discordId).queue(
 				ban -> {
