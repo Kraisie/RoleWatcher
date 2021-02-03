@@ -1,6 +1,7 @@
 package com.motorbesitzen.rolewatcher.bot.command.impl;
 
 import com.motorbesitzen.rolewatcher.bot.command.CommandImpl;
+import com.motorbesitzen.rolewatcher.data.dao.DiscordUser;
 import com.motorbesitzen.rolewatcher.data.dao.ForumUser;
 import com.motorbesitzen.rolewatcher.data.repo.ForumRoleRepo;
 import com.motorbesitzen.rolewatcher.data.repo.ForumUserRepo;
@@ -61,10 +62,9 @@ public class DeleteUser extends CommandImpl {
 	 */
 	private void deleteUser(final GuildMessageReceivedEvent event, final ForumUser user) {
 		// saving needed data, because hibernate nulls the user after deletion from the database
-		final long discordId = user.getLinkedDiscordUser().getDiscordId();
-		final boolean whitelisted = user.getLinkedDiscordUser().isWhitelisted();
+		final DiscordUser dcUser = user.getLinkedDiscordUser();
 
-		event.getGuild().retrieveBanById(discordId).queue(
+		event.getGuild().retrieveBanById(dcUser.getDiscordId()).queue(
 				ban -> {
 					final String banReason = ban.getReason();
 					sendMessage(event.getChannel(), "The user you are unlinking is banned for \"" + banReason + "\" on this guild!");
@@ -76,12 +76,12 @@ public class DeleteUser extends CommandImpl {
 		forumUserRepo.save(user);    // unlinking from discord user, otherwise won't delete entry
 		forumUserRepo.delete(user);
 		answer(event.getChannel(), "Deleted user from database.");
-		doUserDeletionLog(event, discordId, user);
+		doUserDeletionLog(event, dcUser, user);
 
-		if (whitelisted) {
+		if (dcUser.isWhitelisted()) {
 			return;
 		}
-		removeForumRoles(event.getGuild(), discordId);
+		removeForumRoles(event.getGuild(), dcUser.getDiscordId());
 	}
 
 	/**
@@ -103,10 +103,11 @@ public class DeleteUser extends CommandImpl {
 	 * @param event The event provided by JDA that a guild message got received.
 	 * @param user  The deleted user.
 	 */
-	private void doUserDeletionLog(final GuildMessageReceivedEvent event, final long discordId, final ForumUser user) {
+	private void doUserDeletionLog(final GuildMessageReceivedEvent event, final DiscordUser dcUser, final ForumUser user) {
 		final String authorId = event.getAuthor().getId();
 		final String author = event.getAuthor().getAsTag();
-		final String message = author + " (" + authorId + ")" + " deleted a user (" + discordId + ") from the database: " + user.toString() + ".";
+		final String message = author + " (" + authorId + ")" + " deleted a user (" + dcUser.getDiscordId() + ") from the database: " +
+				user.toString() + ", " + dcUser.toString() + ".";
 		LogUtil.logInfo(message);
 	}
 }
