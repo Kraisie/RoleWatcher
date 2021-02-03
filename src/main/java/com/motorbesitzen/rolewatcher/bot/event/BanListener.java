@@ -143,7 +143,7 @@ public class BanListener extends ListenerAdapter {
 
 		final DiscordGuild dcGuild = dcGuildOpt.get();
 		final User bannedUser = ban.getUser();
-		final String banReason = ban.getReason() == null ? "No reason given." : ban.getReason();
+		final String banReason = ban.getReason() == null ? (entry.getReason() == null ? "No reason given." : entry.getReason()) : ban.getReason();
 		final Optional<DiscordUser> bannedDiscordUserOpt = discordUserRepo.findById(bannedUser.getIdLong());
 		bannedDiscordUserOpt.ifPresentOrElse(
 				bannedDiscordUser -> saveBan(DiscordBan.createDiscordBan(actorId, banReason, dcGuild, bannedDiscordUser)),
