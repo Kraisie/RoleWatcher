@@ -1,8 +1,10 @@
 package com.motorbesitzen.rolewatcher.bot.command.impl;
 
 import com.motorbesitzen.rolewatcher.bot.command.CommandImpl;
+import com.motorbesitzen.rolewatcher.data.dao.DiscordBan;
 import com.motorbesitzen.rolewatcher.data.dao.DiscordUser;
 import com.motorbesitzen.rolewatcher.data.dao.ForumUser;
+import com.motorbesitzen.rolewatcher.data.repo.DiscordBanRepo;
 import com.motorbesitzen.rolewatcher.data.repo.ForumRoleRepo;
 import com.motorbesitzen.rolewatcher.data.repo.ForumUserRepo;
 import com.motorbesitzen.rolewatcher.util.DiscordMessageUtil;
@@ -25,11 +27,13 @@ public class DeleteUser extends CommandImpl {
 
 	private final ForumRoleRepo forumRoleRepo;
 	private final ForumUserRepo forumUserRepo;
+	private final DiscordBanRepo banRepo;
 
 	@Autowired
-	public DeleteUser(final ForumRoleRepo forumRoleRepo, final ForumUserRepo forumUserRepo) {
+	public DeleteUser(final ForumRoleRepo forumRoleRepo, final ForumUserRepo forumUserRepo, final DiscordBanRepo banRepo) {
 		this.forumRoleRepo = forumRoleRepo;
 		this.forumUserRepo = forumUserRepo;
+		this.banRepo = banRepo;
 	}
 
 	/**
@@ -49,29 +53,55 @@ public class DeleteUser extends CommandImpl {
 		}
 
 		final Optional<ForumUser> forumUser = forumUserRepo.findByForumIdOrLinkedDiscordUser_DiscordId(memberId, memberId);
-		forumUser.ifPresentOrElse(user -> deleteUser(event, user), () -> sendErrorMessage(channel, "User not found! Make sure the given ID exists."));
+		forumUser.ifPresentOrElse(user -> tryDeleteUser(event, user), () -> sendErrorMessage(channel, "User not found! Make sure the given ID exists."));
+	}
+
+	/**
+	 * Tries to deletes the user from the database and logs the delete action. Sends a success message after deletion.
+	 * Does not unlink the user if the user is banned in the guild. Informs caller about the ban and
+	 * explains what to do to unlink the user.
+	 *
+	 * @param event The event provided by JDA that a guild message got received.
+	 * @param user  The user to delete from the database.
+	 */
+	private void tryDeleteUser(final GuildMessageReceivedEvent event, final ForumUser user) {
+		// saving needed data, because hibernate nulls the user after deletion from the database
+		final long discordId = user.getLinkedDiscordUser().getDiscordId();
+		final long guildId = event.getGuild().getIdLong();
+		final Optional<DiscordBan> dcBan = banRepo.findDiscordBanByBannedUser_DiscordIdAndGuild_GuildId(discordId, guildId);
+		dcBan.ifPresentOrElse(
+				ban -> {
+					final String banReason = ban.getReason();
+					sendMessage(
+							event.getChannel(),
+							"The user you tried to unlink is banned for \"" + banReason + "\" on this guild! " +
+									"Unban the user and try again if you still want to unlink the user."
+					);
+				},
+				() -> event.getGuild().retrieveBanById(discordId).queue(
+						ban -> {
+							final String banReason = ban.getReason() == null ?
+									"Unknown reason (not set in API and database)" : ban.getReason();
+							sendMessage(
+									event.getChannel(),
+									"The user you tried to unlink is banned for \"" + banReason + "\" on this guild! " +
+											"Unban the user and try again if you still want to unlink the user."
+							);
+						},
+						throwable -> deleteUser(event, user)
+				)
+		);
 	}
 
 	/**
 	 * Deletes the user from the database and logs the delete action. Sends a success message after deletion.
-	 * Does not remove Discord roles of the deleted user if the user is whitelisted. Informs caller if the user
-	 * to unlink is banned on this guild.
+	 * Does not remove Discord roles of the deleted user if the user is whitelisted.
 	 *
 	 * @param event The event provided by JDA that a guild message got received.
 	 * @param user  The user to delete from the database.
 	 */
 	private void deleteUser(final GuildMessageReceivedEvent event, final ForumUser user) {
-		// saving needed data, because hibernate nulls the user after deletion from the database
 		final DiscordUser dcUser = user.getLinkedDiscordUser();
-
-		event.getGuild().retrieveBanById(dcUser.getDiscordId()).queue(
-				ban -> {
-					final String banReason = ban.getReason();
-					sendMessage(event.getChannel(), "The user you are unlinking is banned for \"" + banReason + "\" on this guild!");
-				},
-				throwable -> LogUtil.logDebug("Deleted user is not banned in guild.")
-		);
-
 		user.setLinkedDiscordUser(null);
 		forumUserRepo.save(user);    // unlinking from discord user, otherwise won't delete entry
 		forumUserRepo.delete(user);
