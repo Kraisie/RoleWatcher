@@ -65,23 +65,22 @@ public class DeleteUser extends CommandImpl {
 	 * @param user  The user to delete from the database.
 	 */
 	private void tryDeleteUser(final GuildMessageReceivedEvent event, final ForumUser user) {
-		// saving needed data, because hibernate nulls the user after deletion from the database
-		final long discordId = user.getLinkedDiscordUser().getDiscordId();
-		final long guildId = event.getGuild().getIdLong();
 		if (event.getMessage().getContentRaw().endsWith("-f")) {
 			deleteUser(event, user);
 			return;
 		}
 
+		final long discordId = user.getLinkedDiscordUser().getDiscordId();
+		final long guildId = event.getGuild().getIdLong();
 		final Optional<DiscordBan> dcBan = banRepo.findDiscordBanByBannedUser_DiscordIdAndGuild_GuildId(discordId, guildId);
 		dcBan.ifPresentOrElse(
 				ban -> {
 					final String banReason = ban.getReason();
 					sendMessage(
 							event.getChannel(),
-							"The user you tried to unlink is banned for \"" + banReason + "\" on this guild! " +
+							"The user you tried to unlink is banned for \"" + banReason + "\" on this guild!\n" +
 									"Unban the user and try again if you still want to unlink the user. If the user is " +
-									"already unbanned or the ban is imported try to add \"-f\" at the end of the message " +
+									"already unbanned or the ban is imported try to add \"-f\" to the end of the message " +
 									"(without the quotation marks)."
 					);
 				},
@@ -91,8 +90,10 @@ public class DeleteUser extends CommandImpl {
 									"Unknown reason (not set in API and database)" : ban.getReason();
 							sendMessage(
 									event.getChannel(),
-									"The user you tried to unlink is banned for \"" + banReason + "\" on this guild! " +
-											"Unban the user and try again if you still want to unlink the user."
+									"The user you tried to unlink is banned for \"" + banReason + "\" on this guild!\n" +
+											"Unban the user and try again if you still want to unlink the user. If the user is " +
+											"already unbanned or the ban is imported try to add \"-f\" to the end of the message " +
+											"(without the quotation marks)."
 							);
 						},
 						throwable -> deleteUser(event, user)
@@ -115,10 +116,9 @@ public class DeleteUser extends CommandImpl {
 		answer(event.getChannel(), "Deleted user from database.");
 		doUserDeletionLog(event, dcUser, user);
 
-		if (dcUser.isWhitelisted()) {
-			return;
+		if (!dcUser.isWhitelisted()) {
+			removeForumRoles(event.getGuild(), dcUser.getDiscordId());
 		}
-		removeForumRoles(event.getGuild(), dcUser.getDiscordId());
 	}
 
 	/**
