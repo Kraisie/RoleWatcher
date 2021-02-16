@@ -55,6 +55,10 @@ public class Announce extends CommandImpl {
 	 */
 	private Optional<TextChannel> getMentionedChannel(final Message message) {
 		final List<TextChannel> mentionedChannels = message.getMentionedChannels();
+		if (mentionedChannels.size() == 0) {
+			return Optional.empty();
+		}
+
 		return Optional.ofNullable(mentionedChannels.get(0));
 	}
 
