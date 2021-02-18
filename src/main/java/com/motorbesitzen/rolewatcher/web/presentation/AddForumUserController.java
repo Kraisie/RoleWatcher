@@ -51,14 +51,19 @@ public class AddForumUserController {
 			return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body("Invalid/corrupted data!");
 		}
 
-		if (forumUserRepo.existsById(user.getUid())) {
-			return ResponseEntity.status(HttpStatus.CONFLICT).body("Forum user already linked to another Discord account!");
+		final Optional<ForumUser> forumUserOpt = forumUserRepo.findById(user.getUid());
+		if (forumUserOpt.isPresent()) {
+			if (forumUserOpt.get().getLinkedDiscordUser().getDiscordId() == user.getDiscordid()) {
+				return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
+			}
+
+			return ResponseEntity.status(HttpStatus.CONFLICT).body("Forum account already linked to another Discord account!");
 		}
 
 		Optional<DiscordUser> discordUserOpt = discordUserRepo.findById(user.getDiscordid());
 		DiscordUser discordUser = discordUserOpt.orElseGet(() -> DiscordUser.createDiscordUser(user.getDiscordid()));
 		if (discordUser.getLinkedForumUser() != null) {
-			return ResponseEntity.status(HttpStatus.CONFLICT).body("Discord user already linked to another forum account!");
+			return ResponseEntity.status(HttpStatus.CONFLICT).body("Discord account already linked to another forum account!");
 		}
 
 		ForumUser forumUser = ForumUser.withLinkedDiscordUser(user.getUid(), user.getUsername(), discordUser);
