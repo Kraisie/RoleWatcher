@@ -201,7 +201,7 @@ public class RoleUpdater {
 	 * @param member    The member to ban.
 	 */
 	private void banMember(final ForumUser forumUser, final Member member) {
-		member.ban(0, "User has banned role on the forum. Might be a temporary ban.").queue(
+		member.ban(0, "User (" + forumUser.getForumId() + ") has the banned role on the forum. Might be a temporary ban.").queue(
 				(ban) -> LogUtil.logInfo(
 						"Banned member " + member.getUser().getAsTag() + " (" + member.getId() + ")  from \"" +
 								member.getGuild().getName() + "\" (" + member.getGuild().getId() + ") " +
