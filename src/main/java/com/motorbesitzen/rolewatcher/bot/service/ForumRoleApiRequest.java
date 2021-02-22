@@ -85,7 +85,11 @@ public class ForumRoleApiRequest {
 	 * @return A list of {@link ForumRole}s the user has.
 	 * @throws IllegalArgumentException if the JSON is invalid.
 	 */
-	private List<ForumRole> convertJsonToForumRoles(String roleIdsJson) throws IllegalArgumentException {
+	private List<ForumRole> convertJsonToForumRoles(final String roleIdsJson) throws IllegalArgumentException {
+		if (roleIdsJson == null) {
+			throw new IllegalArgumentException("Could not convert role ID JSON to integer array! JSON is null.");
+		}
+
 		try {
 			ObjectMapper mapper = new ObjectMapper();
 			long[] roleIds = mapper.readValue(roleIdsJson, long[].class);
