@@ -102,70 +102,6 @@ public enum CommandInfo {
 			return "Whitelists a user so his roles do not get updated and he will not be kicked if autokick is enabled. " +
 					"Can be used with a Discord tag or a Discord ID.";
 		}
-	}, ALLOW_VIDEO {
-		@Override
-		public String getName() {
-			return "allowvideo";
-		}
-
-		@Override
-		public boolean needsWritePerms() {
-			return false;
-		}
-
-		@Override
-		public boolean needsReadPerms() {
-			return false;
-		}
-
-		@Override
-		public boolean needsOwnerPerms() {
-			return false;
-		}
-
-		@Override
-		public String getUsage() {
-			return getName() + " (@member|discordid)+";
-		}
-
-		@Override
-		public String getDescription() {
-			return "Resets the permission to stream any video in voice chats the bot can access. Can be used with " +
-					"multiple Discord tags and/or Discord IDs of users. Only removes overrides for that user, does " +
-					"not grant the user streaming rights in voice channels!";
-		}
-	}, ANNOUNCE {
-		@Override
-		public String getName() {
-			return "announce";
-		}
-
-		@Override
-		public boolean needsWritePerms() {
-			return false;
-		}
-
-		@Override
-		public boolean needsReadPerms() {
-			return false;
-		}
-
-		@Override
-		public boolean needsOwnerPerms() {
-			return false;
-		}
-
-		@Override
-		public String getUsage() {
-			return getName() + " (everyone|here|@role) #channel \"message\"";
-		}
-
-		@Override
-		public String getDescription() {
-			return "Sends a message in the tagged channel pinging @everyone, @here or a tagged role. " +
-					"Avoiding pings can be done by not using everyone, here or a role tag. Providing " +
-					"multiple role tags will only ping the first one.";
-		}
 	}, AUTHORIZE {
 		@Override
 		public String getName() {
@@ -196,37 +132,6 @@ public enum CommandInfo {
 		public String getDescription() {
 			return "Authorizes a role for using commands or a channel to use commands in. Can be used with " +
 					"multiple discord tags for channels and/or roles.";
-		}
-	}, BLOCK_VIDEO {
-		@Override
-		public String getName() {
-			return "blockvideo";
-		}
-
-		@Override
-		public boolean needsWritePerms() {
-			return false;
-		}
-
-		@Override
-		public boolean needsReadPerms() {
-			return false;
-		}
-
-		@Override
-		public boolean needsOwnerPerms() {
-			return false;
-		}
-
-		@Override
-		public String getUsage() {
-			return getName() + " (@member|discordid)+";
-		}
-
-		@Override
-		public String getDescription() {
-			return "Blocks the permission to stream any video in voice chats the bot can access. Can be used with " +
-					"multiple Discord tags and/or Discord IDs of users. Can be bypassed by leaving and rejoining the guild!";
 		}
 	}, DEAUTHORIZE {
 		@Override
