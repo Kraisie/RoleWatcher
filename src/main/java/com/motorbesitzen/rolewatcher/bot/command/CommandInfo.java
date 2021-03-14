@@ -345,6 +345,36 @@ public enum CommandInfo {
 		public String getDescription() {
 			return "Removes a user from the whitelist. Can be used with a Discord tag or a Discord ID.";
 		}
+	}, RIDDLE {
+		@Override
+		public String getName() {
+			return "riddle";
+		}
+
+		@Override
+		public boolean needsWritePerms() {
+			return true;
+		}
+
+		@Override
+		public boolean needsReadPerms() {
+			return true;
+		}
+
+		@Override
+		public boolean needsOwnerPerms() {
+			return true;
+		}
+
+		@Override
+		public String getUsage() {
+			return getName();
+		}
+
+		@Override
+		public String getDescription() {
+			return "Riddle time, baby!";
+		}
 	}, UPDATE_USER {
 		@Override
 		public String getName() {
