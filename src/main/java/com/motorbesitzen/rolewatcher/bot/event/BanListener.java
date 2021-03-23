@@ -52,7 +52,7 @@ public class BanListener extends ListenerAdapter {
 			return;
 		}
 
-		guild.retrieveBan(bannedUser).queueAfter(5, TimeUnit.SECONDS, ban -> checkAuditLogs(event, ban));
+		guild.retrieveBan(bannedUser).queueAfter(15, TimeUnit.SECONDS, ban -> checkAuditLogs(event, ban));
 	}
 
 	/**
