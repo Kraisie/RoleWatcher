@@ -58,6 +58,15 @@ spring:
     hibernate:
       ddl-auto: create
 ---
+# additionally turn on (or overwrite) if update profile ("updatedb") -> to update DB on changes
+spring:
+  config:
+    activate:
+      on-profile: updatedb
+  jpa:
+    hibernate:
+      ddl-auto: update
+---
 # additionally turn on (or overwrite) if development profile ("dev")
 spring:
   config:
