@@ -63,7 +63,7 @@ class UpdateAutokickDelay extends CommandImpl {
 	 */
 	@Override
 	public String getUsage() {
-		return getName() + " (24-168)";
+		return getName() + " (12-168)";
 	}
 
 	/**
@@ -71,7 +71,7 @@ class UpdateAutokickDelay extends CommandImpl {
 	 */
 	@Override
 	public String getDescription() {
-		return "Sets the autokick delay to an amount of hours between 24 (1 day) and 168 (7 days).";
+		return "Sets the autokick delay to an amount of hours between 12 and 168 (7 days).";
 	}
 
 	/**
@@ -83,8 +83,8 @@ class UpdateAutokickDelay extends CommandImpl {
 	public void execute(final GuildMessageReceivedEvent event) {
 		final Message message = event.getMessage();
 		final long newDelay = DiscordMessageUtil.getMentionedRawId(message);
-		if (newDelay < 24 || newDelay > 168) {
-			sendErrorMessage(event.getChannel(), "Please provide a delay between 24 and 168 hours.");
+		if (newDelay < 12 || newDelay > 168) {
+			sendErrorMessage(event.getChannel(), "Please provide a delay between 12 and 168 hours.");
 			return;
 		}
 
