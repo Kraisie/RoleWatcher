@@ -12,14 +12,14 @@ This bot runs on Java 11, so you need to install the Java 11 JDK for your system
 ### Prerequisites
 
 While not specifically needed a basic understanding of computers, databases (SQL) and web traffic will help you a lot.
-It might be not that easy otherwise, especially if you need to code the
+It might not be that easy otherwise, especially if you need to code the
 [Forum role API](#forum-role-api) yourself.
 
 #### Forum IDs
 
 Your forum needs to have user and role IDs that are numeric and start by 1. Your highest possible ID should be 2<sup>
 63</sup>-1. If your forum uses so called "Snowflakes" as IDs there might be issues as Discord uses that ID system too.
-While duplicates between forum IDs and Discord IDs are very unlikely they can happen if your forum uses them as well. \
+While duplicates between forum IDs and Discord IDs are very unlikely they can happen if your forum uses them as well.
 
 #### Forum user name
 
@@ -108,9 +108,8 @@ do not give the bot the administrator permissions you need to keep your token ve
 * The bot can only kick or ban people if the highest role of that user is below the highest role of the bot. It can not
   kick or ban the server owner at all.
 * The bot can only assign roles lower than its own.
-* The bot can only update permissions of channels it can access.
+* The bot will only react to commands in channels it can read/write messages in.
 * Not granting the bot the needed permissions might lead to unknown behaviour.
-* Commands can only be used in channels the bot has access to.
 * The help command will only show commands your guild can use with the given permissions.
 
 ### Environment
@@ -261,13 +260,13 @@ an example URL would be `https://example.com/roleapi?uid=`. Any authorization yo
 query parameters, so a resulting url would be
 `https://example.com/roleapi?authkey=1234abc890&uid=`. Keep in mind that the users' ID will be appended to the end, so
 the query parameter for the user ID has to be the last one! \
-Role synchronisation will not work if this value is not set or an invalid URL.
+Role synchronisation will not work if this value is not set or if the URL is invalid.
 
 #### FORUM_ROLE_API_DELAY_MS
 
 The delay between requests to the role API in milliseconds. Has to be at least 100 and defaults to 5000 (5000
-milliseconds -> 5 seconds) if no value is set. If you set a value below 100 it will still work but will use a delay of
-100ms.
+milliseconds -> 5 seconds) if no value is set. If you set a value below 100 it will still work but it will use a delay
+of 100ms.
 
 #### [REQUIRED] FORUM_USER_ADD_API_KEY
 
@@ -301,8 +300,8 @@ to be a valid URL according to Discord
 #### ERROR_REDIRECT_URL
 
 If someone requests a webpage that this application does not provide he gets forwarded to an error page. This
-application does not include an own error page so the user gets redirected to an error page. You can set the URL for
-that page if you want to. If this value is not set it will redirect the user
+application does not include a custom error page, so the user gets redirected to a default error page. You can set the
+URL for a custom or an external error page if you want to. If this value is not set it will redirect the user
 to [some annoying website](https://theannoyingsite.com/) as he has no reason to be there. If you do not host other stuff
 on the server the only people to ever access this page are probably bots that try to find a security vulnerability or
 people that use the API to add users who should not get redirected to that page anyway.
@@ -324,63 +323,18 @@ stop the program as described in the same section. Now remove the line you added
 Your database is now set up, and you can start and stop the program as you like. However, do not add the line back
 to `.env` as that will lead to the program creating the database again and thus deleting all your data!
 
-#### Adding your server
+#### Update
 
-If you want to let the bot create the following data automatically you need to add the bot to your server after you
-started it so if you already added the bot to your server you need to kick the bot, start the bot and then add the bot
-back to your server. Afterwards you can use the
-[permission update command](#discord-command-to-grant-and-deny-guild-permissions)
-to update your server permissions. \
-However, you can also add the needed information to the database by hand. To be able to connect to the database download
-[this file](https://repo1.maven.org/maven2/com/h2database/h2/1.4.200/h2-1.4.200.jar)
-and run it with the following command:
+If you need to update the database at some point add the following line to the `.env` file:
 
-```shell
-java -cp h2-1.4.200.jar org.h2.tools.Shell
+```dotenv
+SPRING_PROFILES_ACTIVE=updatedb
 ```
 
-Now you need to provide the credentials of your database, first the URL:
-`jdbc:h2:<path_to_database.mv.db>`. The database is located in `./data/`
-of this program and has the name you chose in the
-[DB_DATABASE](#db_database) section. If you move the file you downloaded to the same location of this README, and the
-database has the default name "database" then the URL is `jdbc:h2:./data/database`. \
-The next thing to enter is the driver which has to be `org.h2.Driver`. If the command line already shows that driver you
-can also just press enter. \
-The next input is the user you set [here](#required-db_user-and-db_password). Just type the username and press enter.
-Afterwards type the password and press enter again. \
-You should now see a line like this at the bottom:
-
-```shell
-sql>
-```
-
-That means you connected to the database so now information can be added. To add your guild enter the following line
-with your data (read below):
-
-```h2
-INSERT INTO DISCORD_GUILD(GUILD_ID, AUTOKICK, AUTOKICK_HOUR_DELAY, READ_PERM, ROLE_SYNC_PERM, WRITE_PERM)
-VALUES (id, true, 24, true, true, true);
-```
-
-The following list describes the values you can set chronologically:
-
-1. `id`: The Discord ID of your guild. Check
-   [this guide](https://support.discord.com/hc/en-us/articles/206346498-Wie-finde-ich-meine-Server-ID-)
-   on how to find your Discord guild ID.
-2. `true`: The first `true` enables the bot to kick users automatically if they joined over x hours ago and are not
-   linked to a forum account. You can set this to `false` if you want.
-3. `24`: The delay in hours for the autokick. If a user joined over x hours ago and is not linked it gets kicked. Can be
-   set to any value between 12 and 168 (7 days), the default is 24.
-4. `true`: The second `true` enables the permission for the guild to read specific data from the database like what
-   forum user a Discord user is linked to. Keep this on `true` or you will not be able to use a lot of functionality.
-   However, any new server the bot gets added to, has this disabled by default.
-5. `true`: The third `true` enables role synchronisation between the forum and Discord for that guild. Keep this
-   on `true` if you want to use this feature in your server.
-6. `true`: The last `true` enables write permissions for the guild, so it can add users, delete users, whitelist users
-   and so on. It is similar to the read permission in terms of additional info.
-
-After adding your guild to the database type `quit` and press enter or press `ctrl+d` to leave the database console. You
-can now start the bot and use its features in your server.
+Afterwards start the bot as described in
+[starting and stopping the bot](#starting-and-stopping-the-bot). Wait until the bot is shown as online in Discord and
+stop the program as described in the same section. Now remove the line you added to the `.env` file. \
+Your database schema is now updated and you can start the bot like normal.
 
 ## Starting and stopping the bot
 
@@ -406,68 +360,17 @@ work for some reason you can also do
 which stops all running Gradle programs with the same Gradle version, so be sure that no other Gradle programs are
 running or restart them afterwards.
 
-## Updating guild (server) data in your database
-
-Any request to/update of the database requires you to connect to the database like in
-the [Adding your server](#adding-your-server) section. The information you typed in that section should be saved, so you
-just need to press enter if the data is correct. \
-It does not matter if the program is running or not. Afterwards type
-`quit` or press `ctrl+d` to leave the database console.
-
-### Updating permissions of guilds (servers)
-
-To grant a permission use the following command and set the data accordingly:
-
-```h2
-UPDATE DISCORD_GUILD
-SET xyz = true
-WHERE GUILD_ID = 123;
-```
-
-Replace `123` with your guild ID and replace `xyz` with one of the following permissions:
-
-```text
-AUTOKICK
-READ_PERM
-ROLE_SYNC_PERM
-WRITE_PERM
-```
-
-You can also grant multiple permissions at once:
-
-```h2
-UPDATE DISCORD_GUILD
-SET xyz1 = true,
-    xyz2 = true,
-    xyz3 = true
-WHERE GUILD_ID = 123;
-```
-
-To deny a permission just replace `true` with `false`.
-
-### Updating the autokick delay
-
-To update the autokick delay use the following command:
-
-```h2
-UPDATE DISCORD_GUILD
-SET AUTOKICK_HOUR_DELAY = xyz
-WHERE GUILD_ID = 123;
-```
-
-Replace `123` with your guild ID and replace `xyz` with the delay in hours between 12 and 168.
-
-### Accessing and updating any other data
-
-If you have basic knowledge of SQL you can use the database console to access any saved data or even update some data by
-hand. Please do not play around in the database if you do not know what you are doing!
+## Updating guilds (servers)
 
 ### Discord command to grant and deny guild permissions
 
-The Discord command to update permissions of a guild is `updateguildperms`
-and has the following syntax `updateguildperms guildId "permission" state`. This command can only be used by the owner
-of the bot (the user who
-[created the bot in the developer portal](#discord-bot-token)) but can be used in any guild the bot is in as well. The
+While you can manually change the permissions in the database you would need to stop the bot before connecting to the
+database. To avoid that downtime you can use the `updateperms` command which does not get shown in the help command as
+only the bot owner can use it. \
+The Discord command to update permissions of a guild is `updateperms`
+and has the following syntax `updateperms guildId "permission" state`. This command can only be used by the owner of the
+bot (the user who
+[created the bot in the developer portal](#discord-bot-token)) but the owner can use it in any guild the bot is in. The
 placeholders in there need to be filled with your data:
 
 * `guildId`: The ID of the guild you want to update. Check
@@ -475,12 +378,21 @@ placeholders in there need to be filled with your data:
   on how to find your Discord guild ID. If you do not specify the guild ID the bot will use the ID of the guild you
   wrote the command in.
 * `permission`: The name of the permission you want to update. You can control the following permissions
-    * `read`: Activates the read permission of the guild, so it can request data for users.
-    * `write`: Activates the write permission of the guild, so it can add, delete and change data for users.
-    * `sync`: Activates role synchronisation between forum and Discord for that guild.
-    * `autkick`: Activates automatic kicking of users that are not linked to a forum account.
+  * `read`: Activates the read permission of the guild, so it can request data for users.
+  * `write`: Activates the write permission of the guild, so it can add, delete and change data for users.
+  * `sync`: Activates role synchronisation between forum and Discord for that guild.
+  * `autokick`: Activates automatic kicking of users that are not linked to a forum account after a set delay.
 * `state`: Can be `true` or `false`. If you do not specify the state it will choose `false` and thus disable the given
   permission for the guild.
+
+### Accessing and updating any other data
+
+If you have basic knowledge of SQL you can use the H2 shell to access any saved data or even update some data by hand.
+Due to the integration into the bot you can only access the database while the bot is not running! Only way to access
+the database while the bot is running is to use the developer profile; **THAT PROFILE WILL WIPE YOUR DATABASE ON EACH
+RESTART SO DO NOT USE IT OUTSIDE OF DEVELOPMENT!!!** \
+Please do not play around in the database if you do not know what you are doing! Almost everything can be controlled
+with Discord commands or by using th features described in this README. There is no need to touch the database at all.
 
 ## Credits
 
@@ -500,18 +412,19 @@ You do not need to understand anything below to use this program.
 
 ### Profiles
 
-This program currently offers two profiles. The default profile, and a developer profile called "dev" which has debug
-outputs and other features that make developing and debugging easier. To change the profile open the `.env` file and add
-the following line:
+This program currently offers a few profiles. The default profile (production), and the developer profile called "dev"
+are probably the most important ones. The debug profile has debug outputs and other features that make developing and
+debugging easier. To change the profile to the developer profile open the `.env` file and add the following line:
 
 ```dotenv
 SPRING_PROFILES_ACTIVE=dev
 ```
 
-### Adding commands and event listeners
+The same effect can be achieved by changing the run configuration of your IDE to use that profile.
 
-To add a command to the bot there are a few steps to perform. First add a new entry to the `CommandInfo` class. The next
-step is to create the command class in
+### Adding commands
+
+To add a command to the bot there are a few steps to perform. First create the command class in
 `com.motorbesitzen.rolewatcher.bot.command.impl`. The command class needs to extend `CommandImpl`. The command needs to
 be a `@Service` and needs to have its command set as a value in lowercase. So a command like `help` would be the
 following:
@@ -520,17 +433,23 @@ following:
 
 @Service("help")
 public class Help extends CommandImpl {
-	// ...
+  // ...
 }
 ```
 
-The same applies for event listeners although they do not need a name and thus no value:
+Your IDE or the compiler should notify you about the methods you need to implement for a command to function.
+
+### Adding event listeners
+
+Event listeners do not need a name and thus no special value. Just annotate the listener class as a service and make
+sure it extends the `ListenerAdapter`. Override at least one of the `ListenerAdapter` methods so your event listener
+actually does something.
 
 ```java
 
 @Service
 public class SomeEventListener extends ListenerAdapter {
-	// ...
+  // ...
 }
 ```
 
@@ -542,5 +461,4 @@ The Java part of this program takes Discord IDs as `Long` so the maximum ID is 9
 change its system and still uses the Twitter snowflake ID system then this ID will be reached around June 2084. If for
 whatever reason Discord, the used technologies or this code should still be around at that time the code has to be
 changed to accept `BigInteger` to avoid overflows while handling IDs as Discord uses the full 2<sup>64</sup>
-range while the Java `Long` only uses 2<sup>63</sup>-1. 
-
+range while the Java `Long` only go up to 2<sup>63</sup>-1. 
