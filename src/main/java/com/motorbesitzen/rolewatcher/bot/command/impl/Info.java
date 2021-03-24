@@ -129,6 +129,9 @@ class Info extends CommandImpl {
 		eb.addField("Authorized channels: ", channelContent, true);
 		eb.addField("Authorized roles: ", roleContent, true);
 		eb.addBlankField(false);
+		eb.addField("Autokick enabled?", guild.canAutokick() ? "Yes" : "No", true);
+		eb.addField("Autokick delay:", guild.getAutokickHourDelay() + "h", true);
+		eb.addBlankField(false);
 
 		eb.setFooter("If no channels are authorized commands can be used everywhere. " +
 				"If no roles are authorized only the owner of the guild can use commands."
