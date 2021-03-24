@@ -264,12 +264,14 @@ public class CommandListener extends ListenerAdapter {
 	private boolean isAuthorizedGuild(final Guild guild, final Command command) {
 		final long guildId = guild.getIdLong();
 		final Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
-		if (dcGuildOpt.isEmpty()) {
-			return false;
-		}
+
+		final DiscordGuild dcGuild = dcGuildOpt.orElseGet(() -> {
+			final DiscordGuild newGuild = DiscordGuild.createDefault(guildId);
+			guildRepo.save(newGuild);
+			return newGuild;
+		});
 
 		// if command needs read permission, but guild does not have it
-		final DiscordGuild dcGuild = dcGuildOpt.get();
 		if (command.needsReadPerms() && !dcGuild.hasReadPerm()) {
 			return false;
 		}
@@ -279,8 +281,8 @@ public class CommandListener extends ListenerAdapter {
 	}
 
 	private boolean isCallerBotOwner(Member caller) {
-		JDA jda = caller.getJDA();
-		User owner = jda.retrieveApplicationInfo().complete().getOwner();
+		final JDA jda = caller.getJDA();
+		final User owner = jda.retrieveApplicationInfo().complete().getOwner();
 		return (owner.getIdLong() == caller.getIdLong());
 	}
 
