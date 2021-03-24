@@ -16,12 +16,12 @@ import java.util.Optional;
  * Whitelists a Discord user either by Discord ID or by forum ID.
  */
 @Service("addwhitelist")
-public class AddWhitelist extends CommandImpl {
+class AddWhitelist extends CommandImpl {
 
 	private final DiscordUserRepo dcUserRepo;
 
 	@Autowired
-	public AddWhitelist(final DiscordUserRepo dcUserRepo) {
+	private AddWhitelist(final DiscordUserRepo dcUserRepo) {
 		this.dcUserRepo = dcUserRepo;
 	}
 

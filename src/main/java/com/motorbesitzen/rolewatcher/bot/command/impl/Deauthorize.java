@@ -16,13 +16,13 @@ import java.util.List;
  * Used to deauthorize Discord text channels and Discord roles to use bot commands.
  */
 @Service("deauthorize")
-public class Deauthorize extends CommandImpl {
+class Deauthorize extends CommandImpl {
 
 	private final AuthedChannelRepo channelRepo;
 	private final AuthedRoleRepo roleRepo;
 
 	@Autowired
-	public Deauthorize(final AuthedChannelRepo channelRepo, final AuthedRoleRepo roleRepo) {
+	private Deauthorize(final AuthedChannelRepo channelRepo, final AuthedRoleRepo roleRepo) {
 		this.channelRepo = channelRepo;
 		this.roleRepo = roleRepo;
 	}

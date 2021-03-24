@@ -16,12 +16,12 @@ import java.util.Optional;
  * Removes a Discord user from the whitelist.
  */
 @Service("removewhitelist")
-public class RemoveWhitelist extends CommandImpl {
+class RemoveWhitelist extends CommandImpl {
 
 	private final DiscordUserRepo dcUserRepo;
 
 	@Autowired
-	public RemoveWhitelist(final DiscordUserRepo dcUserRepo) {
+	private RemoveWhitelist(final DiscordUserRepo dcUserRepo) {
 		this.dcUserRepo = dcUserRepo;
 	}
 

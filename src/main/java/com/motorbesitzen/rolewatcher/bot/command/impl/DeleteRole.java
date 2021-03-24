@@ -11,12 +11,12 @@ import org.springframework.stereotype.Service;
  * Deletes a forum role from the database.
  */
 @Service("delrole")
-public class DeleteRole extends CommandImpl {
+class DeleteRole extends CommandImpl {
 
 	private final ForumRoleRepo forumRoleRepo;
 
 	@Autowired
-	public DeleteRole(final ForumRoleRepo forumRoleRepo) {
+	private DeleteRole(final ForumRoleRepo forumRoleRepo) {
 		this.forumRoleRepo = forumRoleRepo;
 	}
 

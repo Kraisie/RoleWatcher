@@ -28,7 +28,7 @@ import java.util.Optional;
  * A command to manually add a link between a Discord and a forum user.
  */
 @Service("adduser")
-public class AddUser extends CommandImpl {
+class AddUser extends CommandImpl {
 
 	private final DiscordUserRepo discordUserRepo;
 	private final ForumUserRepo forumUserRepo;
@@ -36,7 +36,7 @@ public class AddUser extends CommandImpl {
 	private final ForumRoleApiRequest forumRoleApiRequest;
 
 	@Autowired
-	public AddUser(final DiscordUserRepo discordUserRepo, final ForumUserRepo forumUserRepo, final ForumRoleRepo forumRoleRepo, final ForumRoleApiRequest forumRoleApiRequest) {
+	private AddUser(final DiscordUserRepo discordUserRepo, final ForumUserRepo forumUserRepo, final ForumRoleRepo forumRoleRepo, final ForumRoleApiRequest forumRoleApiRequest) {
 		this.discordUserRepo = discordUserRepo;
 		this.forumUserRepo = forumUserRepo;
 		this.forumRoleRepo = forumRoleRepo;

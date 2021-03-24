@@ -23,14 +23,14 @@ import java.util.Optional;
  * Deletes a forum user entry and by that the link between Discord and forum user from the database.
  */
 @Service("deluser")
-public class DeleteUser extends CommandImpl {
+class DeleteUser extends CommandImpl {
 
 	private final ForumRoleRepo forumRoleRepo;
 	private final ForumUserRepo forumUserRepo;
 	private final DiscordBanRepo banRepo;
 
 	@Autowired
-	public DeleteUser(final ForumRoleRepo forumRoleRepo, final ForumUserRepo forumUserRepo, final DiscordBanRepo banRepo) {
+	private DeleteUser(final ForumRoleRepo forumRoleRepo, final ForumUserRepo forumUserRepo, final DiscordBanRepo banRepo) {
 		this.forumRoleRepo = forumRoleRepo;
 		this.forumUserRepo = forumUserRepo;
 		this.banRepo = banRepo;

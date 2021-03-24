@@ -25,14 +25,14 @@ import java.util.Optional;
  * Manually force a role update of a Discord member.
  */
 @Service("update")
-public class UpdateUser extends CommandImpl {
+class UpdateUser extends CommandImpl {
 
 	private final ForumUserRepo forumUserRepo;
 	private final ForumRoleRepo forumRoleRepo;
 	private final ForumRoleApiRequest forumRoleApiRequest;
 
 	@Autowired
-	public UpdateUser(final ForumUserRepo forumUserRepo, final ForumRoleRepo forumRoleRepo, final ForumRoleApiRequest forumRoleApiRequest) {
+	private UpdateUser(final ForumUserRepo forumUserRepo, final ForumRoleRepo forumRoleRepo, final ForumRoleApiRequest forumRoleApiRequest) {
 		this.forumUserRepo = forumUserRepo;
 		this.forumRoleRepo = forumRoleRepo;
 		this.forumRoleApiRequest = forumRoleApiRequest;

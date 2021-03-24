@@ -15,12 +15,12 @@ import java.util.Optional;
  * Add a forum role to the database.
  */
 @Service("addrole")
-public class AddRole extends CommandImpl {
+class AddRole extends CommandImpl {
 
 	private final ForumRoleRepo forumRoleRepo;
 
 	@Autowired
-	public AddRole(final ForumRoleRepo forumRoleRepo) {
+	private AddRole(final ForumRoleRepo forumRoleRepo) {
 		this.forumRoleRepo = forumRoleRepo;
 	}
 

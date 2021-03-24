@@ -16,12 +16,12 @@ import java.util.Optional;
  * Updates a guilds' permission via command in Discord.
  */
 @Service("updateperms")
-public class UpdateGuildPerms extends CommandImpl {
+class UpdateGuildPerms extends CommandImpl {
 
 	private final DiscordGuildRepo guildRepo;
 
 	@Autowired
-	public UpdateGuildPerms(final DiscordGuildRepo guildRepo) {
+	private UpdateGuildPerms(final DiscordGuildRepo guildRepo) {
 		this.guildRepo = guildRepo;
 	}
 

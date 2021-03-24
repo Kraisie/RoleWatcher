@@ -21,14 +21,14 @@ import java.util.Optional;
  * Used to authorize Discord text channels and Discord roles to use bot commands.
  */
 @Service("authorize")
-public class Authorize extends CommandImpl {
+class Authorize extends CommandImpl {
 
 	private final AuthedChannelRepo channelRepo;
 	private final AuthedRoleRepo roleRepo;
 	private final DiscordGuildRepo discordGuildRepo;
 
 	@Autowired
-	public Authorize(final AuthedChannelRepo channelRepo, final AuthedRoleRepo roleRepo, final DiscordGuildRepo discordGuildRepo) {
+	private Authorize(final AuthedChannelRepo channelRepo, final AuthedRoleRepo roleRepo, final DiscordGuildRepo discordGuildRepo) {
 		this.channelRepo = channelRepo;
 		this.roleRepo = roleRepo;
 		this.discordGuildRepo = discordGuildRepo;

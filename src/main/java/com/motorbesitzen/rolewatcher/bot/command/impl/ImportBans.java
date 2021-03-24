@@ -22,12 +22,12 @@ import java.util.Set;
  * Imports bans of another guild to the list of bans the calling guild has.
  */
 @Service("importbans")
-public class ImportBans extends CommandImpl {
+class ImportBans extends CommandImpl {
 
 	private final DiscordGuildRepo discordGuildRepo;
 
 	@Autowired
-	public ImportBans(final DiscordGuildRepo discordGuildRepo) {
+	private ImportBans(final DiscordGuildRepo discordGuildRepo) {
 		this.discordGuildRepo = discordGuildRepo;
 	}
 

@@ -19,13 +19,13 @@ import java.util.Optional;
  * Sends a help message with information about all available commands to the channel where the help was requested.
  */
 @Service("help")
-public class Help extends CommandImpl {
+class Help extends CommandImpl {
 
 	private final Map<String, Command> commandMap;
 	private final DiscordGuildRepo discordGuildRepo;
 
 	@Autowired
-	public Help(Map<String, Command> commandMap, DiscordGuildRepo discordGuildRepo) {
+	private Help(final Map<String, Command> commandMap, final DiscordGuildRepo discordGuildRepo) {
 		this.commandMap = commandMap;
 		this.discordGuildRepo = discordGuildRepo;
 	}

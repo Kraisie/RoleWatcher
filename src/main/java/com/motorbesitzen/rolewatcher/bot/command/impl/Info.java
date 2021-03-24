@@ -20,14 +20,14 @@ import java.util.Set;
  * Sends basic data of the guild and its settings.
  */
 @Service("info")
-public class Info extends CommandImpl {
+class Info extends CommandImpl {
 
 	private final DiscordGuildRepo guildRepo;
 	private final AuthedChannelRepo channelRepo;
 	private final AuthedRoleRepo roleRepo;
 
 	@Autowired
-	public Info(final DiscordGuildRepo guildRepo, final AuthedChannelRepo channelRepo, final AuthedRoleRepo roleRepo) {
+	private Info(final DiscordGuildRepo guildRepo, final AuthedChannelRepo channelRepo, final AuthedRoleRepo roleRepo) {
 		this.guildRepo = guildRepo;
 		this.channelRepo = channelRepo;
 		this.roleRepo = roleRepo;

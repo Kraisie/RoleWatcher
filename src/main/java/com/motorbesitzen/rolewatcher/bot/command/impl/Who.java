@@ -22,13 +22,13 @@ import java.util.Optional;
  * Sends information about a forum/Discord user if available.
  */
 @Service("who")
-public class Who extends CommandImpl {
+class Who extends CommandImpl {
 
 	private final DiscordUserRepo dcUserRepo;
 	private final ForumUserRepo fUserRepo;
 
 	@Autowired
-	public Who(final DiscordUserRepo dcUserRepo, final ForumUserRepo fUserRepo) {
+	private Who(final DiscordUserRepo dcUserRepo, final ForumUserRepo fUserRepo) {
 		this.dcUserRepo = dcUserRepo;
 		this.fUserRepo = fUserRepo;
 	}
