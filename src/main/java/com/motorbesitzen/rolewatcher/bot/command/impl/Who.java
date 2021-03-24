@@ -34,6 +34,55 @@ public class Who extends CommandImpl {
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getName() {
+		return "who";
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean needsWritePerms() {
+		return false;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean needsReadPerms() {
+		return true;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean needsOwnerPerms() {
+		return false;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getUsage() {
+		return getName() + " (@member|discordid|uid)";
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getDescription() {
+		return "Shows information about a specific user. Can be used with a Discord tag, " +
+				"a Discord ID or a forum ID.";
+	}
+
+	/**
 	 * Sends a message with information about a forum or discord user by ID.
 	 *
 	 * @param event The event provided by JDA that a guild message got received.

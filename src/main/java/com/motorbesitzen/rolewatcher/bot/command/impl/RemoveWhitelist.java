@@ -26,6 +26,54 @@ public class RemoveWhitelist extends CommandImpl {
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getName() {
+		return "removewhitelist";
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean needsWritePerms() {
+		return true;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean needsReadPerms() {
+		return true;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean needsOwnerPerms() {
+		return false;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getUsage() {
+		return getName() + " (@member|discordid)";
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getDescription() {
+		return "Removes a user from the whitelist. Can be used with a Discord tag or a Discord ID.";
+	}
+
+	/**
 	 * Removes a Discord user from the whitelist if he already exists in the database and is whitelisted. If he does not
 	 * exist this it sends an error message. Also sends an error message if no ID
 	 * is given.

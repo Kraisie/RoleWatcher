@@ -86,7 +86,7 @@ public class CommandListener extends ListenerAdapter {
 			return;
 		}
 
-		// check if message is webhook or not send in a text channel
+		// check if message is webhook or not sent in a text channel
 		final Member author = message.getMember();
 		if (author == null) {
 			return;
@@ -99,23 +99,23 @@ public class CommandListener extends ListenerAdapter {
 
 		// identify command
 		final String commandName = identifyCommandName(cmdPrefix, messageContent);
-		final CommandInfo commandInfo = CommandInfo.getCommandInfoByName(commandName);
-		if (commandInfo == CommandInfo.UNKNOWN_COMMAND) {
+		final Command command = commandMap.get(commandName);
+		if (command == null) {
 			return;
 		}
 
 		// check if guild is unauthorized
 		final Guild guild = event.getGuild();
-		if (!isAuthorizedGuild(guild, commandInfo)) {
+		if (!isAuthorizedGuild(guild, command)) {
 			return;
 		}
 
 		// check if command can only be used by owner of the bot and if the caller is not the owner of the bot
-		if (commandInfo.needsOwnerPerms() && !isCallerBotOwner(author)) {
+		if (command.needsOwnerPerms() && !isCallerBotOwner(author)) {
 			return;
 		}
 
-		executeCommand(event, commandName);
+		executeCommand(event, command);
 	}
 
 	/**
@@ -261,7 +261,7 @@ public class CommandListener extends ListenerAdapter {
 	 * has permission to use the command, {@code false} if the <a href="https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/entities/Guild.html">Guild</a>
 	 * lacks the needed permissions.
 	 */
-	private boolean isAuthorizedGuild(final Guild guild, final CommandInfo command) {
+	private boolean isAuthorizedGuild(final Guild guild, final Command command) {
 		final long guildId = guild.getIdLong();
 		final Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
 		if (dcGuildOpt.isEmpty()) {
@@ -288,12 +288,11 @@ public class CommandListener extends ListenerAdapter {
 	 * Executes a command and handles exception if the bot does not have the needed permissions to
 	 * execute that command in the channel/guild.
 	 *
-	 * @param event       The <a href="https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/events/message/guild/GuildMessageReceivedEvent.html">GuildMessageReceivedEvent</a>
-	 *                    *              provided by JDA.
-	 * @param commandName The name of the command in lower case.
+	 * @param event   The <a href="https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/events/message/guild/GuildMessageReceivedEvent.html">GuildMessageReceivedEvent</a>
+	 *                provided by JDA.
+	 * @param command The command to execute.
 	 */
-	private void executeCommand(final GuildMessageReceivedEvent event, final String commandName) {
-		final Command command = commandMap.get(commandName);    // commandName is already lower case and a confirmed match
+	private void executeCommand(final GuildMessageReceivedEvent event, final Command command) {
 		try {
 			command.execute(event);
 		} catch (InsufficientPermissionException e) {

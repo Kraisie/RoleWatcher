@@ -28,6 +28,55 @@ public class Deauthorize extends CommandImpl {
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getName() {
+		return "deauthorize";
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean needsWritePerms() {
+		return false;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean needsReadPerms() {
+		return false;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean needsOwnerPerms() {
+		return false;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getUsage() {
+		return getName() + " (#channel|@role)+";
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getDescription() {
+		return "Deauthorizes a role from using commands or a channel from using commands in. Can be used with " +
+				"multiple discord tags for channels and/or roles.";
+	}
+
+	/**
 	 * Deauthorizes mentioned roles and channels in a message. If no roles or channels are mentioned
 	 * it sends an error message in the chat where the command got used telling the user to mention
 	 * a role or a channel. If none of the mentioned channels/roles is authorized it still replies with

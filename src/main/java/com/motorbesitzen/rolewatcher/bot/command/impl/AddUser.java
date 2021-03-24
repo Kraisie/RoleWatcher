@@ -44,6 +44,54 @@ public class AddUser extends CommandImpl {
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getName() {
+		return "adduser";
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean needsWritePerms() {
+		return true;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean needsReadPerms() {
+		return true;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean needsOwnerPerms() {
+		return false;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getUsage() {
+		return getName() + " @member \"username\" uid";
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getDescription() {
+		return "Adds a link between a Discord and a forum user.";
+	}
+
+	/**
 	 * Executes the command by getting all needed information from the command parameters and adds a link between
 	 * a Discord and a forum user to the database with the given information. Sends error messages to the channel
 	 * where the command got used if any information is missing or invalid or if the mentioned Discord or forum

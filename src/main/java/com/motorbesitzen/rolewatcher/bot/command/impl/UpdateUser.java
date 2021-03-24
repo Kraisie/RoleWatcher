@@ -39,6 +39,55 @@ public class UpdateUser extends CommandImpl {
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getName() {
+		return "update";
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean needsWritePerms() {
+		return false;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean needsReadPerms() {
+		// the guild permissions do not matter as only the owner can use it
+		return true;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean needsOwnerPerms() {
+		return false;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getUsage() {
+		return getName() + " (@member|discordid|uid)";
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getDescription() {
+		return "Forces an update of the roles of the user according to his forum roles.";
+	}
+
+	/**
 	 * Updates the Discord roles of the mentioned member by calling the forum API.
 	 *
 	 * @param event The Discord event triggered when a message is received.

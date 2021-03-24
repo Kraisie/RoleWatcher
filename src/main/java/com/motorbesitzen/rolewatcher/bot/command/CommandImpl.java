@@ -16,7 +16,46 @@ import java.awt.*;
  * All subclasses (Commands) can use these functions.
  */
 @Service
-public class CommandImpl implements Command {
+public abstract class CommandImpl implements Command {
+
+	/**
+	 * {@inheritDoc}
+	 * Default command implementation without command functionality. Declared as 'unknown command'.
+	 */
+	@Override
+	public abstract String getName();
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public abstract boolean needsWritePerms();
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public abstract boolean needsReadPerms();
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public abstract boolean needsOwnerPerms();
+
+	/**
+	 * {@inheritDoc}
+	 * Default command implementation without command functionality. Declared as 'unknown command'.
+	 */
+	@Override
+	public abstract String getUsage();
+
+	/**
+	 * {@inheritDoc}
+	 * Default command implementation without command functionality. Declared as 'unknown command'.
+	 */
+	@Override
+	public abstract String getDescription();
 
 	/**
 	 * {@inheritDoc}

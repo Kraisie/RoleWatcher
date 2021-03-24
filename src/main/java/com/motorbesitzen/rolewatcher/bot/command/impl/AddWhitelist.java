@@ -26,6 +26,55 @@ public class AddWhitelist extends CommandImpl {
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getName() {
+		return "addwhitelist";
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean needsWritePerms() {
+		return true;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean needsReadPerms() {
+		return true;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean needsOwnerPerms() {
+		return false;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getUsage() {
+		return getName() + " (@member|discordid)";
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getDescription() {
+		return "Whitelists a user so his roles do not get updated and he will not be kicked if autokick is enabled. " +
+				"Can be used with a Discord tag or a Discord ID.";
+	}
+
+	/**
 	 * Whitelists a Discord user if he already exists in the database. If he does not exist this method creates a
 	 * new entry for that Discord User with the whitelist status set to {@code true}. Sends an error message if no ID
 	 * is given. Adds an ID if given as a number even if it does not belong to a user on Discord!

@@ -35,6 +35,55 @@ public class Authorize extends CommandImpl {
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getName() {
+		return "authorize";
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean needsWritePerms() {
+		return false;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean needsReadPerms() {
+		return false;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean needsOwnerPerms() {
+		return false;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getUsage() {
+		return getName() + " (#channel|@role)+";
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getDescription() {
+		return "Authorizes a role for using commands or a channel to use commands in. Can be used with " +
+				"multiple discord tags for channels and/or roles.";
+	}
+
+	/**
 	 * Authorizes mentioned roles and channels in a message. If no roles or channels are mentioned
 	 * it sends an error message in the chat where the command got used telling the user to mention
 	 * a role or a channel. If all of the mentioned channels/roles are already authorized it still replies with

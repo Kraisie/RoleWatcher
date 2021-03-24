@@ -10,7 +10,50 @@ import java.awt.*;
 /**
  * The interface for any Command the bot can handle.
  */
-interface Command {
+public interface Command {
+
+	/**
+	 * Get the name of the command. The name should be in lower case and should be equal to the service name.
+	 *
+	 * @return The name of the command.
+	 */
+	String getName();
+
+	/**
+	 * Shows if the guild needs the 'write' permission to execute this command.
+	 *
+	 * @return {@code true} if the guild needs the 'write' permission.
+	 */
+	boolean needsWritePerms();
+
+	/**
+	 * Shows if the guild needs the 'read' permission to execute this command.
+	 * Should also be {@code true} when {@link #needsWritePerms()} is {@code true}.
+	 *
+	 * @return {@code true} if the guild needs the 'read' permission.
+	 */
+	boolean needsReadPerms();
+
+	/**
+	 * Shows if the command can only be used by the owner of the bot.
+	 *
+	 * @return {@code true} if only the bot owner can use the command.
+	 */
+	boolean needsOwnerPerms();
+
+	/**
+	 * Displays the syntax for the command by defining the name and any additionally needed parameters.
+	 *
+	 * @return a representation on how to use the command
+	 */
+	String getUsage();
+
+	/**
+	 * Describes what the command does and includes any information that may be needed.
+	 *
+	 * @return a short text that describes the command and its functionality.
+	 */
+	String getDescription();
 
 	/**
 	 * A method that performs the necessary actions for the given command.
@@ -18,7 +61,7 @@ interface Command {
 	 * @param event The <a href="https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/events/message/guild/GuildMessageReceivedEvent.html">Discord event</a>
 	 *              when a message (possible command) is received.
 	 */
-	void execute(GuildMessageReceivedEvent event);
+	void execute(final GuildMessageReceivedEvent event);
 
 	/**
 	 * Sends an answer to a channel. Does not do anything different than {@link #sendMessage(TextChannel, String)} but
@@ -28,7 +71,7 @@ interface Command {
 	 *                to send the message in.
 	 * @param message The message content to send as answer.
 	 */
-	void answer(TextChannel channel, String message);
+	void answer(final TextChannel channel, final String message);
 
 	/**
 	 * Sends an embedded message as answer to a channel. Does not do anything different than
@@ -40,7 +83,7 @@ interface Command {
 	 * @param embedBuilder The <a href="https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/entities/MessageEmbed.html">embedded message</a>
 	 *                     to send as answer.
 	 */
-	void answer(TextChannel channel, MessageEmbed embedBuilder);
+	void answer(final TextChannel channel, final MessageEmbed embedBuilder);
 
 	/**
 	 * Sends a message to a channel. Does not do anything if bot can not write in that channel.
@@ -49,7 +92,7 @@ interface Command {
 	 *                to send the message in.
 	 * @param message The message content to send as answer.
 	 */
-	void sendMessage(TextChannel channel, String message);
+	void sendMessage(final TextChannel channel, final String message);
 
 	/**
 	 * Sends an embedded message to a channel. Does not do anything if bot can not write in that channel.
@@ -59,7 +102,7 @@ interface Command {
 	 * @param embedBuilder The <a href="https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/entities/MessageEmbed.html">embedded message</a>
 	 *                     to send as answer.
 	 */
-	void sendMessage(TextChannel channel, MessageEmbed embedBuilder);
+	void sendMessage(final TextChannel channel, final MessageEmbed embedBuilder);
 
 	/**
 	 * Sends a placeholder message which can be updated e.g. when a task succeeds. Does not send a message if the bot
@@ -71,7 +114,7 @@ interface Command {
 	 * @return The Discord <a href="https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/entities/Message.html">Message</a>
 	 * object of the sent message, {@code null} if the bot can not write in the given channel.
 	 */
-	Message answerPlaceholder(TextChannel channel, String placeholderMessage);
+	Message answerPlaceholder(final TextChannel channel, final String placeholderMessage);
 
 	/**
 	 * Edits a given Discord Message objects message. Sends error message in channel if given message is not written
@@ -82,7 +125,7 @@ interface Command {
 	 *                   object that is supposed to get edited.
 	 * @param newMessage The new message content for the Discord Message.
 	 */
-	void editPlaceholder(Message message, String newMessage);
+	void editPlaceholder(final Message message, final String newMessage);
 
 	/**
 	 * Edits a message in a channel by ID. Sends an error message with the new content if ID does not exist or if
@@ -93,7 +136,7 @@ interface Command {
 	 * @param messageId  The message ID of the original message.
 	 * @param newMessage The new content for the message.
 	 */
-	void editPlaceholder(TextChannel channel, long messageId, String newMessage);
+	void editPlaceholder(final TextChannel channel, final long messageId, final String newMessage);
 
 	/**
 	 * Used to clarify in the code that an error message is sent, doesn't do anything else than a normal answer message.
@@ -102,7 +145,7 @@ interface Command {
 	 *                     where the original message is located in.
 	 * @param errorMessage The error message to send.
 	 */
-	void sendErrorMessage(TextChannel channel, String errorMessage);
+	void sendErrorMessage(final TextChannel channel, final String errorMessage);
 
 	/**
 	 * Defines the color used for embeds in Discord (color bar on the left). If no color is set in the environment

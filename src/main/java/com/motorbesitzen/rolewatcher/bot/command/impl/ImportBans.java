@@ -32,6 +32,54 @@ public class ImportBans extends CommandImpl {
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getName() {
+		return "importbans";
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean needsWritePerms() {
+		return false;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean needsReadPerms() {
+		return true;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean needsOwnerPerms() {
+		return false;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getUsage() {
+		return getName() + " guildid";
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getDescription() {
+		return "Imports all saved bans from another guild and bans matching users.";
+	}
+
+	/**
 	 * Add the list of bans of another guild to the callers guild list of bans.
 	 * Sends an error message if there is no guild ID given or if the guild ID is the callers guild ID. Also
 	 * sends an error message if a guild by the provided ID does not exist in the database.

@@ -37,6 +37,55 @@ public class DeleteUser extends CommandImpl {
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getName() {
+		return "deluser";
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean needsWritePerms() {
+		return true;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean needsReadPerms() {
+		return true;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean needsOwnerPerms() {
+		return false;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getUsage() {
+		return getName() + " (@member|discordid|uid)";
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getDescription() {
+		return "Removes a link between Discord and forum user. Can be used with a Discord tag, " +
+				"a Discord ID or a forum ID.";
+	}
+
+	/**
 	 * Deletes a forum user from the database by its forum or Discord ID. If there is no ID found in the message then
 	 * an error message gets send in the channel where the command got used. If the user ID is not found in the
 	 * database it also responds with an error message.

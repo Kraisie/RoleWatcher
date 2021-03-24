@@ -15,7 +15,7 @@ import java.util.Optional;
 /**
  * Updates a guilds' permission via command in Discord.
  */
-@Service(value = "updateperms")
+@Service("updateperms")
 public class UpdateGuildPerms extends CommandImpl {
 
 	private final DiscordGuildRepo guildRepo;
@@ -23,6 +23,56 @@ public class UpdateGuildPerms extends CommandImpl {
 	@Autowired
 	public UpdateGuildPerms(final DiscordGuildRepo guildRepo) {
 		this.guildRepo = guildRepo;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getName() {
+		return "updateperms";
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean needsWritePerms() {
+		// the guild permissions do not matter as only the owner can use it
+		return false;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean needsReadPerms() {
+		// the guild permissions do not matter as only the owner can use it
+		return false;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean needsOwnerPerms() {
+		return true;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getUsage() {
+		return getName() + " guildid \"permission\" (true|false)";
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getDescription() {
+		return "Updates the permissions of a guild.";
 	}
 
 	/**
