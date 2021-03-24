@@ -105,16 +105,13 @@ public class CommandImpl implements Command {
 			return;
 		}
 
-		Message message = channel.getHistory().getMessageById(messageId);
-		if (message == null) {
-			sendErrorMessage(
-					channel, "Can not edit message!\nMessage ID " + messageId + " not found in " +
-							channel.getAsMention() + ".\n New message: \"" + newMessage + "\""
-			);
-			return;
-		}
-
-		editPlaceholder(message, newMessage);
+		channel.retrieveMessageById(messageId).queue(
+				message -> editPlaceholder(message, newMessage),
+				throwable -> sendErrorMessage(
+						channel, "Can not edit message!\nMessage ID " + messageId + " not found in " +
+								channel.getAsMention() + ".\n New message: \"" + newMessage + "\""
+				)
+		);
 	}
 
 	/**
