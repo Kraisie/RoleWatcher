@@ -26,8 +26,9 @@ class ImportBans extends CommandImpl {
 
 	private final DiscordGuildRepo discordGuildRepo;
 
+	// public to be able to use @Transactional on execute()
 	@Autowired
-	private ImportBans(final DiscordGuildRepo discordGuildRepo) {
+	public ImportBans(final DiscordGuildRepo discordGuildRepo) {
 		this.discordGuildRepo = discordGuildRepo;
 	}
 
