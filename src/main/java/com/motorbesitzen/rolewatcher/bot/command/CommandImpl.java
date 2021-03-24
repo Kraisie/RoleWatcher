@@ -1,7 +1,6 @@
 package com.motorbesitzen.rolewatcher.bot.command;
 
 import com.motorbesitzen.rolewatcher.util.EnvironmentUtil;
-import com.motorbesitzen.rolewatcher.util.LogUtil;
 import com.motorbesitzen.rolewatcher.util.ParseUtil;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -59,14 +58,10 @@ public abstract class CommandImpl implements Command {
 
 	/**
 	 * {@inheritDoc}
-	 * Placeholder for subclass implementation, does not do anything as this class is not a command which the bot
-	 * handles.
+	 * Default command implementation without command functionality. Declared as 'unknown command'.
 	 */
 	@Override
-	public void execute(final GuildMessageReceivedEvent event) {
-		// Perform tasks in subclasses, not here!
-		LogUtil.logWarning("Tried to execute default command: " + event.toString());
-	}
+	public abstract void execute(final GuildMessageReceivedEvent event);
 
 	/**
 	 * {@inheritDoc}
