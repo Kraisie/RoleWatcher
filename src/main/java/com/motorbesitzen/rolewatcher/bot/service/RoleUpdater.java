@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -181,6 +182,9 @@ public class RoleUpdater {
 		final List<ForumRole> forumRoles;
 		try {
 			forumRoles = apiRequest.getRolesOfForumUser(forumUser);
+		} catch (SocketTimeoutException e) {
+			LogUtil.logError("Skipping user due to API timeout. Could not get roles of " + forumUser.toString());
+			return;
 		} catch (IOException e) {
 			LogUtil.logError("Skipping user. Could not get roles of " + forumUser.toString(), e);
 			return;
