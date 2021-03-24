@@ -6,12 +6,13 @@ import com.motorbesitzen.rolewatcher.data.dao.DiscordGuild;
 import com.motorbesitzen.rolewatcher.data.repo.DiscordGuildRepo;
 import com.motorbesitzen.rolewatcher.util.EnvironmentUtil;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -23,6 +24,8 @@ class Help extends CommandImpl {
 
 	private final Map<String, Command> commandMap;
 	private final DiscordGuildRepo discordGuildRepo;
+
+	private static final int FIELDS_PER_EMBED = 25;
 
 	@Autowired
 	private Help(final Map<String, Command> commandMap, final DiscordGuildRepo discordGuildRepo) {
@@ -98,45 +101,65 @@ class Help extends CommandImpl {
 	 * @param guild   The database entry for the guild where the command got used.
 	 */
 	private void sendHelpMessage(final TextChannel channel, final DiscordGuild guild) {
-		final EmbedBuilder eb = buildHelpMessage(guild);
-		final MessageEmbed embed = eb.build();
-		answer(channel, embed);
-	}
+		final List<Command> commands = new ArrayList<>(commandMap.values());
+		if (commands.size() == 0) {
+			sendErrorMessage(channel, "No commands found!");
+			return;
+		}
 
-	/**
-	 * Builds the help message.
-	 *
-	 * @param guild The database entry for the guild where the command got used.
-	 * @return An {@code EmbedBuilder} that contains the help information.
-	 */
-	private EmbedBuilder buildHelpMessage(final DiscordGuild guild) {
-		final EmbedBuilder eb = new EmbedBuilder();
-		eb.setColor(getEmbedColor());
-		eb.setTitle("Commands and their variations")
-				.setDescription("A list of all commands you can use and what they do. " +
-						"Note that \"(a|b|c)\" means that a, b or c can be chosen.");
-		eb.setFooter("If you are missing some functionality contact the owner of the bot to update your permissions.");
-		addHelpEntries(guild, eb);
-		return eb;
-	}
-
-	/**
-	 * Adds an entry for each command. Does not add commands that the guild has no permission to use.
-	 * Ignores commands that only the owner of the bot can use.
-	 *
-	 * @param guild The database entry for the guild where the command got used.
-	 * @param eb    The {@code EmbedBuilder} to which each commands help information gets.
-	 */
-	private void addHelpEntries(final DiscordGuild guild, final EmbedBuilder eb) {
-		final String prefix = EnvironmentUtil.getEnvironmentVariableOrDefault("CMD_PREFIX", "");
-		for (Command command : commandMap.values()) {
-			if (!canUseCommand(guild, command)) {
-				continue;
+		final int pages = (commands.size() / FIELDS_PER_EMBED) + 1;
+		EmbedBuilder eb = buildEmbedPage(1, pages);
+		for (int i = 0; i < commands.size(); i++) {
+			if (i > 0 && i % 25 == 0) {
+				answer(channel, eb.build());
+				eb = buildEmbedPage((i / FIELDS_PER_EMBED) + 1, pages);
 			}
 
-			final String title = prefix + command.getUsage();
-			eb.addField(title, command.getDescription(), false);
+			final Command command = commands.get(i);
+			addHelpEntry(guild, eb, command);
 		}
+
+		answer(channel, eb.build());
+	}
+
+	/**
+	 * Creates a numerated page for help entries. Can have up to 25 command fields.
+	 *
+	 * @param page       The current page number.
+	 * @param totalPages The total pages needed to display all commands
+	 * @return An {@code EmbedBuilder} with page identification if needed.
+	 */
+	private EmbedBuilder buildEmbedPage(final int page, final int totalPages) {
+		return new EmbedBuilder().setColor(
+				getEmbedColor()
+		).setTitle(
+				page == 1 && totalPages == 1 ?
+						"Commands and their variations" :
+						"Commands and their variations [" + page + "/" + totalPages + "]"
+		).setDescription(
+				"A list of all commands you can use and what they do. " +
+						"Note that \"(a|b|c)\" means that a, b or c can be chosen."
+		).setFooter(
+				"If you are missing some functionality contact the owner of the bot to update your permissions."
+		);
+	}
+
+	/**
+	 * Adds an entry for a command. Does not add commands that the guild has no permission to use.
+	 * Ignores commands that only the owner of the bot can use.
+	 *
+	 * @param guild   The database entry for the guild where the help command got used.
+	 * @param eb      The {@code EmbedBuilder} to which each commands help information gets.
+	 * @param command The command to add to the help page.
+	 */
+	private void addHelpEntry(final DiscordGuild guild, final EmbedBuilder eb, final Command command) {
+		final String prefix = EnvironmentUtil.getEnvironmentVariableOrDefault("CMD_PREFIX", "");
+		if (!canUseCommand(guild, command)) {
+			return;
+		}
+
+		final String title = prefix + command.getUsage();
+		eb.addField(title, command.getDescription(), false);
 	}
 
 	/**
