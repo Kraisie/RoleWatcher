@@ -24,7 +24,7 @@ public class CommandImpl implements Command {
 	 * handles.
 	 */
 	@Override
-	public void execute(GuildMessageReceivedEvent event) {
+	public void execute(final GuildMessageReceivedEvent event) {
 		// Perform tasks in subclasses, not here!
 		LogUtil.logWarning("Tried to execute default command: " + event.toString());
 	}
@@ -33,7 +33,7 @@ public class CommandImpl implements Command {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void answer(TextChannel channel, String message) {
+	public void answer(final TextChannel channel, final String message) {
 		sendMessage(channel, message);
 	}
 
@@ -41,7 +41,7 @@ public class CommandImpl implements Command {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void answer(TextChannel channel, MessageEmbed message) {
+	public void answer(final TextChannel channel, final MessageEmbed message) {
 		sendMessage(channel, message);
 	}
 
@@ -49,7 +49,7 @@ public class CommandImpl implements Command {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void sendMessage(TextChannel channel, String message) {
+	public void sendMessage(final TextChannel channel, final String message) {
 		if (channel.canTalk()) {
 			channel.sendMessage(message).queue();
 		}
@@ -59,7 +59,7 @@ public class CommandImpl implements Command {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void sendMessage(TextChannel channel, MessageEmbed message) {
+	public void sendMessage(final TextChannel channel, final MessageEmbed message) {
 		if (channel.canTalk()) {
 			channel.sendMessage(message).queue();
 		}
@@ -69,7 +69,7 @@ public class CommandImpl implements Command {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Message answerPlaceholder(TextChannel channel, String placeholderMessage) {
+	public Message answerPlaceholder(final TextChannel channel, final String placeholderMessage) {
 		if (!channel.canTalk()) {
 			return null;
 		}
@@ -81,7 +81,7 @@ public class CommandImpl implements Command {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void editPlaceholder(Message message, String newMessage) {
+	public void editPlaceholder(final Message message, final String newMessage) {
 		if (!message.getTextChannel().canTalk()) {
 			return;
 		}
@@ -100,7 +100,7 @@ public class CommandImpl implements Command {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void editPlaceholder(TextChannel channel, long messageId, String newMessage) {
+	public void editPlaceholder(final TextChannel channel, final long messageId, final String newMessage) {
 		if (!channel.canTalk()) {
 			return;
 		}
@@ -118,7 +118,7 @@ public class CommandImpl implements Command {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void sendErrorMessage(TextChannel channel, String errorMessage) {
+	public void sendErrorMessage(final TextChannel channel, final String errorMessage) {
 		answer(channel, errorMessage);
 	}
 
@@ -127,13 +127,13 @@ public class CommandImpl implements Command {
 	 */
 	@Override
 	public Color getEmbedColor() {
-		String envR = EnvironmentUtil.getEnvironmentVariableOrDefault("EMBED_COLOR_R", "222");
-		String envG = EnvironmentUtil.getEnvironmentVariableOrDefault("EMBED_COLOR_G", "105");
-		String envB = EnvironmentUtil.getEnvironmentVariableOrDefault("EMBED_COLOR_B", "12");
+		final String envR = EnvironmentUtil.getEnvironmentVariableOrDefault("EMBED_COLOR_R", "222");
+		final String envG = EnvironmentUtil.getEnvironmentVariableOrDefault("EMBED_COLOR_G", "105");
+		final String envB = EnvironmentUtil.getEnvironmentVariableOrDefault("EMBED_COLOR_B", "12");
 
-		int r = ParseUtil.safelyParseStringToInt(envR);
-		int g = ParseUtil.safelyParseStringToInt(envG);
-		int b = ParseUtil.safelyParseStringToInt(envB);
+		final int r = ParseUtil.safelyParseStringToInt(envR);
+		final int g = ParseUtil.safelyParseStringToInt(envG);
+		final int b = ParseUtil.safelyParseStringToInt(envB);
 
 		// make sure r,g,b stay in rgb range of 0-255
 		return new Color(
