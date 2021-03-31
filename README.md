@@ -392,7 +392,7 @@ Due to the integration into the bot you can only access the database while the b
 the database while the bot is running is to use the developer profile; **THAT PROFILE WILL WIPE YOUR DATABASE ON EACH
 RESTART SO DO NOT USE IT OUTSIDE OF DEVELOPMENT!!!** \
 Please do not play around in the database if you do not know what you are doing! Almost everything can be controlled
-with Discord commands or by using th features described in this README. There is no need to touch the database at all.
+with Discord commands or by using the features described in this README. There is no need to touch the database at all.
 
 ## Credits
 
