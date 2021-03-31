@@ -105,7 +105,7 @@ class AddUser extends CommandImpl {
 		final Message message = event.getMessage();
 		final TextChannel channel = event.getChannel();
 		final long discordId = DiscordMessageUtil.getMentionedMemberId(message);
-		if (discordId == -1) {
+		if (discordId <= 10000000000000000L) {
 			sendErrorMessage(channel, "Please provide a mention or an ID for the add command.");
 			return;
 		}
