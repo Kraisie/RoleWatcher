@@ -22,6 +22,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.SocketTimeoutException;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -238,7 +240,18 @@ public class RoleUpdater {
 	 */
 	private void checkForKick(final Member member) {
 		if (shouldKick(member)) {
-			member.kick("Autokick due to being unlinked.").queue();
+			final Duration memberTime = Duration.between(member.getTimeJoined(), LocalDateTime.now());
+			final long days = memberTime.toDays();
+			final long hours = memberTime.toHoursPart();
+			final long minutes = memberTime.toMinutesPart();
+			final String joinedText =
+					"Joined " +
+							(days != 0 ? "**" + days + "**d " : "") +
+							(hours != 0 ? "**" + hours + "**h " : "") +
+							(minutes != 0 ? "**" + minutes + "**m " : "") +
+							"ago";
+
+			member.kick("Autokick due to being unlinked. (Joined " + joinedText + ")").queue();
 			LogUtil.logInfo(
 					"Kicked member " + member.getUser().getAsTag() + " (" + member.getId() + ") from " +
 							"\"" + member.getGuild().getName() + "\" (" + member.getGuild().getId() + ") due to being unlinked."
