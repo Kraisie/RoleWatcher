@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import javax.security.auth.login.LoginException;
+import java.util.EnumSet;
 import java.util.Map;
 
 /**
@@ -74,10 +75,11 @@ public class JdaBeanConfig {
 	 */
 	private JDABuilder buildBot(final String discordToken, final Map<String, ? extends ListenerAdapter> eventListeners) {
 		final Activity activity = getBotActivity();
-		final JDABuilder builder = JDABuilder.createDefault(discordToken)
-				.enableIntents(GatewayIntent.GUILD_MEMBERS)
-				.setStatus(OnlineStatus.ONLINE)
-				.setActivity(activity);
+		final JDABuilder builder =
+				JDABuilder.createLight(
+						discordToken,
+						EnumSet.of(GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_BANS, GatewayIntent.GUILD_MESSAGES)
+				).setStatus(OnlineStatus.ONLINE).setActivity(activity);
 
 		for (Map.Entry<String, ? extends ListenerAdapter> eventListener : eventListeners.entrySet()) {
 			builder.addEventListeners(eventListener.getValue());
