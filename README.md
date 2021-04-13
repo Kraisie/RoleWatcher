@@ -81,7 +81,6 @@ down and select all needed permissions:
 ```text
 View Audit Log
 Manage Roles
-Manage Channels
 Kick Members
 Ban Members
 View Channels
@@ -89,7 +88,6 @@ Send Messages
 Embed Links
 Mention everyone
 Use external emojis
-Add reactions
 ```
 
 Back up in the scopes section on that site there is now a link you can use to add the bot to your server with the
