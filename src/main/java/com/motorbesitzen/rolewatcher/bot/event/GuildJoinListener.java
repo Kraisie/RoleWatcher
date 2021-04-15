@@ -30,7 +30,7 @@ public class GuildJoinListener extends ListenerAdapter {
 	private final DiscordUserRepo discordUserRepo;
 
 	@Autowired
-	public GuildJoinListener(final DiscordGuildRepo discordGuildRepo, final DiscordBanRepo discordBanRepo, final DiscordUserRepo discordUserRepo) {
+	private GuildJoinListener(final DiscordGuildRepo discordGuildRepo, final DiscordBanRepo discordBanRepo, final DiscordUserRepo discordUserRepo) {
 		this.discordGuildRepo = discordGuildRepo;
 		this.discordBanRepo = discordBanRepo;
 		this.discordUserRepo = discordUserRepo;

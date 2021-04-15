@@ -1,14 +1,10 @@
 package com.motorbesitzen.rolewatcher.bot.command;
 
-import com.motorbesitzen.rolewatcher.util.EnvironmentUtil;
-import com.motorbesitzen.rolewatcher.util.ParseUtil;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import org.springframework.stereotype.Service;
-
-import java.awt.*;
 
 /**
  * Basic implementation of a Command. Has all needed methods to send messages, answer to commands and log (debug) actions.
@@ -64,46 +60,69 @@ public abstract class CommandImpl implements Command {
 	public abstract void execute(final GuildMessageReceivedEvent event);
 
 	/**
-	 * {@inheritDoc}
+	 * Sends an answer to a channel. Does not do anything different than {@link #sendMessage(TextChannel, String)} but
+	 * clarifies that the message will be send as an answer to a command in the caller channel.
+	 *
+	 * @param channel <a href="https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/entities/TextChannel.html">TextChannel</a>
+	 *                to send the message in.
+	 * @param message The message content to send as answer.
 	 */
-	@Override
-	public void answer(final TextChannel channel, final String message) {
+	protected void answer(final TextChannel channel, final String message) {
 		sendMessage(channel, message);
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Sends an embedded message as answer to a channel. Does not do anything different than
+	 * {@link #sendMessage(TextChannel, MessageEmbed)} but clarifies that the message will be send as an answer to a
+	 * command in the caller channel.
+	 *
+	 * @param channel <a href="https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/entities/TextChannel.html">TextChannel</a>
+	 *                to send the message in.
+	 * @param message The <a href="https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/entities/MessageEmbed.html">embedded message</a>
+	 *                to send as answer.
 	 */
-	@Override
-	public void answer(final TextChannel channel, final MessageEmbed message) {
+	protected void answer(final TextChannel channel, final MessageEmbed message) {
 		sendMessage(channel, message);
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Sends a message to a channel. Does not do anything if bot can not write in that channel.
+	 *
+	 * @param channel <a href="https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/entities/TextChannel.html">TextChannel</a>
+	 *                to send the message in.
+	 * @param message The message content to send as answer.
 	 */
-	@Override
-	public void sendMessage(final TextChannel channel, final String message) {
+	protected void sendMessage(final TextChannel channel, final String message) {
 		if (channel.canTalk()) {
 			channel.sendMessage(message).queue();
 		}
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Sends an embedded message to a channel. Does not do anything if bot can not write in that channel.
+	 *
+	 * @param channel <a href="https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/entities/TextChannel.html">TextChannel</a>
+	 *                to send the message in.
+	 * @param message The <a href="https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/entities/MessageEmbed.html">embedded message</a>
+	 *                to send as answer.
 	 */
-	@Override
-	public void sendMessage(final TextChannel channel, final MessageEmbed message) {
+	protected void sendMessage(final TextChannel channel, final MessageEmbed message) {
 		if (channel.canTalk()) {
 			channel.sendMessage(message).queue();
 		}
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Sends a placeholder message which can be updated e.g. when a task succeeds. Does not send a message if the bot
+	 * has no permissions to write in the given chat.
+	 *
+	 * @param channel            <a href="https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/entities/TextChannel.html">TextChannel</a>
+	 *                           to send the placeholder in.
+	 * @param placeholderMessage The message content so send as a placeholder.
+	 * @return The Discord <a href="https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/entities/Message.html">Message</a>
+	 * object of the sent message, {@code null} if the bot can not write in the given channel.
 	 */
-	@Override
-	public Message answerPlaceholder(final TextChannel channel, final String placeholderMessage) {
+	protected Message answerPlaceholder(final TextChannel channel, final String placeholderMessage) {
 		if (!channel.canTalk()) {
 			return null;
 		}
@@ -112,10 +131,15 @@ public abstract class CommandImpl implements Command {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Edits a given Discord Message objects message. Sends error message in channel if given message is not written
+	 * by the bot. Does not do anything if message does not exist anymore or if the bot does not have the needed
+	 * permissions.
+	 *
+	 * @param message    The Discord <a href="https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/entities/Message.html">Message</a>
+	 *                   object that is supposed to get edited.
+	 * @param newMessage The new message content for the Discord Message.
 	 */
-	@Override
-	public void editPlaceholder(final Message message, final String newMessage) {
+	protected void editPlaceholder(final Message message, final String newMessage) {
 		if (!message.getTextChannel().canTalk()) {
 			return;
 		}
@@ -131,10 +155,15 @@ public abstract class CommandImpl implements Command {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Edits a message in a channel by ID. Sends an error message with the new content if ID does not exist or if
+	 * the given message is not written by the bot. Does not do anything if the bot does not have the needed permissions.
+	 *
+	 * @param channel    The <a href="https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/entities/TextChannel.html">TextChannel</a>
+	 *                   where the original message is located in.
+	 * @param messageId  The message ID of the original message.
+	 * @param newMessage The new content for the message.
 	 */
-	@Override
-	public void editPlaceholder(final TextChannel channel, final long messageId, final String newMessage) {
+	protected void editPlaceholder(final TextChannel channel, final long messageId, final String newMessage) {
 		if (!channel.canTalk()) {
 			return;
 		}
@@ -149,31 +178,13 @@ public abstract class CommandImpl implements Command {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Used to clarify in the code that an error message is sent, doesn't do anything else than a normal answer message.
+	 *
+	 * @param channel      The <a href="https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/entities/TextChannel.html">TextChannel</a>
+	 *                     where the original message is located in.
+	 * @param errorMessage The error message to send.
 	 */
-	@Override
-	public void sendErrorMessage(final TextChannel channel, final String errorMessage) {
+	protected void sendErrorMessage(final TextChannel channel, final String errorMessage) {
 		answer(channel, errorMessage);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public Color getEmbedColor() {
-		final String envR = EnvironmentUtil.getEnvironmentVariableOrDefault("EMBED_COLOR_R", "222");
-		final String envG = EnvironmentUtil.getEnvironmentVariableOrDefault("EMBED_COLOR_G", "105");
-		final String envB = EnvironmentUtil.getEnvironmentVariableOrDefault("EMBED_COLOR_B", "12");
-
-		final int r = ParseUtil.safelyParseStringToInt(envR);
-		final int g = ParseUtil.safelyParseStringToInt(envG);
-		final int b = ParseUtil.safelyParseStringToInt(envB);
-
-		// make sure r,g,b stay in rgb range of 0-255
-		return new Color(
-				Math.max(0, r % 256),
-				Math.max(0, g % 256),
-				Math.max(0, b % 256)
-		);
 	}
 }

@@ -21,7 +21,7 @@ public class AuthedDeletionListener extends ListenerAdapter {
 	private final AuthedRoleRepo authedRoleRepo;
 
 	@Autowired
-	public AuthedDeletionListener(final AuthedChannelRepo authedChannelRepo, final AuthedRoleRepo authedRoleRepo) {
+	private AuthedDeletionListener(final AuthedChannelRepo authedChannelRepo, final AuthedRoleRepo authedRoleRepo) {
 		this.authedChannelRepo = authedChannelRepo;
 		this.authedRoleRepo = authedRoleRepo;
 	}

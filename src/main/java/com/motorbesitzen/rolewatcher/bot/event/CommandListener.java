@@ -1,12 +1,13 @@
-package com.motorbesitzen.rolewatcher.bot.command;
+package com.motorbesitzen.rolewatcher.bot.event;
 
+import com.motorbesitzen.rolewatcher.bot.command.Command;
+import com.motorbesitzen.rolewatcher.bot.service.EnvSettings;
 import com.motorbesitzen.rolewatcher.data.dao.AuthedChannel;
 import com.motorbesitzen.rolewatcher.data.dao.AuthedRole;
 import com.motorbesitzen.rolewatcher.data.dao.DiscordGuild;
 import com.motorbesitzen.rolewatcher.data.repo.AuthedChannelRepo;
 import com.motorbesitzen.rolewatcher.data.repo.AuthedRoleRepo;
 import com.motorbesitzen.rolewatcher.data.repo.DiscordGuildRepo;
-import com.motorbesitzen.rolewatcher.util.EnvironmentUtil;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
@@ -33,6 +34,7 @@ public class CommandListener extends ListenerAdapter {
 	 * Contains all Command subclasses (and CommandImpl itself) which are registered as a Bean
 	 */
 	private final Map<String, Command> commandMap;
+	private final EnvSettings envSettings;
 	private final DiscordGuildRepo guildRepo;
 	private final AuthedChannelRepo channelRepo;
 	private final AuthedRoleRepo roleRepo;
@@ -45,8 +47,11 @@ public class CommandListener extends ListenerAdapter {
 	 *                   (key) and the implementation (value).
 	 */
 	@Autowired
-	private CommandListener(final Map<String, Command> commandMap, final DiscordGuildRepo guildRepo, final AuthedChannelRepo channelRepo, final AuthedRoleRepo roleRepo) {
+	private CommandListener(final Map<String, Command> commandMap, final EnvSettings envSettings,
+							final DiscordGuildRepo guildRepo, final AuthedChannelRepo channelRepo,
+							final AuthedRoleRepo roleRepo) {
 		this.commandMap = commandMap;
+		this.envSettings = envSettings;
 		this.guildRepo = guildRepo;
 		this.channelRepo = channelRepo;
 		this.roleRepo = roleRepo;
@@ -80,7 +85,7 @@ public class CommandListener extends ListenerAdapter {
 		}
 
 		// check if valid command prefix
-		final String cmdPrefix = EnvironmentUtil.getEnvironmentVariableOrDefault("CMD_PREFIX", "");
+		final String cmdPrefix = envSettings.getCommandPrefix();
 		final String messageContent = message.getContentRaw();
 		if (!isValidCommandPrefix(cmdPrefix, messageContent)) {
 			return;

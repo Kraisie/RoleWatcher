@@ -16,7 +16,7 @@ public class BotBuilder implements ApplicationListener<ApplicationReadyEvent> {
 	private final RoleUpdater updater;
 
 	@Autowired
-	public BotBuilder(final RoleUpdater updater) {
+	private BotBuilder(final RoleUpdater updater) {
 		this.updater = updater;
 	}
 

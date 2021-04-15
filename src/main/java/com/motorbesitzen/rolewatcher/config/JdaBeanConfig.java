@@ -1,6 +1,6 @@
 package com.motorbesitzen.rolewatcher.config;
 
-import com.motorbesitzen.rolewatcher.util.EnvironmentUtil;
+import com.motorbesitzen.rolewatcher.bot.service.EnvSettings;
 import com.motorbesitzen.rolewatcher.util.LogUtil;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -26,14 +26,16 @@ public class JdaBeanConfig {
 	/**
 	 * Provides the JDA object by starting the bot. If the bot can not be started the application gets stopped.
 	 *
+	 * @param envSettings        The class that handles the environment variables.
 	 * @param eventListeners     A list of event listeners.
 	 * @param applicationContext The Spring application context.
 	 * @return The 'core object' of the bot, the JDA.
 	 */
 	@Bean
-	JDA startBot(final Map<String, ? extends ListenerAdapter> eventListeners, final ApplicationContext applicationContext) {
-		final String discordToken = getToken(applicationContext);
-		final JDABuilder jdaBuilder = buildBot(discordToken, eventListeners);
+	JDA startBot(final EnvSettings envSettings, final Map<String, ? extends ListenerAdapter> eventListeners,
+				 final ApplicationContext applicationContext) {
+		final String discordToken = getToken(envSettings, applicationContext);
+		final JDABuilder jdaBuilder = buildBot(envSettings, discordToken, eventListeners);
 		final JDA jda = botLogin(jdaBuilder);
 		if (jda == null) {
 			shutdown(applicationContext);
@@ -46,11 +48,12 @@ public class JdaBeanConfig {
 	/**
 	 * Gets the token from the environment variables. Stops the application if no token is set.
 	 *
+	 * @param envSettings        The class that handles the environment variables.
 	 * @param applicationContext The Spring application context.
 	 * @return The token as a {@code String}.
 	 */
-	private String getToken(ApplicationContext applicationContext) {
-		final String discordToken = EnvironmentUtil.getEnvironmentVariable("DC_TOKEN");
+	private String getToken(final EnvSettings envSettings, final ApplicationContext applicationContext) {
+		final String discordToken = envSettings.getToken();
 		if (discordToken == null) {
 			LogUtil.logError("RoleWatcher Discord token is null! Please check the environment variables and add a token.");
 			shutdown(applicationContext);
@@ -69,12 +72,14 @@ public class JdaBeanConfig {
 	/**
 	 * Initializes the bot with the needed information.
 	 *
+	 * @param envSettings    The class that handles the environment variables.
 	 * @param discordToken   The Discord token of the bot.
 	 * @param eventListeners A list of event listeners.
 	 * @return A <a href="https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/JDA.html">JDA instance</a> of the bot.
 	 */
-	private JDABuilder buildBot(final String discordToken, final Map<String, ? extends ListenerAdapter> eventListeners) {
-		final Activity activity = getBotActivity();
+	private JDABuilder buildBot(final EnvSettings envSettings, final String discordToken,
+								final Map<String, ? extends ListenerAdapter> eventListeners) {
+		final Activity activity = getBotActivity(envSettings);
 		final JDABuilder builder =
 				JDABuilder.createLight(
 						discordToken,
@@ -93,12 +98,13 @@ public class JdaBeanConfig {
 	 * to information in the environment variables. Can be turned off by not including
 	 * {@code BOT_ACTIVITY} or {@code BOT_ACTIVITY_TEXT} in the environment file.
 	 *
+	 * @param envSettings The class that handles the environment variables.
 	 * @return A Discord {@code Activity} object.
 	 */
-	private Activity getBotActivity() {
-		String activityType = EnvironmentUtil.getEnvironmentVariable("BOT_ACTIVITY");
-		String activityText = EnvironmentUtil.getEnvironmentVariable("BOT_ACTIVITY_TEXT");
-		String activityStreamingUrl = EnvironmentUtil.getEnvironmentVariable("BOT_ACTIVITY_STREAMING_URL");
+	private Activity getBotActivity(final EnvSettings envSettings) {
+		final String activityType = envSettings.getBotActivityType();
+		final String activityText = envSettings.getBotActivityText();
+		final String activityStreamingUrl = envSettings.getBotStreamingUrl();
 
 		if (activityType == null || activityText == null) {
 			LogUtil.logInfo("Activity or activity text not given, ignoring activity settings.");
@@ -126,7 +132,7 @@ public class JdaBeanConfig {
 	 * @param url  The URL to the stream, only needed when the {@code ActivityType} is set to 'streaming'.
 	 * @return A Discord {@code Activity} object.
 	 */
-	private Activity buildActivity(String type, String text, String url) {
+	private Activity buildActivity(final String type, final String text, final String url) {
 		switch (type.toLowerCase()) {
 			case "playing":
 				return Activity.playing(text);
@@ -149,7 +155,7 @@ public class JdaBeanConfig {
 	 * @param builder The builder that is supposed to generate the JDA instance.
 	 * @return The JDA instance, the 'core' of the API/the bot.
 	 */
-	private JDA botLogin(JDABuilder builder) {
+	private JDA botLogin(final JDABuilder builder) {
 		try {
 			return builder.build();
 		} catch (LoginException e) {
@@ -165,7 +171,7 @@ public class JdaBeanConfig {
 	 *
 	 * @param applicationContext The Spring application context.
 	 */
-	private void shutdown(ApplicationContext applicationContext) {
+	private void shutdown(final ApplicationContext applicationContext) {
 		SpringApplication.exit(applicationContext, () -> 1);
 		System.exit(1);
 	}

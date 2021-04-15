@@ -2,9 +2,9 @@ package com.motorbesitzen.rolewatcher.bot.command.impl;
 
 import com.motorbesitzen.rolewatcher.bot.command.Command;
 import com.motorbesitzen.rolewatcher.bot.command.CommandImpl;
+import com.motorbesitzen.rolewatcher.bot.service.EnvSettings;
 import com.motorbesitzen.rolewatcher.data.dao.DiscordGuild;
 import com.motorbesitzen.rolewatcher.data.repo.DiscordGuildRepo;
-import com.motorbesitzen.rolewatcher.util.EnvironmentUtil;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
@@ -22,13 +22,15 @@ import java.util.Optional;
 @Service("help")
 class Help extends CommandImpl {
 
+	private static final int FIELDS_PER_EMBED = 25;
+	private final EnvSettings envSettings;
 	private final Map<String, Command> commandMap;
 	private final DiscordGuildRepo discordGuildRepo;
 
-	private static final int FIELDS_PER_EMBED = 25;
-
 	@Autowired
-	private Help(final Map<String, Command> commandMap, final DiscordGuildRepo discordGuildRepo) {
+	private Help(final EnvSettings envSettings, final Map<String, Command> commandMap,
+				 final DiscordGuildRepo discordGuildRepo) {
+		this.envSettings = envSettings;
 		this.commandMap = commandMap;
 		this.discordGuildRepo = discordGuildRepo;
 	}
@@ -130,18 +132,18 @@ class Help extends CommandImpl {
 	 * @return An {@code EmbedBuilder} with page identification if needed.
 	 */
 	private EmbedBuilder buildEmbedPage(final int page, final int totalPages) {
-		return new EmbedBuilder().setColor(
-				getEmbedColor()
-		).setTitle(
-				page == 1 && totalPages == 1 ?
-						"Commands and their variations" :
-						"Commands and their variations [" + page + "/" + totalPages + "]"
-		).setDescription(
-				"A list of all commands you can use and what they do. " +
-						"Note that \"(a|b|c)\" means that a, b or c can be chosen."
-		).setFooter(
-				"If you are missing some functionality contact the owner of the bot to update your permissions."
-		);
+		return new EmbedBuilder()
+				.setColor(envSettings.getEmbedColor())
+				.setTitle(
+						page == 1 && totalPages == 1 ?
+								"Commands and their variations" :
+								"Commands and their variations [" + page + "/" + totalPages + "]"
+				).setDescription(
+						"A list of all commands you can use and what they do. " +
+								"Note that \"(a|b|c)\" means that a, b or c can be chosen."
+				).setFooter(
+						"If you are missing some functionality contact the owner of the bot to update your permissions."
+				);
 	}
 
 	/**
@@ -153,7 +155,7 @@ class Help extends CommandImpl {
 	 * @param command The command to add to the help page.
 	 */
 	private void addHelpEntry(final DiscordGuild guild, final EmbedBuilder eb, final Command command) {
-		final String prefix = EnvironmentUtil.getEnvironmentVariableOrDefault("CMD_PREFIX", "");
+		final String prefix = envSettings.getCommandPrefix();
 		if (!canUseCommand(guild, command)) {
 			return;
 		}

@@ -1,8 +1,9 @@
 package com.motorbesitzen.rolewatcher.web.error;
 
-import com.motorbesitzen.rolewatcher.util.EnvironmentUtil;
+import com.motorbesitzen.rolewatcher.bot.service.EnvSettings;
 import com.motorbesitzen.rolewatcher.util.LogUtil;
 import com.motorbesitzen.rolewatcher.web.entity.validation.ValidApiKey;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -22,6 +23,13 @@ import java.util.Set;
 @ControllerAdvice(basePackages = "com.motorbesitzen.rolewatcher.web.presentation")
 public class WebErrorHandler {
 
+	private final EnvSettings envSettings;
+
+	@Autowired
+	private WebErrorHandler(final EnvSettings envSettings) {
+		this.envSettings = envSettings;
+	}
+
 	/**
 	 * Handles all exceptions that are not handled otherwise and logs them.
 	 *
@@ -29,7 +37,7 @@ public class WebErrorHandler {
 	 * @return A response with the status code 500.
 	 */
 	@ExceptionHandler(Exception.class)
-	public ResponseEntity<?> handleInternalServerError(Exception e) {
+	public ResponseEntity<?> handleInternalServerError(final Exception e) {
 		LogUtil.logError("Internal server error (5XX)!", e);
 		return ResponseEntity.
 				status(HttpStatus.INTERNAL_SERVER_ERROR).
@@ -42,7 +50,7 @@ public class WebErrorHandler {
 	 * @return A response with the status code 404.
 	 */
 	@ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-	public ResponseEntity<?> handleRequestMethodNotSupported(HttpServletRequest request) {
+	public ResponseEntity<?> handleRequestMethodNotSupported(final HttpServletRequest request) {
 		LogUtil.logDebug("Request method \"" + request.getMethod() + "\" not supported for query: " + request.getQueryString());
 		return ResponseEntity.
 				status(HttpStatus.NOT_FOUND).
@@ -57,8 +65,9 @@ public class WebErrorHandler {
 	 * @return A response with the status code 403 if the key is not correct or with the status code of 422 if the key is correct.
 	 */
 	@ExceptionHandler(HttpMessageNotReadableException.class)
-	public ResponseEntity<?> handleHttpMessageNotReadableException(HttpMessageNotReadableException e, HttpServletRequest request) {
-		if (!request.getQueryString().equals("key=" + EnvironmentUtil.getEnvironmentVariable("FORUM_USER_ADD_API_KEY"))) {
+	public ResponseEntity<?> handleHttpMessageNotReadableException(final HttpMessageNotReadableException e,
+																   final HttpServletRequest request) {
+		if (!request.getQueryString().equals("key=" + envSettings.getSelfaddApiKey())) {
 			logInvalidApiKey(request);
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access forbidden!");
 		}
@@ -77,7 +86,8 @@ public class WebErrorHandler {
 	 * @return A response with the status code 403 if the key is not correct or with the status code of 400 if the key is correct.
 	 */
 	@ExceptionHandler(ConstraintViolationException.class)
-	public ResponseEntity<?> handleConstraintViolationException(ConstraintViolationException e, HttpServletRequest request) {
+	public ResponseEntity<?> handleConstraintViolationException(final ConstraintViolationException e,
+																final HttpServletRequest request) {
 		Set<ConstraintViolation<?>> constraintViolations = e.getConstraintViolations();
 		for (ConstraintViolation<?> constraintViolation : constraintViolations) {
 			Class<? extends Annotation> violatedAnnotation = constraintViolation.getConstraintDescriptor().getAnnotation().annotationType();
@@ -95,7 +105,7 @@ public class WebErrorHandler {
 	 *
 	 * @param request Information about the request.
 	 */
-	private void logInvalidApiKey(HttpServletRequest request) {
+	private void logInvalidApiKey(final HttpServletRequest request) {
 		LogUtil.logWarning(
 				"SelfAdd API got accessed with the wrong key! " +
 						"IP (wrong if proxies like nginx are used): " + request.getRemoteAddr() +

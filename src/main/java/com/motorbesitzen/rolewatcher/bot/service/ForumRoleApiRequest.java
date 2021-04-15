@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.motorbesitzen.rolewatcher.data.dao.ForumRole;
 import com.motorbesitzen.rolewatcher.data.dao.ForumUser;
 import com.motorbesitzen.rolewatcher.data.repo.ForumRoleRepo;
-import com.motorbesitzen.rolewatcher.util.EnvironmentUtil;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -28,10 +27,12 @@ import java.util.Optional;
 @Service
 public class ForumRoleApiRequest {
 
+	private final EnvSettings envSettings;
 	private final ForumRoleRepo forumRoleRepo;
 
 	@Autowired
-	public ForumRoleApiRequest(ForumRoleRepo forumRoleRepo) {
+	private ForumRoleApiRequest(final EnvSettings envSettings, final ForumRoleRepo forumRoleRepo) {
+		this.envSettings = envSettings;
 		this.forumRoleRepo = forumRoleRepo;
 	}
 
@@ -43,7 +44,7 @@ public class ForumRoleApiRequest {
 	 * @throws IOException If the roles can not be requested.
 	 */
 	public List<ForumRole> getRolesOfForumUser(final ForumUser forumUser) throws IOException {
-		final String roleApi = EnvironmentUtil.getEnvironmentVariableOrDefault("FORUM_ROLE_API_URL", "");
+		final String roleApi = envSettings.getForumRoleApiUrl();
 		if (roleApi.isBlank()) {
 			throw new IllegalStateException("Forum role API URL not set. Not able to receive forum roles!");
 		}

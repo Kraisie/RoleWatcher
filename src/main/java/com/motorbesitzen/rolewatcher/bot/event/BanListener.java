@@ -32,7 +32,7 @@ public class BanListener extends ListenerAdapter {
 	private final DiscordUserRepo discordUserRepo;
 
 	@Autowired
-	public BanListener(final DiscordBanRepo discordBanRepo, final DiscordGuildRepo discordGuildRepo, final DiscordUserRepo discordUserRepo) {
+	private BanListener(final DiscordBanRepo discordBanRepo, final DiscordGuildRepo discordGuildRepo, final DiscordUserRepo discordUserRepo) {
 		this.discordBanRepo = discordBanRepo;
 		this.discordGuildRepo = discordGuildRepo;
 		this.discordUserRepo = discordUserRepo;

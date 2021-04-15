@@ -1,6 +1,7 @@
 package com.motorbesitzen.rolewatcher.bot.command.impl;
 
 import com.motorbesitzen.rolewatcher.bot.command.CommandImpl;
+import com.motorbesitzen.rolewatcher.bot.service.EnvSettings;
 import com.motorbesitzen.rolewatcher.data.dao.AuthedChannel;
 import com.motorbesitzen.rolewatcher.data.dao.AuthedRole;
 import com.motorbesitzen.rolewatcher.data.dao.DiscordGuild;
@@ -22,12 +23,15 @@ import java.util.Set;
 @Service("info")
 class Info extends CommandImpl {
 
+	private final EnvSettings envSettings;
 	private final DiscordGuildRepo guildRepo;
 	private final AuthedChannelRepo channelRepo;
 	private final AuthedRoleRepo roleRepo;
 
 	@Autowired
-	private Info(final DiscordGuildRepo guildRepo, final AuthedChannelRepo channelRepo, final AuthedRoleRepo roleRepo) {
+	private Info(final EnvSettings envSettings, final DiscordGuildRepo guildRepo, final AuthedChannelRepo channelRepo,
+				 final AuthedRoleRepo roleRepo) {
+		this.envSettings = envSettings;
 		this.guildRepo = guildRepo;
 		this.channelRepo = channelRepo;
 		this.roleRepo = roleRepo;
@@ -120,24 +124,22 @@ class Info extends CommandImpl {
 		final String channelContent = buildAuthedChannelList(authedChannels);
 		final String roleContent = buildAuthedRoleList(authedRoles);
 
-		final EmbedBuilder eb = new EmbedBuilder();
-		eb.setTitle("Info for \"" + event.getGuild().getName() + "\":");
-		eb.setColor(getEmbedColor());
-		eb.addField("Read Permission: ", (guild.hasReadPerm() ? "Yes" : "No"), true);
-		eb.addField("Write Permission: ", (guild.hasWritePerm() ? "Yes" : "No"), true);
-		eb.addBlankField(false);
-		eb.addField("Authorized channels: ", channelContent, true);
-		eb.addField("Authorized roles: ", roleContent, true);
-		eb.addBlankField(false);
-		eb.addField("Autokick enabled?", guild.canAutokick() ? "Yes" : "No", true);
-		eb.addField("Autokick delay:", guild.getAutokickHourDelay() + "h", true);
-		eb.addBlankField(false);
-
-		eb.setFooter("If no channels are authorized commands can be used everywhere. " +
-				"If no roles are authorized only the owner of the guild can use commands."
-		);
-
-		return eb.build();
+		return new EmbedBuilder()
+				.setTitle("Info for \"" + event.getGuild().getName() + "\":")
+				.setColor(envSettings.getEmbedColor())
+				.addField("Read Permission: ", (guild.hasReadPerm() ? "Yes" : "No"), true)
+				.addField("Write Permission: ", (guild.hasWritePerm() ? "Yes" : "No"), true)
+				.addBlankField(false)
+				.addField("Authorized channels: ", channelContent, true)
+				.addField("Authorized roles: ", roleContent, true)
+				.addBlankField(false)
+				.addField("Autokick enabled?", guild.canAutokick() ? "Yes" : "No", true)
+				.addField("Autokick delay:", guild.getAutokickHourDelay() + "h", true)
+				.addBlankField(false)
+				.setFooter(
+						"If no channels are authorized commands can be used everywhere. " +
+								"If no roles are authorized only the owner of the guild can use commands."
+				).build();
 	}
 
 	/**

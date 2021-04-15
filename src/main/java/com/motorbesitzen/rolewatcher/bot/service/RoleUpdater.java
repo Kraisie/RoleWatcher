@@ -8,7 +8,6 @@ import com.motorbesitzen.rolewatcher.data.repo.DiscordGuildRepo;
 import com.motorbesitzen.rolewatcher.data.repo.DiscordUserRepo;
 import com.motorbesitzen.rolewatcher.data.repo.ForumRoleRepo;
 import com.motorbesitzen.rolewatcher.data.repo.ForumUserRepo;
-import com.motorbesitzen.rolewatcher.util.EnvironmentUtil;
 import com.motorbesitzen.rolewatcher.util.LogUtil;
 import com.motorbesitzen.rolewatcher.util.ParseUtil;
 import com.motorbesitzen.rolewatcher.util.RoleUtil;
@@ -38,6 +37,7 @@ import java.util.concurrent.TimeUnit;
 public class RoleUpdater {
 
 	private final JDA jda;
+	private final EnvSettings envSettings;
 	private final DiscordUserRepo discordUserRepo;
 	private final ForumUserRepo forumUserRepo;
 	private final ForumRoleRepo forumRoleRepo;
@@ -47,9 +47,11 @@ public class RoleUpdater {
 	private final int delayMs;
 
 	@Autowired
-	public RoleUpdater(final JDA jda, final DiscordUserRepo discordUserRepo, final ForumUserRepo forumUserRepo,
-					   final ForumRoleRepo forumRoleRepo, final DiscordGuildRepo guildRepo, final ForumRoleApiRequest apiRequest) {
+	private RoleUpdater(final JDA jda, final EnvSettings envSettings, final DiscordUserRepo discordUserRepo,
+						final ForumUserRepo forumUserRepo, final ForumRoleRepo forumRoleRepo,
+						final DiscordGuildRepo guildRepo, final ForumRoleApiRequest apiRequest) {
 		this.jda = jda;
+		this.envSettings = envSettings;
 		this.discordUserRepo = discordUserRepo;
 		this.forumUserRepo = forumUserRepo;
 		this.forumRoleRepo = forumRoleRepo;
@@ -67,7 +69,7 @@ public class RoleUpdater {
 	 * @return The delay between each member in milliseconds.
 	 */
 	private int getDelay() {
-		final String delayStr = EnvironmentUtil.getEnvironmentVariableOrDefault("FORUM_ROLE_API_DELAY_MS", "5000");
+		final String delayStr = envSettings.getForumRoleApiDelay();
 		return Math.max(100, ParseUtil.safelyParseStringToInt(delayStr));
 	}
 
@@ -185,14 +187,14 @@ public class RoleUpdater {
 		try {
 			forumRoles = apiRequest.getRolesOfForumUser(forumUser);
 		} catch (SocketTimeoutException e) {
-			LogUtil.logError("Skipping user due to API timeout. Could not get roles of " + forumUser.toString());
+			LogUtil.logError("Skipping user due to API timeout. Could not get roles of " + forumUser);
 			return;
 		} catch (IOException e) {
-			LogUtil.logError("Skipping user. Could not get roles of " + forumUser.toString(), e);
+			LogUtil.logError("Skipping user. Could not get roles of " + forumUser, e);
 			return;
 		}
 
-		if (RoleUtil.hasBannedRole(forumRoles)) {
+		if (RoleUtil.hasBannedRole(envSettings, forumRoles)) {
 			banMember(forumUser, member);
 			return;
 		}
@@ -211,9 +213,9 @@ public class RoleUpdater {
 				(ban) -> LogUtil.logInfo(
 						"Banned member " + member.getUser().getAsTag() + " (" + member.getId() + ")  from \"" +
 								member.getGuild().getName() + "\" (" + member.getGuild().getId() + ") " +
-								"due to having the banned role. User is linked to " + forumUser.toString() + "."
+								"due to having the banned role. User is linked to " + forumUser + "."
 				),
-				throwable -> LogUtil.logError("Could not ban " + forumUser.toString() + " on \"" + member.getGuild().getName() + "\".", throwable)
+				throwable -> LogUtil.logError("Could not ban " + forumUser + " on \"" + member.getGuild().getName() + "\".", throwable)
 		);
 	}
 

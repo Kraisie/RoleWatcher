@@ -1,5 +1,6 @@
 package com.motorbesitzen.rolewatcher.util;
 
+import com.motorbesitzen.rolewatcher.bot.service.EnvSettings;
 import com.motorbesitzen.rolewatcher.data.dao.ForumRole;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -140,12 +141,13 @@ public final class RoleUtil {
 	 * Checks if the user has a role with the same ID as the banned role. Returns false if no role ID is
 	 * set in the environment variables.
 	 *
-	 * @param forumRoles The list of forum roles the user has.
+	 * @param envSettings The class that handles the environment variables.
+	 * @param forumRoles  The list of forum roles the user has.
 	 * @return {@code true} if the user has the banned role on the forum, {@code false} if there is no
 	 * banned role ID set, the user does not have the banned role or if the ID exceeds Integer range.
 	 */
-	public static boolean hasBannedRole(final List<ForumRole> forumRoles) {
-		final String bannedRoleIdStr = EnvironmentUtil.getEnvironmentVariableOrDefault("FORUM_BANNED_ROLE_ID", "");
+	public static boolean hasBannedRole(final EnvSettings envSettings, final List<ForumRole> forumRoles) {
+		final String bannedRoleIdStr = envSettings.getForumBannedRoleId();
 		if (bannedRoleIdStr.isBlank()) {
 			return false;
 		}

@@ -1,12 +1,12 @@
 package com.motorbesitzen.rolewatcher.bot.command.impl;
 
 import com.motorbesitzen.rolewatcher.bot.command.CommandImpl;
+import com.motorbesitzen.rolewatcher.bot.service.EnvSettings;
 import com.motorbesitzen.rolewatcher.data.dao.DiscordUser;
 import com.motorbesitzen.rolewatcher.data.dao.ForumUser;
 import com.motorbesitzen.rolewatcher.data.repo.DiscordUserRepo;
 import com.motorbesitzen.rolewatcher.data.repo.ForumUserRepo;
 import com.motorbesitzen.rolewatcher.util.DiscordMessageUtil;
-import com.motorbesitzen.rolewatcher.util.EnvironmentUtil;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
@@ -24,11 +24,13 @@ import java.util.Optional;
 @Service("who")
 class Who extends CommandImpl {
 
+	private final EnvSettings envSettings;
 	private final DiscordUserRepo dcUserRepo;
 	private final ForumUserRepo fUserRepo;
 
 	@Autowired
-	private Who(final DiscordUserRepo dcUserRepo, final ForumUserRepo fUserRepo) {
+	private Who(final EnvSettings envSettings, final DiscordUserRepo dcUserRepo, final ForumUserRepo fUserRepo) {
+		this.envSettings = envSettings;
 		this.dcUserRepo = dcUserRepo;
 		this.fUserRepo = fUserRepo;
 	}
@@ -121,7 +123,7 @@ class Who extends CommandImpl {
 	private void sendInfoMessage(final TextChannel channel, final Optional<ForumUser> fUserOpt, final Optional<DiscordUser> dcUserOpt) {
 		final EmbedBuilder eb = new EmbedBuilder();
 		eb.setTitle("User information: ");
-		eb.setColor(getEmbedColor());
+		eb.setColor(envSettings.getEmbedColor());
 		dcUserOpt.ifPresentOrElse(
 				dcUser -> setUserInfo(channel, eb, dcUser, fUserOpt),
 				() -> setUnknownUserInfo(eb)
@@ -174,7 +176,7 @@ class Who extends CommandImpl {
 	 * @param dcUser The Discord user to show info about.
 	 */
 	private void setDefaultInfo(final EmbedBuilder eb, final DiscordUser dcUser) {
-		final String iconUrl = EnvironmentUtil.getEnvironmentVariable("DEFAULT_AVATAR_URL");
+		final String iconUrl = envSettings.getDefaultAvatarUrl();
 		eb.setAuthor("Found user!", null, iconUrl);
 		eb.addField("Discord user:", "<@" + dcUser.getDiscordId() + ">", true);
 		setWhitelistInfo(eb, dcUser);
@@ -221,9 +223,9 @@ class Who extends CommandImpl {
 	 */
 	private void setForumInfo(final EmbedBuilder eb, final ForumUser fUser) {
 		final String link =
-				EnvironmentUtil.getEnvironmentVariable("FORUM_MEMBER_PROFILE_URL") == null ?
+				envSettings.getForumMemberProfileUrl() == null ?
 						"Forum link not set!" :
-						EnvironmentUtil.getEnvironmentVariable("FORUM_MEMBER_PROFILE_URL") + fUser.getForumId();
+						envSettings.getForumMemberProfileUrl() + fUser.getForumId();
 		eb.addField("Forum user:", fUser.getForumUsername() + " (UID: " + fUser.getForumId() + ")", false);
 		eb.addField("Link: ", link, false);
 	}

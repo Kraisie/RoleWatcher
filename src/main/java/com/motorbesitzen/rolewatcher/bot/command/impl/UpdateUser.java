@@ -1,6 +1,7 @@
 package com.motorbesitzen.rolewatcher.bot.command.impl;
 
 import com.motorbesitzen.rolewatcher.bot.command.CommandImpl;
+import com.motorbesitzen.rolewatcher.bot.service.EnvSettings;
 import com.motorbesitzen.rolewatcher.bot.service.ForumRoleApiRequest;
 import com.motorbesitzen.rolewatcher.data.dao.ForumRole;
 import com.motorbesitzen.rolewatcher.data.dao.ForumUser;
@@ -27,12 +28,15 @@ import java.util.Optional;
 @Service("update")
 class UpdateUser extends CommandImpl {
 
+	private final EnvSettings envSettings;
 	private final ForumUserRepo forumUserRepo;
 	private final ForumRoleRepo forumRoleRepo;
 	private final ForumRoleApiRequest forumRoleApiRequest;
 
 	@Autowired
-	private UpdateUser(final ForumUserRepo forumUserRepo, final ForumRoleRepo forumRoleRepo, final ForumRoleApiRequest forumRoleApiRequest) {
+	private UpdateUser(final EnvSettings envSettings, final ForumUserRepo forumUserRepo,
+					   final ForumRoleRepo forumRoleRepo, final ForumRoleApiRequest forumRoleApiRequest) {
+		this.envSettings = envSettings;
 		this.forumUserRepo = forumUserRepo;
 		this.forumRoleRepo = forumRoleRepo;
 		this.forumRoleApiRequest = forumRoleApiRequest;
@@ -141,7 +145,7 @@ class UpdateUser extends CommandImpl {
 			return;
 		}
 
-		if (RoleUtil.hasBannedRole(forumRoles)) {
+		if (RoleUtil.hasBannedRole(envSettings, forumRoles)) {
 			member.ban(0, "User (" + forumUser.getForumId() + ") has the banned role on the forum. Might be a temporary ban.").queue();
 			sendErrorMessage(channel, "Member has the banned role on the forum and thus has been banned.");
 			return;

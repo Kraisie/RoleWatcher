@@ -1,7 +1,8 @@
 package com.motorbesitzen.rolewatcher.web.entity.validation.impl;
 
-import com.motorbesitzen.rolewatcher.util.EnvironmentUtil;
+import com.motorbesitzen.rolewatcher.bot.service.EnvSettings;
 import com.motorbesitzen.rolewatcher.web.entity.validation.ValidApiKey;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
@@ -11,7 +12,13 @@ import javax.validation.ConstraintValidatorContext;
  */
 public class ApiKeyValidator implements ConstraintValidator<ValidApiKey, String> {
 
+	private final EnvSettings envSettings;
 	private String selfAddKey;
+
+	@Autowired
+	private ApiKeyValidator(final EnvSettings envSettings) {
+		this.envSettings = envSettings;
+	}
 
 	/**
 	 * Initializes the validator.
@@ -20,7 +27,7 @@ public class ApiKeyValidator implements ConstraintValidator<ValidApiKey, String>
 	 */
 	@Override
 	public void initialize(ValidApiKey validApiKey) {
-		this.selfAddKey = EnvironmentUtil.getEnvironmentVariable("FORUM_USER_ADD_API_KEY");
+		this.selfAddKey = envSettings.getSelfaddApiKey();
 	}
 
 	/**
@@ -31,7 +38,7 @@ public class ApiKeyValidator implements ConstraintValidator<ValidApiKey, String>
 	 * @return {@code true} if the key is valid, {@code false} otherwise.
 	 */
 	@Override
-	public boolean isValid(String key, ConstraintValidatorContext validatorContext) {
+	public boolean isValid(final String key, final ConstraintValidatorContext validatorContext) {
 		return key.equals(selfAddKey);
 	}
 }

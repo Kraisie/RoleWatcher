@@ -1,6 +1,5 @@
 package com.motorbesitzen.rolewatcher.bot.service;
 
-import com.motorbesitzen.rolewatcher.util.EnvironmentUtil;
 import com.motorbesitzen.rolewatcher.util.LogUtil;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,10 +18,12 @@ import java.util.stream.Collectors;
 public class StartUpChecker implements ApplicationListener<ApplicationStartedEvent> {
 
 	private final ApplicationContext context;
+	private final EnvSettings envSettings;
 
 	@Autowired
-	private StartUpChecker(final ApplicationContext context) {
+	private StartUpChecker(final ApplicationContext context, final EnvSettings envSettings) {
 		this.context = context;
+		this.envSettings = envSettings;
 	}
 
 	/**
@@ -48,7 +49,7 @@ public class StartUpChecker implements ApplicationListener<ApplicationStartedEve
 	 * Obviously does not check for word lists or dictionary attacks.
 	 */
 	private void checkApiKeyEnv() {
-		final String apiKey = EnvironmentUtil.getEnvironmentVariable("FORUM_USER_ADD_API_KEY");
+		final String apiKey = envSettings.getSelfaddApiKey();
 		if (apiKey == null) {
 			LogUtil.logError("Please set a secure (length at least 64) FORUM_USER_ADD_API_KEY in the .env file! Make sure the caller uses an URL encoded key.");
 			shutdown();

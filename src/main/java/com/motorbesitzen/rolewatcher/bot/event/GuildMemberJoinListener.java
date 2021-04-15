@@ -1,5 +1,6 @@
 package com.motorbesitzen.rolewatcher.bot.event;
 
+import com.motorbesitzen.rolewatcher.bot.service.EnvSettings;
 import com.motorbesitzen.rolewatcher.bot.service.ForumRoleApiRequest;
 import com.motorbesitzen.rolewatcher.data.dao.DiscordBan;
 import com.motorbesitzen.rolewatcher.data.dao.ForumRole;
@@ -26,13 +27,17 @@ import java.util.Optional;
 @Service
 public class GuildMemberJoinListener extends ListenerAdapter {
 
+	private final EnvSettings envSettings;
 	private final ForumUserRepo forumUserRepo;
 	private final ForumRoleRepo forumRoleRepo;
 	private final DiscordBanRepo discordBanRepo;
 	private final ForumRoleApiRequest forumRoleApiRequest;
 
 	@Autowired
-	public GuildMemberJoinListener(final ForumUserRepo forumUserRepo, final ForumRoleRepo forumRoleRepo, final DiscordBanRepo discordBanRepo, final ForumRoleApiRequest forumRoleApiRequest) {
+	public GuildMemberJoinListener(final EnvSettings envSettings, final ForumUserRepo forumUserRepo,
+								   final ForumRoleRepo forumRoleRepo, final DiscordBanRepo discordBanRepo,
+								   final ForumRoleApiRequest forumRoleApiRequest) {
+		this.envSettings = envSettings;
 		this.forumUserRepo = forumUserRepo;
 		this.forumRoleRepo = forumRoleRepo;
 		this.discordBanRepo = discordBanRepo;
@@ -74,7 +79,7 @@ public class GuildMemberJoinListener extends ListenerAdapter {
 			return;
 		}
 
-		if (RoleUtil.hasBannedRole(forumRoles)) {
+		if (RoleUtil.hasBannedRole(envSettings, forumRoles)) {
 			member.ban(0, "User (" + forumUser.getForumId() + ") has the banned role on the forum. Might be a temporary ban.").queue();
 			return;
 		}
