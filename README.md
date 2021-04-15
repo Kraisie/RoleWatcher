@@ -6,8 +6,9 @@ not grant database access.
 
 ## Setup
 
-The following text is written for linux based systems. Windows or Mac systems might need slightly different setup steps.
-This bot runs on Java 11, so you need to install the Java 11 JDK for your system.
+The following text is written for linux based systems. Windows or Mac systems might need slightly different setup steps
+and a different startup and stop script. This bot runs on Java 11, so you need to install the Java 11 JDK for your
+system.
 
 ### Prerequisites
 
@@ -150,7 +151,7 @@ met:
 
 * Do not write text in multiple lines after the equal sign (`=`).
 * Make sure your lines do not have trailing spaces or tabs!
-* While it also works without, you should encapsulate text with spaces in it with quotation marks.
+* Encapsulate text with spaces in it with quotation marks (`"`).
 
 Settings that have to be set are marked with `[REQUIRED]`. If you leave these blank the program will not work correctly
 and mostly will not even start completely.
@@ -349,14 +350,7 @@ sh stop.sh
 ```
 
 For these scripts to work make sure to not delete the file `pid.txt` while the program is running. If `stop.sh` does not
-work for some reason you can also do
-
-```shell
-./gradlew --stop
-```
-
-which stops all running Gradle programs with the same Gradle version, so be sure that no other Gradle programs are
-running or restart them afterwards.
+work for some reason you can also search for the `java` process and kill it manually.
 
 ## Updating guilds (servers)
 

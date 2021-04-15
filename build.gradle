@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'com.motorbesitzen'
-version = '0.3.2'
+version = '0.3.3'
 sourceCompatibility = '11'
 targetCompatibility = '11'
 
@@ -45,30 +45,4 @@ dependencies {
 
 test {
     useJUnitPlatform()
-}
-
-// create a manifest in the jar file
-jar {
-    manifest {
-        attributes(
-                'Main-Class': group + '.rolewatcher.RolewatcherApplication'
-        )
-    }
-}
-
-bootRun {
-    file('.env').readLines().each() {
-        if (!it.isEmpty() && !it.startsWith("#")) {
-            def pos = it.indexOf("=")
-            def key = it.substring(0, pos).trim()
-            def value = it.substring(pos + 1).trim()
-            if(value.startsWith("\"") && value.endsWith("\"")) {
-                value = value.substring(1, value.length() - 1)
-            }
-
-            if (System.getenv(key) == null) {
-                environment key, value
-            }
-        }
-    }
 }
