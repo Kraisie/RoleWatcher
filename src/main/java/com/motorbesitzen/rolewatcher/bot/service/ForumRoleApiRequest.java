@@ -50,7 +50,7 @@ public class ForumRoleApiRequest {
 		}
 
 		final long uid = forumUser.getForumId();
-		final String roleApiUrl = roleApi + uid;
+		final String roleApiUrl = roleApi + "=" + uid;
 		final String roleIdsJson = getRoleIdsJson(roleApiUrl);
 		return convertJsonToForumRoles(roleIdsJson);
 	}

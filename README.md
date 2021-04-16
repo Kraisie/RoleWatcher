@@ -255,10 +255,10 @@ moment.
 A link to your forum role API as described in the
 [Forum role API](#forum-role-api) section. Also needs to include the query parameters so if your query parameter for the
 user ID is `uid`
-an example URL would be `https://example.com/roleapi?uid=`. Any authorization your API requires needs to happen via
-query parameters, so a resulting url would be
-`https://example.com/roleapi?authkey=1234abc890&uid=`. Keep in mind that the users' ID will be appended to the end, so
-the query parameter for the user ID has to be the last one! \
+an example URL would be `https://example.com/roleapi?uid`. Any authorization your API requires needs to happen via query
+parameters, so a resulting url would be
+`https://example.com/roleapi?authkey=1234abc890&uid`. Keep in mind that the users' ID will be appended to the end, so
+the query parameter for the user ID has to be the last one! The program add the needed `=` itself! \
 Role synchronisation will not work if this value is not set or if the URL is invalid.
 
 #### FORUM_ROLE_API_DELAY_MS
