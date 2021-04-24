@@ -195,7 +195,7 @@ public class BanListener extends ListenerAdapter {
 		event.getGuild()
 				.retrieveAuditLogs()
 				.type(ActionType.UNBAN)            // only keep audit logs about unbans
-				.queueAfter(5, TimeUnit.SECONDS, logEntries -> findUnban(event, ban, logEntries));
+				.queueAfter(15, TimeUnit.SECONDS, logEntries -> findUnban(event, ban, logEntries));
 	}
 
 	/**
