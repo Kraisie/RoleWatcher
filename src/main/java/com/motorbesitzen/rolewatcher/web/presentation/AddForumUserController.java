@@ -29,7 +29,7 @@ public class AddForumUserController {
 	private final DiscordUserRepo discordUserRepo;
 
 	@Autowired
-	public AddForumUserController(ForumUserRepo forumUserRepo, DiscordUserRepo discordUserRepo) {
+	public AddForumUserController(final ForumUserRepo forumUserRepo, final DiscordUserRepo discordUserRepo) {
 		this.forumUserRepo = forumUserRepo;
 		this.discordUserRepo = discordUserRepo;
 	}
@@ -44,8 +44,8 @@ public class AddForumUserController {
 	 * entity, 409 = the user already exists, 500 = some internal error).
 	 */
 	@RequestMapping(value = "/users", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.TEXT_PLAIN_VALUE)
-	public ResponseEntity<?> addMember(@ValidApiKey @RequestParam(value = "key", required = false) String key, @Valid @RequestBody User user,
-									   BindingResult bindingResult) {
+	public ResponseEntity<?> addMember(@ValidApiKey @RequestParam(value = "key", required = false) final String key,
+									   @Valid @RequestBody final User user, final BindingResult bindingResult) {
 		// key does not get used as it gets validated before any of this code below even starts, DO NOT REMOVE KEY
 		if (bindingResult.hasErrors()) {
 			return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body("Invalid/corrupted data!");
@@ -53,20 +53,26 @@ public class AddForumUserController {
 
 		final Optional<ForumUser> forumUserOpt = forumUserRepo.findById(user.getUid());
 		if (forumUserOpt.isPresent()) {
-			if (forumUserOpt.get().getLinkedDiscordUser().getDiscordId() == user.getDiscordid()) {
+			final long linkedDiscordId = forumUserOpt.get().getLinkedDiscordUser().getDiscordId();
+			if (linkedDiscordId == user.getDiscordid()) {
 				return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
 			}
 
-			return ResponseEntity.status(HttpStatus.CONFLICT).body("Forum account already linked to another Discord account!");
+			return ResponseEntity.status(HttpStatus.CONFLICT).body(
+					"Forum account already linked to another Discord account! (" + linkedDiscordId + ")"
+			);
 		}
 
-		Optional<DiscordUser> discordUserOpt = discordUserRepo.findById(user.getDiscordid());
-		DiscordUser discordUser = discordUserOpt.orElseGet(() -> DiscordUser.createDiscordUser(user.getDiscordid()));
+		final Optional<DiscordUser> discordUserOpt = discordUserRepo.findById(user.getDiscordid());
+		final DiscordUser discordUser = discordUserOpt.orElseGet(() -> DiscordUser.createDiscordUser(user.getDiscordid()));
 		if (discordUser.getLinkedForumUser() != null) {
-			return ResponseEntity.status(HttpStatus.CONFLICT).body("Discord account already linked to another forum account!");
+			final long linkedForumId = discordUser.getLinkedForumUser().getForumId();
+			return ResponseEntity.status(HttpStatus.CONFLICT).body(
+					"Discord account already linked to another forum account! (" + linkedForumId + ")"
+			);
 		}
 
-		ForumUser forumUser = ForumUser.withLinkedDiscordUser(user.getUid(), user.getUsername(), discordUser);
+		final ForumUser forumUser = ForumUser.withLinkedDiscordUser(user.getUid(), user.getUsername(), discordUser);
 		discordUser.setLinkedForumUser(forumUser);
 		discordUserRepo.save(discordUser);
 		return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
