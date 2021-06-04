@@ -178,6 +178,7 @@ public class Verify extends CommandImpl {
 		final ForumUser newForumUser = ForumUser.create(forumId, username);
 		final Optional<DiscordUser> dcUserOpt = dcUserRepo.findById(discordId);
 		dcUserOpt.ifPresentOrElse(dcUser -> addForumUserLink(dcUser, newForumUser), () -> createDiscordUserLink(discordId, newForumUser));
+		infoRepo.delete(linkingInformation);
 		assignUserRoles(channel.getGuild(), newForumUser);
 		LogUtil.logDebug("Linked user: " + newForumUser);
 	}
