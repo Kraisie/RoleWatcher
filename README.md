@@ -62,9 +62,13 @@ accounts themselves. You will need to send the following JSON object to your ser
 }
 ```
 
-Obviously you need to replace the data in that object with the user data. Send that payload to `/users` and add a query
-parameter `key` which gets described in [FORUM_USER_ADD_API_KEY](#[REQUIRED] FORUM_USER_ADD_API_KEY). An example URL
-would look like this: `https://example.com/users?key=4875944894BNADCBelsafs5487346dn`. \
+Obviously you need to replace the data in that object with the user data. However, the maximum length of
+the `verificationCode` is 20 characters! \
+Send that payload to `/users` and add a query parameter `key` which gets described in [FORUM_USER_ADD_API_KEY](
+
+# [REQUIRED] FORUM_USER_ADD_API_KEY). An example URL would look like
+
+this: `https://example.com/users?key=4875944894BNADCBelsafs5487346dn`. \
 The reply may contain an error message in plain text, but the status codes are more important:
 
 * `204`: Everything went okay, and the bot received the code for the user

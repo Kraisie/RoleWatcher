@@ -129,7 +129,7 @@ public class Verify extends CommandImpl {
 		}
 
 		final String verificationCode = tokens[tokens.length - 1];
-		if (!verificationCode.matches("[a-zA-Z0-9]{1,15}")) {
+		if (verificationCode.length() < 1 || verificationCode.length() > 20) {
 			sendTemporaryErrorMessage(
 					event.getChannel(),
 					author.getAsMention() + " please check the validity of your code and try again.",
