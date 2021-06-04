@@ -15,6 +15,13 @@ public interface Command {
 	String getName();
 
 	/**
+	 * Shows if the caller needs an authorized role and an authorized channel to use the command.
+	 *
+	 * @return {@code true} if the caller needs an authorized role and an authorized channel.
+	 */
+	boolean needsAuthorization();
+
+	/**
 	 * Shows if the guild needs the 'write' permission to execute this command.
 	 *
 	 * @return {@code true} if the guild needs the 'write' permission.

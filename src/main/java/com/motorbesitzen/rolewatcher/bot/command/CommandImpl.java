@@ -6,6 +6,8 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import org.springframework.stereotype.Service;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * Basic implementation of a Command. Has all needed methods to send messages, answer to commands and log (debug) actions.
  * All subclasses (Commands) can use these functions.
@@ -19,6 +21,12 @@ public abstract class CommandImpl implements Command {
 	 */
 	@Override
 	public abstract String getName();
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public abstract boolean needsAuthorization();
 
 	/**
 	 * {@inheritDoc}
@@ -186,5 +194,33 @@ public abstract class CommandImpl implements Command {
 	 */
 	protected void sendErrorMessage(final TextChannel channel, final String errorMessage) {
 		answer(channel, errorMessage);
+	}
+
+	/**
+	 * Sends a temporary error messages that gets deleted after a certain time has passed.
+	 *
+	 * @param channel         <a href="https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/entities/TextChannel.html">TextChannel</a>
+	 *                        to send the error message in.
+	 * @param errorMessage    The error message to send.
+	 * @param deleteTimerSecs The time in seconds until the error message should get deleted.
+	 */
+	protected void sendTemporaryErrorMessage(final TextChannel channel, final String errorMessage, final int deleteTimerSecs) {
+		sendTemporaryMessage(channel, errorMessage, deleteTimerSecs);
+	}
+
+	/**
+	 * Sends a temporary messages that gets deleted after a certain time has passed.
+	 *
+	 * @param channel         <a href="https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/entities/TextChannel.html">TextChannel</a>
+	 *                        to send the message in.
+	 * @param message         The message to send.
+	 * @param deleteTimerSecs The time in seconds until the message should get deleted.
+	 */
+	protected void sendTemporaryMessage(final TextChannel channel, final String message, final int deleteTimerSecs) {
+		if (channel.canTalk()) {
+			channel.sendMessage(message).queue(
+					msg -> msg.delete().queueAfter(deleteTimerSecs, TimeUnit.SECONDS)
+			);
+		}
 	}
 }

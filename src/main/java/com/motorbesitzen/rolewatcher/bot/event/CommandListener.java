@@ -97,16 +97,18 @@ public class CommandListener extends ListenerAdapter {
 			return;
 		}
 
-		// check if role/channel is authorized
-		if (!isAuthorizedUsage(author, channel)) {
-			return;
-		}
-
 		// identify command
 		final String commandName = identifyCommandName(cmdPrefix, messageContent);
 		final Command command = commandMap.get(commandName);
 		if (command == null) {
 			return;
+		}
+
+		// check if role/channel is authorized
+		if (command.needsAuthorization()) {
+			if (!isAuthorizedUsage(author, channel)) {
+				return;
+			}
 		}
 
 		// check if guild is unauthorized

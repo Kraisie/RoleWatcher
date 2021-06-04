@@ -47,6 +47,14 @@ class Help extends CommandImpl {
 	 * {@inheritDoc}
 	 */
 	@Override
+	public boolean needsAuthorization() {
+		return true;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public boolean needsWritePerms() {
 		return false;
 	}

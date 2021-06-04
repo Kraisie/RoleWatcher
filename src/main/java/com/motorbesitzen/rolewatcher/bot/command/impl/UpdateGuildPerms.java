@@ -37,6 +37,14 @@ class UpdateGuildPerms extends CommandImpl {
 	 * {@inheritDoc}
 	 */
 	@Override
+	public boolean needsAuthorization() {
+		return true;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public boolean needsWritePerms() {
 		// the guild permissions do not matter as only the owner can use it
 		return false;

@@ -48,6 +48,14 @@ class DeleteUser extends CommandImpl {
 	 * {@inheritDoc}
 	 */
 	@Override
+	public boolean needsAuthorization() {
+		return true;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public boolean needsWritePerms() {
 		return true;
 	}
@@ -193,7 +201,7 @@ class DeleteUser extends CommandImpl {
 		final String authorId = event.getAuthor().getId();
 		final String author = event.getAuthor().getAsTag();
 		final String message = author + " (" + authorId + ")" + " deleted a user (" + dcUser.getDiscordId() + ") from the database: " +
-				user.toString() + ", " + dcUser.toString() + ".";
+				user.toString() + ", " + dcUser + ".";
 		LogUtil.logInfo(message);
 	}
 }
