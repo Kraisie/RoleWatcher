@@ -31,6 +31,9 @@ public class DiscordGuild {
 	@ColumnDefault("false")
 	private boolean roleSyncPerm;
 
+	@ColumnDefault("0")
+	private long verificationChannelId;
+
 	@NotNull
 	@ColumnDefault("false")
 	private boolean autokick;
@@ -52,11 +55,13 @@ public class DiscordGuild {
 	protected DiscordGuild() {
 	}
 
-	public DiscordGuild(long guildId, boolean writePerm, boolean readPerm, boolean autokick, int autokickHourDelay) {
+	public DiscordGuild(long guildId, boolean writePerm, boolean readPerm, boolean roleSyncPerm, boolean autokick, long verificationChannelId, int autokickHourDelay) {
 		this.guildId = guildId;
 		this.writePerm = writePerm;
 		this.readPerm = readPerm;
+		this.roleSyncPerm = roleSyncPerm;
 		this.autokick = autokick;
+		this.verificationChannelId = verificationChannelId;
 		this.autokickHourDelay = autokickHourDelay;
 		this.authedChannels = new HashSet<>();
 		this.authedRoles = new HashSet<>();
@@ -64,7 +69,7 @@ public class DiscordGuild {
 	}
 
 	public static DiscordGuild createDefault(long guildId) {
-		return new DiscordGuild(guildId, false, false, false, 24);
+		return new DiscordGuild(guildId, false, false, false, false, 0, 24);
 	}
 
 	public long getGuildId() {
@@ -97,6 +102,14 @@ public class DiscordGuild {
 
 	public void setRoleSyncPerm(boolean roleSyncPerm) {
 		this.roleSyncPerm = roleSyncPerm;
+	}
+
+	public long getVerificationChannelId() {
+		return verificationChannelId;
+	}
+
+	public void setVerificationChannelId(long verificationChannelId) {
+		this.verificationChannelId = verificationChannelId;
 	}
 
 	public boolean canAutokick() {
