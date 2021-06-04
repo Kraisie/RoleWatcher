@@ -19,7 +19,7 @@ It might not be that easy otherwise, especially if you need to code the
 #### Forum IDs
 
 Your forum needs to have user and role IDs that are numeric and start by 1. Your highest possible ID should be 2<sup>
-63</sup>-1. If your forum uses so called "Snowflakes" as IDs there might be issues as Discord uses that ID system too.
+63</sup>-1. If your forum uses so-called "Snowflakes" as IDs there might be issues as Discord uses that ID system too.
 While duplicates between forum IDs and Discord IDs are very unlikely they can happen if your forum uses them as well.
 
 #### Forum user name
@@ -48,6 +48,33 @@ This answer would show that the user has the roles with the IDs 1, 4 and 9 on th
 or anything, just answer as
 `application/json`! \
 Any authorization needs to happen via query parameters.
+
+#### Forum selfadd API/webhook
+
+While you can link users with the provided commands you can also build a site on your forum to let users link their
+accounts themselves. You will need to send the following JSON object to your server:
+
+```json
+{
+  "uid": 1234,
+  "username": "abc",
+  "verificationcode": "def"
+}
+```
+
+Obviously you need to replace the data in that object with the user data. Send that payload to `/users` and add a query
+parameter `key` which gets described in [FORUM_USER_ADD_API_KEY](#[REQUIRED] FORUM_USER_ADD_API_KEY). An example URL
+would look like this: `https://example.com/users?key=4875944894BNADCBelsafs5487346dn`. \
+The reply may contain an error message in plain text, but the status codes are more important:
+
+* `204`: Everything went okay, and the bot received the code for the user
+* `400`: The verification code is already reserved for another user
+* `409`: The user is already linked
+* `422`: The bot received invalid data
+* `5XX`: Some server-sided issue, check the logs for further information
+
+After that the user has to verify with the provided verification command and the verification code in your Discord
+server. The used Discord account and the sent forum user information get linked to each other if the code matches.
 
 ### Tokens & APIs
 
@@ -438,7 +465,7 @@ Your IDE or the compiler should notify you about the methods you need to impleme
 ### Adding event listeners
 
 Event listeners do not need a name and thus no special value. Just annotate the listener class as a service and make
-sure it extends the `ListenerAdapter`. Override at least one of the `ListenerAdapter` methods so your event listener
+sure it extends the `ListenerAdapter`. Override at least one of the `ListenerAdapter` methods, so your event listener
 actually does something.
 
 ```java
@@ -456,5 +483,5 @@ public class SomeEventListener extends ListenerAdapter {
 The Java part of this program takes Discord IDs as `Long` so the maximum ID is 9223372036854775807. If Discord does not
 change its system and still uses the Twitter snowflake ID system then this ID will be reached around June 2084. If for
 whatever reason Discord, the used technologies or this code should still be around at that time the code has to be
-changed to accept `BigInteger` to avoid overflows while handling IDs as Discord uses the full 2<sup>64</sup>
+changed to accept `BigInteger`. To avoid overflows while handling IDs as Discord uses the full 2<sup>64</sup>
 range while the Java `Long` only go up to 2<sup>63</sup>-1. 
