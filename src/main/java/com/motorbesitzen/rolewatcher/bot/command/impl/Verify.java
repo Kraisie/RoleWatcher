@@ -31,6 +31,8 @@ public class Verify extends CommandImpl {
 	private final ForumRoleRepo forumRoleRepo;
 	private final LinkingInformationRepo infoRepo;
 
+	private static final int MESSAGE_DELETE_TIMER_SECS = 30;
+
 	@Autowired
 	private Verify(final EnvSettings envSettings, final DiscordGuildRepo guildRepo, final DiscordUserRepo dcUserRepo,
 				   final ForumUserRepo forumUserRepo, final ForumRoleApiRequest forumRoleApiRequest,
@@ -122,7 +124,7 @@ public class Verify extends CommandImpl {
 					event.getChannel(),
 					author.getAsMention() + " please use the correct syntax: `" + prefix + "verify <code>`\n" +
 							"Insert the `code` you got on the forum for `<code>` and remove the `<` and `>`!",
-					30
+					MESSAGE_DELETE_TIMER_SECS
 			);
 			message.delete().queue();
 			return;
@@ -133,7 +135,7 @@ public class Verify extends CommandImpl {
 			sendTemporaryErrorMessage(
 					event.getChannel(),
 					author.getAsMention() + " please check the validity of your code and try again.",
-					30
+					MESSAGE_DELETE_TIMER_SECS
 			);
 			message.delete().queue();
 			return;
@@ -145,7 +147,7 @@ public class Verify extends CommandImpl {
 				() -> sendTemporaryErrorMessage(
 						event.getChannel(),
 						author.getAsMention() + " please check the validity of your code and try again.",
-						30
+						MESSAGE_DELETE_TIMER_SECS
 				)
 		);
 
@@ -159,7 +161,7 @@ public class Verify extends CommandImpl {
 			sendTemporaryErrorMessage(
 					channel,
 					"Your forum account is already linked! Contact a staff if you want to get unlinked.",
-					30
+					MESSAGE_DELETE_TIMER_SECS
 			);
 			return;
 		}
@@ -169,7 +171,7 @@ public class Verify extends CommandImpl {
 			sendTemporaryErrorMessage(
 					channel,
 					"Your Discord account is already linked! Contact a staff if you want to get unlinked.",
-					30
+					MESSAGE_DELETE_TIMER_SECS
 			);
 			return;
 		}
