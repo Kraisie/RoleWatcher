@@ -8,6 +8,7 @@ import com.motorbesitzen.rolewatcher.data.dao.DiscordGuild;
 import com.motorbesitzen.rolewatcher.data.repo.AuthedChannelRepo;
 import com.motorbesitzen.rolewatcher.data.repo.AuthedRoleRepo;
 import com.motorbesitzen.rolewatcher.data.repo.DiscordGuildRepo;
+import com.motorbesitzen.rolewatcher.util.LogUtil;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
@@ -72,28 +73,31 @@ public class CommandListener extends ListenerAdapter {
 	 */
 	@Override
 	public void onGuildMessageReceived(final GuildMessageReceivedEvent event) {
-		// check if channel is valid for command usage
-		final TextChannel channel = event.getChannel();
-		if (!isValidChannel(channel)) {
+		// check if message is webhook or not sent in a text channel
+		final Message message = event.getMessage();
+		final Member author = message.getMember();
+		if (author == null) {
 			return;
 		}
 
 		// check if valid message
-		final Message message = event.getMessage();
 		if (!isValidMessage(message)) {
 			return;
 		}
 
+		// get guild
+		final long guildId = event.getGuild().getIdLong();
+		final DiscordGuild dcGuild = getDiscordGuild(guildId);
+
 		// check if valid command prefix
+		final TextChannel channel = event.getChannel();
 		final String cmdPrefix = envSettings.getCommandPrefix();
 		final String messageContent = message.getContentRaw();
 		if (!isValidCommandPrefix(cmdPrefix, messageContent)) {
-			return;
-		}
-
-		// check if message is webhook or not sent in a text channel
-		final Member author = message.getMember();
-		if (author == null) {
+			// check if verification channel
+			if (isVerifyChannel(dcGuild, channel)) {
+				deleteMessage(message);
+			}
 			return;
 		}
 
@@ -101,6 +105,15 @@ public class CommandListener extends ListenerAdapter {
 		final String commandName = identifyCommandName(cmdPrefix, messageContent);
 		final Command command = commandMap.get(commandName);
 		if (command == null) {
+			// check if verification channel
+			if (isVerifyChannel(dcGuild, channel)) {
+				deleteMessage(message);
+			}
+			return;
+		}
+
+		// check if command can only be used by owner of the bot and if the caller is not the owner of the bot
+		if (command.needsOwnerPerms() && !isCallerBotOwner(author)) {
 			return;
 		}
 
@@ -111,14 +124,13 @@ public class CommandListener extends ListenerAdapter {
 			}
 		}
 
-		// check if guild is unauthorized
-		final Guild guild = event.getGuild();
-		if (!isAuthorizedGuild(guild, command)) {
+		// check if channel is valid for command usage
+		if (!isValidChannel(channel)) {
 			return;
 		}
 
-		// check if command can only be used by owner of the bot and if the caller is not the owner of the bot
-		if (command.needsOwnerPerms() && !isCallerBotOwner(author)) {
+		// check if guild is unauthorized
+		if (!isAuthorizedGuild(dcGuild, command)) {
 			return;
 		}
 
@@ -261,23 +273,13 @@ public class CommandListener extends ListenerAdapter {
 	 * Checks if the <a href="https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/entities/Guild.html">Guild</a>
 	 * has permission to use the command.
 	 *
-	 * @param guild   The <a href="https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/entities/Guild.html">Guild</a>
-	 *                in which the message was sent.
+	 * @param dcGuild The Discord Guild in which the message was sent.
 	 * @param command The information about the used command which contains the needed permissions to use it.
 	 * @return {@code true} if the <a href="https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/entities/Guild.html">Guild</a>
 	 * has permission to use the command, {@code false} if the <a href="https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/entities/Guild.html">Guild</a>
 	 * lacks the needed permissions.
 	 */
-	private boolean isAuthorizedGuild(final Guild guild, final Command command) {
-		final long guildId = guild.getIdLong();
-		final Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
-
-		final DiscordGuild dcGuild = dcGuildOpt.orElseGet(() -> {
-			final DiscordGuild newGuild = DiscordGuild.createDefault(guildId);
-			guildRepo.save(newGuild);
-			return newGuild;
-		});
-
+	private boolean isAuthorizedGuild(final DiscordGuild dcGuild, final Command command) {
 		// if command needs read permission, but guild does not have it
 		if (command.needsReadPerms() && !dcGuild.hasReadPerm()) {
 			return false;
@@ -311,5 +313,44 @@ public class CommandListener extends ListenerAdapter {
 			String message = "Bot can not modify some of this users roles! Please move the bot role above any forum role.";
 			event.getChannel().sendMessage(message).queue();
 		}
+	}
+
+	/**
+	 * Checks if the channel is the verification channel of the guild the message got sent in.
+	 *
+	 * @param dcGuild The Discord guild in which the message got sent.
+	 * @param channel The <a href="https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/entities/TextChannel.html">TextChannel</a>
+	 *                in which the message got sent.
+	 * @return {@code true} if the channel is the verification channel of the guild, {@code false} if is not.
+	 */
+	private boolean isVerifyChannel(final DiscordGuild dcGuild, final TextChannel channel) {
+		return dcGuild.getVerificationChannelId() == channel.getIdLong();
+	}
+
+	/**
+	 * Gets the {@link DiscordGuild} for the given guild ID in the database or creates a new one if it does not exist yet.
+	 *
+	 * @param guildId The guild ID to check the database for.
+	 * @return The {@link DiscordGuild} for the given ID.
+	 */
+	private DiscordGuild getDiscordGuild(final long guildId) {
+		final Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
+		return dcGuildOpt.orElseGet(() -> {
+			final DiscordGuild newGuild = DiscordGuild.createDefault(guildId);
+			guildRepo.save(newGuild);
+			return newGuild;
+		});
+	}
+
+	/**
+	 * Deletes a given Discord message.
+	 *
+	 * @param message The message to delete.
+	 */
+	private void deleteMessage(final Message message) {
+		message.delete().queue(
+				v -> LogUtil.logDebug("Deleted non-command message in verification channel."),
+				throwable -> LogUtil.logWarning("Could not delete message in verification channel! " + throwable.getMessage())
+		);
 	}
 }
