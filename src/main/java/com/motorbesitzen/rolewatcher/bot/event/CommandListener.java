@@ -94,10 +94,7 @@ public class CommandListener extends ListenerAdapter {
 		final String cmdPrefix = envSettings.getCommandPrefix();
 		final String messageContent = message.getContentRaw();
 		if (!isValidCommandPrefix(cmdPrefix, messageContent)) {
-			// check if verification channel
-			if (isVerifyChannel(dcGuild, channel)) {
-				deleteMessage(message);
-			}
+			deleteInVerify(dcGuild, message);
 			return;
 		}
 
@@ -105,32 +102,33 @@ public class CommandListener extends ListenerAdapter {
 		final String commandName = identifyCommandName(cmdPrefix, messageContent);
 		final Command command = commandMap.get(commandName);
 		if (command == null) {
-			// check if verification channel
-			if (isVerifyChannel(dcGuild, channel)) {
-				deleteMessage(message);
-			}
+			deleteInVerify(dcGuild, message);
 			return;
 		}
 
 		// check if command can only be used by owner of the bot and if the caller is not the owner of the bot
 		if (command.needsOwnerPerms() && !isCallerBotOwner(author)) {
+			deleteInVerify(dcGuild, message);
 			return;
 		}
 
 		// check if role/channel is authorized
 		if (command.needsAuthorization()) {
 			if (!isAuthorizedUsage(author, channel)) {
+				deleteInVerify(dcGuild, message);
 				return;
 			}
 		}
 
 		// check if channel is valid for command usage
 		if (!isValidChannel(channel)) {
+			deleteInVerify(dcGuild, message);
 			return;
 		}
 
 		// check if guild is unauthorized
 		if (!isAuthorizedGuild(dcGuild, command)) {
+			deleteInVerify(dcGuild, message);
 			return;
 		}
 
@@ -312,6 +310,19 @@ public class CommandListener extends ListenerAdapter {
 		} catch (HierarchyException e) {
 			String message = "Bot can not modify some of this users roles! Please move the bot role above any forum role.";
 			event.getChannel().sendMessage(message).queue();
+		}
+	}
+
+	/**
+	 * Deletes the given message if it got sent in the verification channel of the guild.
+	 *
+	 * @param dcGuild The Discord guild in which the message got sent.
+	 * @param message The message to clear if it got sent in the verification channel.
+	 */
+	private void deleteInVerify(final DiscordGuild dcGuild, final Message message) {
+		final TextChannel channel = message.getTextChannel();
+		if (isVerifyChannel(dcGuild, channel)) {
+			deleteMessage(message);
 		}
 	}
 
