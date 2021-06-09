@@ -113,9 +113,12 @@ public class WebErrorHandler {
 		if (headerNames != null) {
 			while (headerNames.hasMoreElements()) {
 				final String headerName = headerNames.nextElement();
-				final String headerValue = request.getHeader(headerNames.nextElement());
-				headers.append(headerName).append(": ").append(headerValue).append("; ");
+				if (headerName != null) {
+					final String headerValue = request.getHeader(headerName);
+					headers.append(headerName).append(": ").append(headerValue).append("; ");
+				}
 			}
+			headers.setLength(headers.length() - 1);
 		} else {
 			headers.append("None");
 		}
