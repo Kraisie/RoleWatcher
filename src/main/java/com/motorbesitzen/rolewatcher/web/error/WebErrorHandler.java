@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import java.lang.annotation.Annotation;
+import java.util.Enumeration;
 import java.util.Set;
 
 /**
@@ -37,8 +38,9 @@ public class WebErrorHandler {
 	 * @return A response with the status code 500.
 	 */
 	@ExceptionHandler(Exception.class)
-	public ResponseEntity<?> handleInternalServerError(final Exception e) {
+	public ResponseEntity<?> handleInternalServerError(final Exception e, final HttpServletRequest request) {
 		LogUtil.logError("Internal server error (5XX)!", e);
+		logInvalidRequest(request);
 		return ResponseEntity.
 				status(HttpStatus.INTERNAL_SERVER_ERROR).
 				body("Internal server error, please inform the forum or Discord staff about this message!");
@@ -88,9 +90,9 @@ public class WebErrorHandler {
 	@ExceptionHandler(ConstraintViolationException.class)
 	public ResponseEntity<?> handleConstraintViolationException(final ConstraintViolationException e,
 																final HttpServletRequest request) {
-		Set<ConstraintViolation<?>> constraintViolations = e.getConstraintViolations();
+		final Set<ConstraintViolation<?>> constraintViolations = e.getConstraintViolations();
 		for (ConstraintViolation<?> constraintViolation : constraintViolations) {
-			Class<? extends Annotation> violatedAnnotation = constraintViolation.getConstraintDescriptor().getAnnotation().annotationType();
+			final Class<? extends Annotation> violatedAnnotation = constraintViolation.getConstraintDescriptor().getAnnotation().annotationType();
 			if (ValidApiKey.class.equals(violatedAnnotation)) {
 				logInvalidApiKey(request);
 				return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access forbidden!");
@@ -98,6 +100,33 @@ public class WebErrorHandler {
 		}
 
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad request.");
+	}
+
+	/**
+	 * Logs invalid requests to API.
+	 *
+	 * @param request Information about the request.
+	 */
+	private void logInvalidRequest(final HttpServletRequest request) {
+		final StringBuilder headers = new StringBuilder();
+		final Enumeration<String> headerNames = request.getHeaderNames();
+		if (headerNames != null) {
+			while (headerNames.hasMoreElements()) {
+				final String headerName = headerNames.nextElement();
+				final String headerValue = request.getHeader(headerNames.nextElement());
+				headers.append(headerName).append(": ").append(headerValue).append("; ");
+			}
+		} else {
+			headers.append("None");
+		}
+
+		LogUtil.logWarning(
+				"Received invalid request! " +
+						"IP (wrong if proxies like nginx are used): " + request.getRemoteAddr() +
+						", X-Forwarded-For IPs: " + request.getHeader("X-FORWARDED-FOR") +
+						", query: \"" + request.getQueryString() + "\"" +
+						", headers: \"" + headers + "\""
+		);
 	}
 
 	/**
