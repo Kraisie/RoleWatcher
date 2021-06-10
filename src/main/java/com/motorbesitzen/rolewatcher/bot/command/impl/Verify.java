@@ -91,7 +91,7 @@ public class Verify extends CommandImpl {
 	 */
 	@Override
 	public String getUsage() {
-		return null;
+		return getName() + " <code>";
 	}
 
 	/**
@@ -99,7 +99,7 @@ public class Verify extends CommandImpl {
 	 */
 	@Override
 	public String getDescription() {
-		return null;
+		return "Links your forum account to your Discord account by a verification code.";
 	}
 
 	@Override
