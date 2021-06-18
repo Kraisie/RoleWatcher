@@ -73,21 +73,14 @@ public class CommandListener extends ListenerAdapter {
 	 */
 	@Override
 	public void onGuildMessageReceived(final GuildMessageReceivedEvent event) {
-		// check if message is webhook or not sent in a text channel
-		final Message message = event.getMessage();
-		final Member author = message.getMember();
-		if (author == null) {
-			return;
-		}
-
 		// check if valid message
-		if (!isValidMessage(message)) {
-			return;
-		}
-
-		// get guild
 		final long guildId = event.getGuild().getIdLong();
 		final DiscordGuild dcGuild = getDiscordGuild(guildId);
+		final Message message = event.getMessage();
+		if (!isValidMessage(message)) {
+			deleteInVerify(dcGuild, message);
+			return;
+		}
 
 		// check if valid command prefix
 		final TextChannel channel = event.getChannel();
@@ -103,6 +96,11 @@ public class CommandListener extends ListenerAdapter {
 		final Command command = commandMap.get(commandName);
 		if (command == null) {
 			deleteInVerify(dcGuild, message);
+			return;
+		}
+
+		final Member author = message.getMember();
+		if (author == null) {
 			return;
 		}
 
