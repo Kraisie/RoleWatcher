@@ -116,7 +116,7 @@ public abstract class CommandImpl implements Command {
 	 */
 	protected void sendMessage(final TextChannel channel, final MessageEmbed message) {
 		if (channel.canTalk()) {
-			channel.sendMessage(message).queue();
+			channel.sendMessageEmbeds(message).queue();
 		}
 	}
 
