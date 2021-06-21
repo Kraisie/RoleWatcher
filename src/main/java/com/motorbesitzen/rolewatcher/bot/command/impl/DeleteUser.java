@@ -171,7 +171,6 @@ class DeleteUser extends CommandImpl {
 		forumUserRepo.save(user);    // unlinking from discord user, otherwise won't delete entry
 		forumUserRepo.delete(user);
 		answer(event.getChannel(), "Deleted user from database.");
-		doUserDeletionLog(event, dcUser, user);
 
 		if (!dcUser.isWhitelisted()) {
 			removeForumRoles(event.getGuild(), dcUser.getDiscordId());
@@ -189,19 +188,5 @@ class DeleteUser extends CommandImpl {
 				member -> RoleUtil.updateRoles(member, new ArrayList<>(), forumRoleRepo.findAll()),
 				throwable -> LogUtil.logDebug("Can not remove roles from deleted user as user is not in the guild.")
 		);
-	}
-
-	/**
-	 * Logs the delete action.
-	 *
-	 * @param event The event provided by JDA that a guild message got received.
-	 * @param user  The deleted user.
-	 */
-	private void doUserDeletionLog(final GuildMessageReceivedEvent event, final DiscordUser dcUser, final ForumUser user) {
-		final String authorId = event.getAuthor().getId();
-		final String author = event.getAuthor().getAsTag();
-		final String message = author + " (" + authorId + ")" + " deleted a user (" + dcUser.getDiscordId() + ") from the database: " +
-				user.toString() + ", " + dcUser + ".";
-		LogUtil.logInfo(message);
 	}
 }

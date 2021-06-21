@@ -209,7 +209,7 @@ public class RoleUpdater {
 	 */
 	private void banMember(final ForumUser forumUser, final Member member) {
 		member.ban(0, "User (" + forumUser.getForumId() + ") has the banned role on the forum. Might be a temporary ban.").queue(
-				(ban) -> LogUtil.logInfo(
+				(ban) -> LogUtil.logDebug(
 						"Banned member " + member.getUser().getAsTag() + " (" + member.getId() + ")  from \"" +
 								member.getGuild().getName() + "\" (" + member.getGuild().getId() + ") " +
 								"due to having the banned role. User is linked to " + forumUser + "."
@@ -253,7 +253,7 @@ public class RoleUpdater {
 							"ago";
 
 			member.kick("Autokick due to being unlinked. (" + joinedText + ")").queue();
-			LogUtil.logInfo(
+			LogUtil.logDebug(
 					"Kicked member " + member.getUser().getAsTag() + " (" + member.getId() + ") from " +
 							"\"" + member.getGuild().getName() + "\" (" + member.getGuild().getId() + ") due to being unlinked."
 			);

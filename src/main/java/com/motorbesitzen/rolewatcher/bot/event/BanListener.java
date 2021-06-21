@@ -52,7 +52,11 @@ public class BanListener extends ListenerAdapter {
 			return;
 		}
 
-		guild.retrieveBan(bannedUser).queueAfter(15, TimeUnit.SECONDS, ban -> checkAuditLogs(event, ban));
+		guild.retrieveBan(bannedUser).queueAfter(
+				15, TimeUnit.SECONDS,
+				ban -> checkAuditLogs(event, ban),
+				throwable -> LogUtil.logWarning("Could not retrieve ban, maybe already unbanned? " + throwable.getMessage())
+		);
 	}
 
 	/**
@@ -131,7 +135,7 @@ public class BanListener extends ListenerAdapter {
 		final Guild guild = entry.getGuild();
 		final Optional<DiscordGuild> dcGuildOpt = discordGuildRepo.findById(guild.getIdLong());
 		if (dcGuildOpt.isEmpty()) {
-			LogUtil.logWarning("Ignoring ban event on unknown guild \"" + guild.getName() + "\" (" + guild.getId() + ").");
+			LogUtil.logDebug("Ignoring ban event on unknown guild \"" + guild.getName() + "\" (" + guild.getId() + ").");
 			return;
 		}
 
@@ -154,7 +158,7 @@ public class BanListener extends ListenerAdapter {
 				}
 		);
 
-		LogUtil.logInfo("\"" + ban.getUser().getAsTag() + "\" (" + ban.getUser().getId() +
+		LogUtil.logDebug("\"" + ban.getUser().getAsTag() + "\" (" + ban.getUser().getId() +
 				") got banned for \"" + banReason + "\"");
 	}
 
@@ -247,7 +251,7 @@ public class BanListener extends ListenerAdapter {
 		final String authorTag = entry.getUser() != null ? entry.getUser().getAsTag() : "UnknownUser";
 		final String authorId = entry.getUser() != null ? entry.getUser().getId() : "0";
 		discordBanRepo.deleteById(ban.getBanId());
-		LogUtil.logInfo(ban.getBannedUser().getDiscordId() + " got unbanned on \"" + guild.getName() + "\" (" + guild.getId() +
+		LogUtil.logDebug(ban.getBannedUser().getDiscordId() + " got unbanned on \"" + guild.getName() + "\" (" + guild.getId() +
 				") by \"" + authorTag + "\" (" + authorId + ").");
 	}
 }
