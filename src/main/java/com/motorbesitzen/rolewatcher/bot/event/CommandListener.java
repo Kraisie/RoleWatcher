@@ -312,13 +312,20 @@ public class CommandListener extends ListenerAdapter {
 	}
 
 	/**
-	 * Deletes the given message if it got sent in the verification channel of the guild.
+	 * Deletes the given message if it got sent in the verification channel of the guild. However, does not delete
+	 * its own messages.
 	 *
 	 * @param dcGuild The Discord guild in which the message got sent.
 	 * @param message The message to clear if it got sent in the verification channel.
 	 */
 	private void deleteInVerify(final DiscordGuild dcGuild, final Message message) {
 		final TextChannel channel = message.getTextChannel();
+		final User author = message.getAuthor();
+		final Member self = message.getGuild().getSelfMember();
+		if (author.getIdLong() == self.getIdLong()) {
+			return;
+		}
+
 		if (isVerifyChannel(dcGuild, channel)) {
 			deleteMessage(message);
 		}
