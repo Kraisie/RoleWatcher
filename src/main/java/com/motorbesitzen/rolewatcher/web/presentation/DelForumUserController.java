@@ -1,12 +1,16 @@
 package com.motorbesitzen.rolewatcher.web.presentation;
 
 import com.motorbesitzen.rolewatcher.data.dao.DiscordBan;
+import com.motorbesitzen.rolewatcher.data.dao.DiscordGuild;
 import com.motorbesitzen.rolewatcher.data.dao.DiscordUser;
 import com.motorbesitzen.rolewatcher.data.dao.ForumUser;
 import com.motorbesitzen.rolewatcher.data.repo.DiscordBanRepo;
+import com.motorbesitzen.rolewatcher.data.repo.DiscordGuildRepo;
 import com.motorbesitzen.rolewatcher.data.repo.ForumUserRepo;
 import com.motorbesitzen.rolewatcher.util.LogUtil;
 import com.motorbesitzen.rolewatcher.web.entity.validation.ValidApiKey;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Guild;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -28,11 +32,16 @@ public class DelForumUserController {
 
 	private final ForumUserRepo forumUserRepo;
 	private final DiscordBanRepo banRepo;
+	private final DiscordGuildRepo guildRepo;
+	private final JDA jda;
 
 	@Autowired
-	public DelForumUserController(final ForumUserRepo forumUserRepo, final DiscordBanRepo banRepo) {
+	public DelForumUserController(final ForumUserRepo forumUserRepo, final DiscordBanRepo banRepo,
+								  final DiscordGuildRepo guildRepo, final JDA jda) {
 		this.forumUserRepo = forumUserRepo;
 		this.banRepo = banRepo;
+		this.guildRepo = guildRepo;
+		this.jda = jda;
 	}
 
 	/**
@@ -67,9 +76,37 @@ public class DelForumUserController {
 			);
 		}
 
+		kickUser(forumUser);
 		forumUser.setLinkedDiscordUser(null);
 		forumUserRepo.save(forumUser);    // unlinking from discord user, otherwise won't delete entry
 		forumUserRepo.delete(forumUser);
 		return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
+	}
+
+	private void kickUser(final ForumUser forumUser) {
+		final DiscordUser dcUser = forumUser.getLinkedDiscordUser();
+		if (dcUser.isWhitelisted()) {
+			return;
+		}
+
+		final Iterable<DiscordGuild> dcGuilds = guildRepo.findAll();
+		for (DiscordGuild dcGuild : dcGuilds) {
+			if (!dcGuild.hasRoleSyncPerm()) {
+				continue;
+			}
+
+			final Guild guild = jda.getGuildById(dcGuild.getGuildId());
+			if (guild != null) {
+				final long forumId = forumUser.getForumId();
+				final long discordId = dcUser.getDiscordId();
+				guild.kick(
+						String.valueOf(dcUser.getDiscordId()),
+						"Kicked due to self-unlink (" + forumId + " <-> " + discordId + ")."
+				).queue(
+						v -> LogUtil.logDebug("Kicked member due to self-unlink."),
+						throwable -> LogUtil.logDebug("Could not kick self-unlinked user!", throwable)
+				);
+			}
+		}
 	}
 }

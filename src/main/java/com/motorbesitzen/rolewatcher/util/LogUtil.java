@@ -55,4 +55,13 @@ public final class LogUtil {
 	public static void logError(String message, Throwable t) {
 		LOGGER.error(message, t);
 	}
+
+	/**
+	 * Used to log debug information and aditional exceptions. Uses Spring (slf4j) debug logger ({@code Logger.debug(...)}).
+	 *
+	 * @param message The message to print as debug information.
+	 */
+	public static void logDebug(String message, Throwable t) {
+		LOGGER.debug(message, t);
+	}
 }
