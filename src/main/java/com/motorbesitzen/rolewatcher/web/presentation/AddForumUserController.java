@@ -77,8 +77,9 @@ public class AddForumUserController {
 			if (!savedInfo.getVerificationCode().equals(linkingInformation.getVerificationCode())) {
 				savedInfo.setVerificationCode(linkingInformation.getVerificationCode());
 				linkingRepo.save(savedInfo);
-				return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
 			}
+
+			return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
 		}
 
 		linkingRepo.save(linkingInformation);
