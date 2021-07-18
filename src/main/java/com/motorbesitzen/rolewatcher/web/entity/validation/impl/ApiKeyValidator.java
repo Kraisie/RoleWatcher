@@ -39,6 +39,10 @@ public class ApiKeyValidator implements ConstraintValidator<ValidApiKey, String>
 	 */
 	@Override
 	public boolean isValid(final String key, final ConstraintValidatorContext validatorContext) {
+		if (key == null) {
+			return false;
+		}
+
 		return key.equals(selfAddKey);
 	}
 }
