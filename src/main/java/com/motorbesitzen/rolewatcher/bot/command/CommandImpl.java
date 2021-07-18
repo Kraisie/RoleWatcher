@@ -116,7 +116,10 @@ public abstract class CommandImpl implements Command {
 	 */
 	protected void sendMessage(final TextChannel channel, final MessageEmbed message) {
 		if (channel.canTalk()) {
-			channel.sendMessageEmbeds(message).queue();
+			channel.sendMessageEmbeds(message).queue(
+					null,
+					throwable -> sendErrorMessage(channel, "Please enable the `Embed Links` permission for me!")
+			);
 		}
 	}
 
