@@ -211,7 +211,8 @@ class AddUser extends CommandImpl {
 	private void assignUserRoles(final TextChannel channel, final ForumUser newUser) {
 		final Guild guild = channel.getGuild();
 		guild.retrieveMemberById(newUser.getLinkedDiscordUser().getDiscordId()).queue(
-				member -> assignMemberRoles(channel, newUser, member)
+				member -> assignMemberRoles(channel, newUser, member),
+				throwable -> LogUtil.logDebug("Member not found! Can not assign roles.")
 		);
 	}
 
