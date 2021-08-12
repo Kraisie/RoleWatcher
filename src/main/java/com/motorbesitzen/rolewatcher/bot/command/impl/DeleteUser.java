@@ -114,7 +114,7 @@ class DeleteUser extends CommandImpl {
 	}
 
 	/**
-	 * Tries to deletes the user from the database and logs the delete action. Sends a success message after deletion.
+	 * Tries to delete the user from the database and logs the delete action. Sends a success message after deletion.
 	 * Does not unlink the user if the user is banned in the guild. Informs caller about the ban and
 	 * explains what to do to unlink the user.
 	 *
@@ -129,32 +129,35 @@ class DeleteUser extends CommandImpl {
 
 		final long discordId = user.getLinkedDiscordUser().getDiscordId();
 		final long guildId = event.getGuild().getIdLong();
-		final Optional<DiscordBan> dcBan = banRepo.findDiscordBanByBannedUser_DiscordIdAndGuild_GuildId(discordId, guildId);
-		dcBan.ifPresentOrElse(
-				ban -> {
-					final String banReason = ban.getReason();
-					sendMessage(
-							event.getChannel(),
-							"The user you tried to unlink is banned for \"" + banReason + "\" on this guild!\n" +
-									"Unban the user and try again if you still want to unlink the user. If the user is " +
-									"already unbanned or the ban is imported try to add \"-f\" to the end of the message " +
-									"(without the quotation marks)."
-					);
-				},
+		final Optional<DiscordBan> dcBanOpt = banRepo.findDiscordBanByBannedUser_DiscordIdAndGuild_GuildId(discordId, guildId);
+		dcBanOpt.ifPresentOrElse(
+				dcBan -> informOfUserBan(event.getChannel(), dcBan.getReason()),
 				() -> event.getGuild().retrieveBanById(discordId).queue(
-						ban -> {
-							final String banReason = ban.getReason() == null ?
-									"Unknown reason (not set in API and database)" : ban.getReason();
-							sendMessage(
-									event.getChannel(),
-									"The user you tried to unlink is banned for \"" + banReason + "\" on this guild!\n" +
-											"Unban the user and try again if you still want to unlink the user. If the user is " +
-											"already unbanned or the ban is imported try to add \"-f\" to the end of the message " +
-											"(without the quotation marks)."
-							);
-						},
+						ban -> informOfUserBan(event.getChannel(), ban.getReason()),
 						throwable -> deleteUser(event, user)
 				)
+		);
+	}
+
+	/**
+	 * Informs about a ban for the user that is supposed to get unlinked.
+	 *
+	 * @param channel   The channel to send the message in.
+	 * @param banReason The reason for the ban of the user if given.
+	 */
+	private void informOfUserBan(final TextChannel channel, String banReason) {
+		if (banReason == null) {
+			banReason = "Unknown reason (not set in API and database)";
+		} else if (banReason.isBlank()) {
+			banReason = "No reason given.";
+		}
+
+		sendMessage(
+				channel,
+				"The user you tried to unlink is banned for \"" + banReason + "\" on this guild!\n" +
+						"Unban the user and try again if you still want to unlink the user. If the user is " +
+						"**already unbanned** or the **ban is imported** try to add \"-f\" to the end of the message " +
+						"(without the quotation marks)."
 		);
 	}
 
