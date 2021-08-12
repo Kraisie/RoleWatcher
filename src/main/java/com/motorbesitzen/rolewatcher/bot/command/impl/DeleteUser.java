@@ -173,7 +173,7 @@ class DeleteUser extends CommandImpl {
 		user.setLinkedDiscordUser(null);
 		forumUserRepo.save(user);    // unlinking from discord user, otherwise won't delete entry
 		forumUserRepo.delete(user);
-		answer(event.getChannel(), "Deleted user from database.");
+		answer(event.getChannel(), "Deleted user (" + dcUser.getDiscordId() + " <-> " + user.getForumId() + ") from database.");
 
 		if (!dcUser.isWhitelisted()) {
 			removeForumRoles(event.getGuild(), dcUser.getDiscordId());
