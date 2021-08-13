@@ -31,6 +31,8 @@ public class BanListener extends ListenerAdapter {
 	private final DiscordGuildRepo discordGuildRepo;
 	private final DiscordUserRepo discordUserRepo;
 
+	private static final int RETRIEVAL_DELAY_SECONDS = 5;
+
 	@Autowired
 	private BanListener(final DiscordBanRepo discordBanRepo, final DiscordGuildRepo discordGuildRepo, final DiscordUserRepo discordUserRepo) {
 		this.discordBanRepo = discordBanRepo;
@@ -53,7 +55,7 @@ public class BanListener extends ListenerAdapter {
 		}
 
 		guild.retrieveBan(bannedUser).queueAfter(
-				15, TimeUnit.SECONDS,
+				RETRIEVAL_DELAY_SECONDS, TimeUnit.SECONDS,
 				ban -> checkAuditLogs(event, ban),
 				throwable -> LogUtil.logWarning("Could not retrieve ban, maybe already unbanned? " + throwable.getMessage())
 		);
@@ -199,7 +201,7 @@ public class BanListener extends ListenerAdapter {
 		event.getGuild()
 				.retrieveAuditLogs()
 				.type(ActionType.UNBAN)            // only keep audit logs about unbans
-				.queueAfter(15, TimeUnit.SECONDS, logEntries -> findUnban(event, ban, logEntries));
+				.queueAfter(RETRIEVAL_DELAY_SECONDS, TimeUnit.SECONDS, logEntries -> findUnban(event, ban, logEntries));
 	}
 
 	/**
