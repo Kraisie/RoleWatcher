@@ -124,6 +124,24 @@ public abstract class CommandImpl implements Command {
 	}
 
 	/**
+	 * Sends a message to a channel. Adds an embed to that message. Does not do anything if bot can not write in that channel.
+	 *
+	 * @param channel <a href="https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/entities/TextChannel.html">TextChannel</a>
+	 *                to send the message in.
+	 * @param text    The message content to send as normal message.
+	 * @param embed   The <a href="https://ci.dv8tion.net/job/JDA/javadoc/net/dv8tion/jda/api/entities/MessageEmbed.html">embedded message</a>
+	 *                *                to add to the message.
+	 */
+	protected void sendTextMessageWithEmbed(final TextChannel channel, final String text, final MessageEmbed embed) {
+		if (channel.canTalk()) {
+			channel.sendMessage(text).setEmbeds(embed).queue(
+					null,
+					throwable -> sendErrorMessage(channel, "Please enable the `Embed Links` permission for me!")
+			);
+		}
+	}
+
+	/**
 	 * Sends a placeholder message which can be updated e.g. when a task succeeds. Does not send a message if the bot
 	 * has no permissions to write in the given chat.
 	 *

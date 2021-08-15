@@ -1,6 +1,7 @@
 package com.motorbesitzen.rolewatcher.bot.command.impl;
 
 import com.motorbesitzen.rolewatcher.bot.command.CommandImpl;
+import com.motorbesitzen.rolewatcher.bot.service.EnvSettings;
 import com.motorbesitzen.rolewatcher.data.dao.DiscordBan;
 import com.motorbesitzen.rolewatcher.data.dao.DiscordUser;
 import com.motorbesitzen.rolewatcher.data.dao.ForumUser;
@@ -10,7 +11,9 @@ import com.motorbesitzen.rolewatcher.data.repo.ForumUserRepo;
 import com.motorbesitzen.rolewatcher.util.DiscordMessageUtil;
 import com.motorbesitzen.rolewatcher.util.LogUtil;
 import com.motorbesitzen.rolewatcher.util.RoleUtil;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,12 +31,15 @@ class DeleteUser extends CommandImpl {
 	private final ForumRoleRepo forumRoleRepo;
 	private final ForumUserRepo forumUserRepo;
 	private final DiscordBanRepo banRepo;
+	private final EnvSettings envSettings;
 
 	@Autowired
-	private DeleteUser(final ForumRoleRepo forumRoleRepo, final ForumUserRepo forumUserRepo, final DiscordBanRepo banRepo) {
+	private DeleteUser(final ForumRoleRepo forumRoleRepo, final ForumUserRepo forumUserRepo,
+					   final DiscordBanRepo banRepo, final EnvSettings envSettings) {
 		this.forumRoleRepo = forumRoleRepo;
 		this.forumUserRepo = forumUserRepo;
 		this.banRepo = banRepo;
+		this.envSettings = envSettings;
 	}
 
 	/**
@@ -131,9 +137,9 @@ class DeleteUser extends CommandImpl {
 		final long guildId = event.getGuild().getIdLong();
 		final Optional<DiscordBan> dcBanOpt = banRepo.findDiscordBanByBannedUser_DiscordIdAndGuild_GuildId(discordId, guildId);
 		dcBanOpt.ifPresentOrElse(
-				dcBan -> informOfUserBan(event.getChannel(), dcBan.getReason()),
+				dcBan -> informOfUserBan(event.getChannel(), dcBan.getReason(), user),
 				() -> event.getGuild().retrieveBanById(discordId).queue(
-						ban -> informOfUserBan(event.getChannel(), ban.getReason()),
+						ban -> informOfUserBan(event.getChannel(), ban.getReason(), user),
 						throwable -> deleteUser(event, user)
 				)
 		);
@@ -145,20 +151,40 @@ class DeleteUser extends CommandImpl {
 	 * @param channel   The channel to send the message in.
 	 * @param banReason The reason for the ban of the user if given.
 	 */
-	private void informOfUserBan(final TextChannel channel, String banReason) {
+	private void informOfUserBan(final TextChannel channel, String banReason, final ForumUser user) {
 		if (banReason == null) {
 			banReason = "Unknown reason (not set in API and database)";
 		} else if (banReason.isBlank()) {
 			banReason = "No reason given.";
 		}
 
-		sendMessage(
+		sendTextMessageWithEmbed(
 				channel,
 				"The user you tried to unlink is banned for \"" + banReason + "\" on this guild!\n" +
 						"Unban the user and try again if you still want to unlink the user. If the user is " +
 						"**already unbanned** or the **ban is imported** try to add \"-f\" to the end of the message " +
-						"(without the quotation marks)."
+						"(without the quotation marks).",
+				buildUserInfo(user, user.getLinkedDiscordUser())
 		);
+	}
+
+	/**
+	 * Creates an embed with the information about the user.
+	 *
+	 * @param user   The forum user to show the info of.
+	 * @param dcUser The Discord user who was/is linked to the forum user as the user might got unlinked already.
+	 * @return The MessageEmbed with the information.
+	 */
+	private MessageEmbed buildUserInfo(final ForumUser user, final DiscordUser dcUser) {
+		return new EmbedBuilder()
+				.setTitle("User information:")
+				.setColor(envSettings.getEmbedColor())
+				.addField("Discord user:", "<@" + dcUser.getDiscordId() + ">", true)
+				.addField("Whitelisted?", (dcUser.isWhitelisted() ? "Yes" : "No"), true)
+				.addBlankField(false)
+				.addField("Forum User:", user.getForumUsername() + " (UID: " + user.getForumId() + ")", false)
+				.addField("Link: ", envSettings.getForumMemberProfileUrl() + user.getForumId(), false)
+				.build();
 	}
 
 	/**
@@ -173,7 +199,7 @@ class DeleteUser extends CommandImpl {
 		user.setLinkedDiscordUser(null);
 		forumUserRepo.save(user);    // unlinking from discord user, otherwise won't delete entry
 		forumUserRepo.delete(user);
-		answer(event.getChannel(), "Deleted user (" + dcUser.getDiscordId() + " <-> " + user.getForumId() + ") from database.");
+		sendTextMessageWithEmbed(event.getChannel(), "Deleted the following user from the database.", buildUserInfo(user, dcUser));
 
 		if (!dcUser.isWhitelisted()) {
 			removeForumRoles(event.getGuild(), dcUser.getDiscordId());
