@@ -32,8 +32,8 @@ public class ForumUserControllerInfo {
 	}
 
 	@RequestMapping(value = "/users/{id}", method = RequestMethod.GET, produces = MediaType.TEXT_PLAIN_VALUE)
-	public ResponseEntity<?> addMember(@ValidApiKey @RequestParam(value = "key", required = false) final String key,
-									   @PathVariable("id") final Long id, final HttpServletRequest request) {
+	public ResponseEntity<?> memberInfo(@ValidApiKey @RequestParam(value = "key", required = false) final String key,
+										@PathVariable("id") final Long id, final HttpServletRequest request) {
 		if (id == null) {
 			LogUtil.logDebug(request.getRequestURI());
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Missing ID!");
