@@ -93,8 +93,13 @@ class AddWhitelist extends CommandImpl {
 	public void execute(final GuildMessageReceivedEvent event) {
 		final TextChannel channel = event.getChannel();
 		final long id = DiscordMessageUtil.getMentionedMemberId(event.getMessage());
-		if (id == -1) {
-			sendErrorMessage(channel, "Please mention a user or provide a user ID to whitelist.");
+		if (id <= 10000000000000000L) {
+			if (id == -1) {
+				sendErrorMessage(channel, "Please mention a user or provide a user ID to whitelist.");
+			} else {
+				sendErrorMessage(channel, "Invalid Discord ID!");
+			}
+
 			return;
 		}
 
