@@ -7,6 +7,7 @@ import com.motorbesitzen.rolewatcher.data.repo.LinkingInformationRepo;
 import com.motorbesitzen.rolewatcher.util.LogUtil;
 import com.motorbesitzen.rolewatcher.web.entity.validation.ValidApiKey;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +15,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.ConstraintViolationException;
 import javax.validation.Valid;
 import java.util.Optional;
 
@@ -82,19 +82,22 @@ public class AddForumUserController {
 			return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
 		}
 
-		linkingRepo.save(linkingInformation);
+		try {
+			linkingRepo.save(linkingInformation);
+		} catch (DataIntegrityViolationException e) {
+			handleDataIntegrityViolationException(e, linkingInformation);
+		}
+
 		return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
 	}
 
-	/**
-	 * Handles exception when JSON is valid but does not fulfill the constraints of the object.
-	 *
-	 * @param e The thrown exception.
-	 * @return A response with the status code representing invalid data.
-	 */
-	@ExceptionHandler(ConstraintViolationException.class)
-	public ResponseEntity<?> handleConstraintViolation(final Exception e) {
-		LogUtil.logError("Received constraint violation on mapping!", e);
-		return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body("Invalid/corrupted data!");
+	private void handleDataIntegrityViolationException(final DataIntegrityViolationException e, final LinkingInformation linkingInformation) {
+		linkingRepo.findById(linkingInformation.getUid()).ifPresentOrElse(
+				oldLinkingInformation -> {
+					oldLinkingInformation.setVerificationCode(linkingInformation.getVerificationCode());
+					linkingRepo.save(oldLinkingInformation);
+				},
+				() -> LogUtil.logError("Received DataIntegrityViolationException for unknown user " + linkingInformation, e)
+		);
 	}
 }

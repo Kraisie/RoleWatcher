@@ -99,6 +99,7 @@ public class WebErrorHandler {
 			}
 		}
 
+		LogUtil.logError("Received constraint violation on mapping!", e);
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad request.");
 	}
 

@@ -61,4 +61,9 @@ public class LinkingInformation {
 	public void setVerificationCode(String verificationCode) {
 		this.verificationCode = verificationCode;
 	}
+
+	@Override
+	public String toString() {
+		return "{uid=" + uid + ", forumUsername='" + forumUsername + "', verificationCode='" + verificationCode + "'}";
+	}
 }
