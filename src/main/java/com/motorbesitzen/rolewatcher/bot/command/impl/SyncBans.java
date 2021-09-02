@@ -8,6 +8,8 @@ import com.motorbesitzen.rolewatcher.data.repo.DiscordBanRepo;
 import com.motorbesitzen.rolewatcher.data.repo.DiscordGuildRepo;
 import com.motorbesitzen.rolewatcher.data.repo.DiscordUserRepo;
 import com.motorbesitzen.rolewatcher.util.LogUtil;
+import net.dv8tion.jda.api.audit.ActionType;
+import net.dv8tion.jda.api.audit.AuditLogEntry;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
@@ -127,8 +129,17 @@ class SyncBans extends CommandImpl {
 		final List<DiscordBan> toRemove = getBansToRemove(dcBans, banList);
 		final List<Guild.Ban> toAdd = getBansToAdd(dcBans, banList);
 		banRepo.deleteAll(toRemove);
-		addBans(dcGuild, toAdd);
-		sendSummary(event.getChannel(), toRemove.size(), toAdd.size());
+		event.getGuild().retrieveAuditLogs().type(ActionType.BAN).queue(
+				auditLogEntries -> {
+					addBans(dcGuild, auditLogEntries, toAdd);
+					sendSummary(event.getChannel(), toRemove.size(), toAdd.size());
+				},
+				throwable -> {
+					LogUtil.logError("Could not request audit log:", throwable);
+					addBans(dcGuild, new ArrayList<>(), toAdd);
+					sendSummary(event.getChannel(), toRemove.size(), toAdd.size());
+				}
+		);
 	}
 
 	/**
@@ -209,24 +220,47 @@ class SyncBans extends CommandImpl {
 	}
 
 	/**
-	 * Adds a list of missing bans to the database. Ignores the actor as that information is only receivable
-	 * by requesting the audit log and if the action happened in the last 90 days (Discord limitation).
+	 * Adds a list of missing bans to the database.
 	 *
 	 * @param dcGuild The Discord guild database entry to add the bans to.
 	 * @param toAdd   The bans to add to the database.
 	 */
-	private void addBans(final DiscordGuild dcGuild, final List<Guild.Ban> toAdd) {
+	private void addBans(final DiscordGuild dcGuild, final List<AuditLogEntry> auditLogEntries, final List<Guild.Ban> toAdd) {
 		final List<DiscordBan> dcBans = new ArrayList<>();
 		for (Guild.Ban ban : toAdd) {
 			final long bannedUserId = ban.getUser().getIdLong();
 			final Optional<DiscordUser> bannedUserOpt = userRepo.findById(bannedUserId);
 			final DiscordUser bannedUser = bannedUserOpt.orElseGet(() -> createDiscordUser(bannedUserId));
-			final DiscordBan dcBan = DiscordBan.withUnknownActor(ban.getReason(), dcGuild, bannedUser);
+			final AuditLogEntry matchingEntry = findMatchingEntry(auditLogEntries, bannedUserId);
+			final DiscordBan dcBan = matchingEntry == null ?
+					DiscordBan.withUnknownActor(ban.getReason(), dcGuild, bannedUser) :
+					(
+							matchingEntry.getUser() == null ?
+									DiscordBan.withUnknownActor(ban.getReason(), dcGuild, bannedUser) :
+									DiscordBan.createDiscordBan(matchingEntry.getUser().getIdLong(), ban.getReason(), dcGuild, bannedUser)
+					);
 			dcBans.add(dcBan);
 			LogUtil.logInfo("[SYNC] Add " + dcBan);
 		}
 
 		banRepo.saveAll(dcBans);
+	}
+
+	/**
+	 * Finds a matching audit log entry for a ban of a user if it exists
+	 *
+	 * @param auditLogEntries The ban audit log entries of the guild.
+	 * @param bannedUserId    The Discord ID of the banned user.
+	 * @return The audit log entry for the ban of the given user, {@code null} if it can not find one.
+	 */
+	private AuditLogEntry findMatchingEntry(final List<AuditLogEntry> auditLogEntries, final long bannedUserId) {
+		for (AuditLogEntry entry : auditLogEntries) {
+			if (entry.getTargetIdLong() == bannedUserId) {
+				return entry;
+			}
+		}
+
+		return null;
 	}
 
 	/**
