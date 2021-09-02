@@ -12,4 +12,6 @@ public interface DiscordBanRepo extends CrudRepository<DiscordBan, Long> {
 	Optional<DiscordBan> findDiscordBanByBannedUser_DiscordIdAndGuild_GuildId(long userId, long guildId);
 
 	List<DiscordBan> findAllByBannedUser_DiscordId(long userId);
+
+	List<DiscordBan> findAllByGuild_GuildId(long guildId);
 }

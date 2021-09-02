@@ -88,4 +88,15 @@ public class DiscordBan {
 	public void setBannedUser(DiscordUser bannedUser) {
 		this.bannedUser = bannedUser;
 	}
+
+	@Override
+	public String toString() {
+		return '{' +
+				"banId=" + banId +
+				", actorDiscordId=" + actorDiscordId +
+				", reason='" + reason + '\'' +
+				", guild=" + guild +
+				", bannedUser=" + bannedUser +
+				'}';
+	}
 }
