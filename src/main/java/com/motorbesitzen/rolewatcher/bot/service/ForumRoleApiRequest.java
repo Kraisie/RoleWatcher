@@ -30,6 +30,8 @@ public class ForumRoleApiRequest {
 	private final EnvSettings envSettings;
 	private final ForumRoleRepo forumRoleRepo;
 
+	private static final int TIMEOUT_MS = 10000;
+
 	@Autowired
 	private ForumRoleApiRequest(final EnvSettings envSettings, final ForumRoleRepo forumRoleRepo) {
 		this.envSettings = envSettings;
@@ -63,20 +65,27 @@ public class ForumRoleApiRequest {
 	 * @throws IOException if the roles can not be requested.
 	 */
 	private String getRoleIdsJson(String userApiUrl) throws IOException {
-		int timeoutMs = 10000;
-		RequestConfig config = RequestConfig.custom()
-				.setConnectTimeout(timeoutMs)
-				.setConnectionRequestTimeout(timeoutMs)
-				.setSocketTimeout(timeoutMs)
+		final RequestConfig config = RequestConfig.custom()
+				.setConnectTimeout(TIMEOUT_MS)
+				.setConnectionRequestTimeout(TIMEOUT_MS)
+				.setSocketTimeout(TIMEOUT_MS)
 				.build();
-		HttpClient httpClient = HttpClientBuilder.create().setDefaultRequestConfig(config).build();
-		HttpGet request = new HttpGet(userApiUrl);
-		HttpResponse response = httpClient.execute(request);
-		HttpEntity entity = response.getEntity();
-		BufferedReader reader = new BufferedReader(new InputStreamReader(entity.getContent()));
-		String line = reader.readLine();
+		final HttpClient httpClient = HttpClientBuilder.create().setDefaultRequestConfig(config).build();
+		final HttpGet request = new HttpGet(userApiUrl);
+		final HttpResponse response = httpClient.execute(request);
+		final HttpEntity entity = response.getEntity();
+		return readEntity(entity);
+	}
+
+	private String readEntity(final HttpEntity entity) throws IOException {
+		final BufferedReader reader = new BufferedReader(new InputStreamReader(entity.getContent()));
+		final StringBuilder sb = new StringBuilder();
+		String line;
+		while ((line = reader.readLine()) != null) {
+			sb.append(line);
+		}
 		reader.close();
-		return line;
+		return sb.toString();
 	}
 
 	/**
@@ -92,8 +101,8 @@ public class ForumRoleApiRequest {
 		}
 
 		try {
-			ObjectMapper mapper = new ObjectMapper();
-			long[] roleIds = mapper.readValue(roleIdsJson, long[].class);
+			final ObjectMapper mapper = new ObjectMapper();
+			final long[] roleIds = mapper.readValue(roleIdsJson, long[].class);
 			return convertRoleIdsToForumRoles(roleIds);
 		} catch (JsonProcessingException e) {
 			throw new IllegalArgumentException("Could not convert role ID JSON to integer array! JSON: \"" + roleIdsJson + "\"", e);
@@ -107,9 +116,9 @@ public class ForumRoleApiRequest {
 	 * @return A list of {@link ForumRole}s.
 	 */
 	private List<ForumRole> convertRoleIdsToForumRoles(long[] roleIds) {
-		List<ForumRole> matchingRoles = new ArrayList<>();
+		final List<ForumRole> matchingRoles = new ArrayList<>();
 		for (long roleId : roleIds) {
-			Optional<ForumRole> roleOpt = forumRoleRepo.findById(roleId);
+			final Optional<ForumRole> roleOpt = forumRoleRepo.findById(roleId);
 			if (roleOpt.isEmpty()) {
 				continue;
 			}
