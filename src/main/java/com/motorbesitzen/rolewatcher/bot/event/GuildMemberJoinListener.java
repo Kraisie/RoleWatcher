@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.util.List;
 import java.util.Optional;
 
@@ -74,8 +75,11 @@ public class GuildMemberJoinListener extends ListenerAdapter {
 		final List<ForumRole> forumRoles;
 		try {
 			forumRoles = forumRoleApiRequest.getRolesOfForumUser(forumUser);
-		} catch (IOException e) {
-			LogUtil.logError("Could not get roles of " + forumUser.toString(), e);
+		} catch (SocketTimeoutException e) {
+			LogUtil.logError("Skipping user due to API timeout. Could not get roles of " + forumUser);
+			return;
+		} catch (IOException | IllegalArgumentException e) {
+			LogUtil.logError("Skipping user. Could not get roles of " + forumUser, e);
 			return;
 		}
 

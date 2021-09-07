@@ -188,7 +188,7 @@ public class RoleUpdater {
 		} catch (SocketTimeoutException e) {
 			LogUtil.logError("Skipping user due to API timeout. Could not get roles of " + forumUser);
 			return;
-		} catch (IOException e) {
+		} catch (IOException | IllegalArgumentException e) {
 			LogUtil.logError("Skipping user. Could not get roles of " + forumUser, e);
 			return;
 		}

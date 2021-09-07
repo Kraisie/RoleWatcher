@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.util.List;
 import java.util.Optional;
 
@@ -234,8 +235,11 @@ public class Verify extends CommandImpl {
 		final List<ForumRole> forumRoles;
 		try {
 			forumRoles = forumRoleApiRequest.getRolesOfForumUser(newUser);
-		} catch (IOException e) {
-			LogUtil.logError("[VERIFY] Could not get roles of " + newUser.toString(), e);
+		} catch (SocketTimeoutException e) {
+			LogUtil.logError("Skipping user due to API timeout. Could not get roles of " + newUser);
+			return;
+		} catch (IOException | IllegalArgumentException e) {
+			LogUtil.logError("Skipping user. Could not get roles of " + newUser, e);
 			return;
 		}
 
