@@ -60,7 +60,7 @@ class SyncBans extends CommandImpl {
 	 */
 	@Override
 	public boolean needsWritePerms() {
-		return false;
+		return true;
 	}
 
 	/**
@@ -84,7 +84,7 @@ class SyncBans extends CommandImpl {
 	 */
 	@Override
 	public String getUsage() {
-		return getName() + " guildid";
+		return getName();
 	}
 
 	/**
@@ -92,7 +92,7 @@ class SyncBans extends CommandImpl {
 	 */
 	@Override
 	public String getDescription() {
-		return "Imports all saved bans from another guild and bans matching users.";
+		return "Synchronises bans between Discord and database.";
 	}
 
 	/**
