@@ -160,7 +160,6 @@ CMD_PREFIX=
 EMBED_COLOR_R=
 EMBED_COLOR_G=
 EMBED_COLOR_B=
-OWNER_DISCORD_ID=
 
 BOT_ACTIVITY=
 BOT_ACTIVITY_TEXT=
@@ -171,8 +170,6 @@ FORUM_ROLE_API_DELAY_MS=
 FORUM_USER_ADD_API_KEY=
 FORUM_MEMBER_PROFILE_URL=
 FORUM_BANNED_ROLE_ID=
-
-ERROR_REDIRECT_URL=
 ```
 
 In the following sections each of these settings will be explained. For each of them the following points need to be
@@ -316,45 +313,6 @@ This value defines the role ID a user has if he is banned on the forum. Any link
 banned from the Discord if the server has the permission to synchronise roles. You can only set one ID so if you have
 multiple roles for different bans only one will work. If this value is not set the program obviously will not know what
 the banned role is, so it will not ban anyone from the Discord based on the forum roles the user has.
-
-#### ERROR_REDIRECT_URL
-
-If someone requests a webpage that this application does not provide he gets forwarded to an error page. This
-application does not include a custom error page, so the user gets redirected to a default error page. You can set the
-URL for a custom or an external error page if you want to. If this value is not set it will redirect the user
-to [some annoying website](https://theannoyingsite.com/) as he has no reason to be there. If you do not host other stuff
-on the server the only people to ever access this page are probably bots that try to find a security vulnerability or
-people that use the API to add users who should not get redirected to that page anyway.
-
-### Database
-
-#### Creation
-
-On the first start the program has to create the database which needs some action on your side. To perform that setup,
-add the following line to the `.env` file:
-
-```dotenv
-SPRING_PROFILES_ACTIVE=firststart
-```
-
-Afterwards start the bot as described in
-[starting and stopping the bot](#starting-and-stopping-the-bot). Wait until the bot is shown as online in Discord and
-stop the program as described in the same section. Now remove the line you added to the `.env` file. \
-Your database is now set up, and you can start and stop the program as you like. However, do not add the line back
-to `.env` as that will lead to the program creating the database again and thus deleting all your data!
-
-#### Update
-
-If you need to update the database at some point add the following line to the `.env` file:
-
-```dotenv
-SPRING_PROFILES_ACTIVE=updatedb
-```
-
-Afterwards start the bot as described in
-[starting and stopping the bot](#starting-and-stopping-the-bot). Wait until the bot is shown as online in Discord and
-stop the program as described in the same section. Now remove the line you added to the `.env` file. \
-Your database schema is now updated and you can start the bot like normal.
 
 ## Starting and stopping the bot
 
