@@ -11,7 +11,6 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -171,8 +170,6 @@ class Who extends CommandImpl {
 	 * @param dcUser The Discord user to show info about.
 	 */
 	private void setMemberInfo(final EmbedBuilder eb, final DiscordUser dcUser, final Member member) {
-		final User user = member.getUser();
-		eb.setAuthor("Found user!", null, user.getAvatarUrl());
 		eb.addField("Discord user:", member.getAsMention(), true);
 		setWhitelistInfo(eb, dcUser);
 	}
@@ -184,8 +181,6 @@ class Who extends CommandImpl {
 	 * @param dcUser The Discord user to show info about.
 	 */
 	private void setDefaultInfo(final EmbedBuilder eb, final DiscordUser dcUser) {
-		final String iconUrl = envSettings.getDefaultAvatarUrl();
-		eb.setAuthor("Found user!", null, iconUrl);
 		eb.addField("Discord user:", "<@" + dcUser.getDiscordId() + ">", true);
 		setWhitelistInfo(eb, dcUser);
 	}

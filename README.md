@@ -171,7 +171,6 @@ FORUM_ROLE_API_DELAY_MS=
 FORUM_USER_ADD_API_KEY=
 FORUM_MEMBER_PROFILE_URL=
 FORUM_BANNED_ROLE_ID=
-DEFAULT_AVATAR_URL=
 
 ERROR_REDIRECT_URL=
 ```
@@ -317,14 +316,6 @@ This value defines the role ID a user has if he is banned on the forum. Any link
 banned from the Discord if the server has the permission to synchronise roles. You can only set one ID so if you have
 multiple roles for different bans only one will work. If this value is not set the program obviously will not know what
 the banned role is, so it will not ban anyone from the Discord based on the forum roles the user has.
-
-#### DEFAULT_AVATAR_URL
-
-Some commands show Discord avatars of users. However, if there is no avatar the bot can use (e.g. because the user is
-not on the Discord server anymore) it will not show one. If you set this value to a URL of a picture it will use that
-picture as a default avatar. If this value is not set it just won't show an avatar if the avatar is unknown. The URL has
-to be a valid URL according to Discord
-(include "http(s)") and has a maximum length of 2000 characters.
 
 #### ERROR_REDIRECT_URL
 

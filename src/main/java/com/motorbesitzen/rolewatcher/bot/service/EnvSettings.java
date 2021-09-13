@@ -68,15 +68,6 @@ public class EnvSettings {
 	}
 
 	/**
-	 * Defines the default avatar URL to use if there is no known Discord avatar.
-	 *
-	 * @return The set default avatar URL if there is one, {@code null} if there is none set.
-	 */
-	public String getDefaultAvatarUrl() {
-		return environment.getProperty("DEFAULT_AVATAR_URL");
-	}
-
-	/**
 	 * Defines the base URL of a forum profile.
 	 *
 	 * @return The set forum profile URL base if there is one, {@code null} if there is none set.
