@@ -106,15 +106,6 @@ public class EnvSettings {
 	}
 
 	/**
-	 * Defines the URL to redirect to if an error occurs.
-	 *
-	 * @return The URL to redirect to if set or "https://theannoyingsite.com/" if none is set.
-	 */
-	public String getErrorRedirectUrl() {
-		return environment.getProperty("ERROR_REDIRECT_URL", "https://theannoyingsite.com/");
-	}
-
-	/**
 	 * Defines the ID of the forum role that indicates a ban.
 	 *
 	 * @return The ID of the banned role if set or an empty String if none is set.
