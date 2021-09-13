@@ -10,6 +10,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolation;
@@ -101,6 +102,16 @@ public class WebErrorHandler {
 
 		LogUtil.logError("Received constraint violation on mapping!", e);
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad request.");
+	}
+
+	/**
+	 * Handles type mismatches in requests.
+	 *
+	 * @return A bad request (400) response.
+	 */
+	@ExceptionHandler(MethodArgumentTypeMismatchException.class)
+	public ResponseEntity<?> handleMethodArgumentTypeMismatchException() {
+		return ResponseEntity.status(400).body("Bad request.");
 	}
 
 	/**
