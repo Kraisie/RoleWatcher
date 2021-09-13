@@ -7,7 +7,7 @@ spring:
     add-properties: false
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
     open-in-view: false
   datasource:
     url: jdbc:h2:file:./data/${DB_DATABASE:database};DB_CLOSE_ON_EXIT=FALSE;IFEXISTS=FALSE;DB_CLOSE_DELAY=-1
@@ -48,24 +48,6 @@ logging:
           debug
     web:
       debug
----
-# additionally turn on (or overwrite) if first start profile ("firststart")
-spring:
-  config:
-    activate:
-      on-profile: firststart
-  jpa:
-    hibernate:
-      ddl-auto: create
----
-# additionally turn on (or overwrite) if update profile ("updatedb") -> to update DB on changes
-spring:
-  config:
-    activate:
-      on-profile: updatedb
-  jpa:
-    hibernate:
-      ddl-auto: update
 ---
 # additionally turn on (or overwrite) if development profile ("dev")
 spring:
