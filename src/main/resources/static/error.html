@@ -2,6 +2,7 @@
     <title>MotorBesitzen</title>
     <meta charset="UTF-8">
     <meta content="dark light" name="color-scheme">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <style>
         @media (prefers-color-scheme: dark) {
             body {
@@ -28,11 +29,11 @@
         }
 
         a {
-            color: #4242ff;
+            color: #0777f2;
         }
 
         a:visited {
-            color: #9717b6;
+            color: #c11deb;
         }
 
         footer {
@@ -41,6 +42,8 @@
             left: 0;
             bottom: 0;
             text-align: center;
+            align-content: center;
+            padding: 0.5em;
         }
 
         .content {
@@ -49,6 +52,13 @@
             left: 50%;
             -webkit-transform: translate(-50%, -50%);
             transform: translate(-50%, -50%);
+        }
+
+        .product {
+            display: inline-block;
+            margin-left: 1em;
+            margin-right: 1em;
+            line-height: 0;
         }
     </style>
 </head>
@@ -59,11 +69,9 @@
     <p>Not all those who wander are lost; However, you are.</p>
 </div>
 <footer>
-    <p>
-        RoleWatcher &nbsp;
-        <a href="https://github.com/Kraisie/MessageWatcher">MessageWatcher</a> &nbsp;
-        <a href="https://github.com/Kraisie/GambleBot">GambleBot</a> &nbsp;
-        <a href="https://github.com/Kraisie/StatusWatcher">StatusWatcher</a> &nbsp;
-    </p>
+    <p class="product">RoleWatcher</p>
+    <p class="product"><a href="https://github.com/Kraisie/MessageWatcher">MessageWatcher</a></p>
+    <p class="product"><a href="https://github.com/Kraisie/GambleBot">GambleBot</a></p>
+    <p class="product"><a href="https://github.com/Kraisie/StatusWatcher">StatusWatcher</a></p>
 </footer>
 </body>
