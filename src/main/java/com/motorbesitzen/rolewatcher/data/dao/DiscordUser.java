@@ -6,6 +6,7 @@ import javax.persistence.*;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 @Entity
@@ -92,5 +93,15 @@ public class DiscordUser {
 				"discordId=" + discordId +
 				", whitelisted=" + whitelisted +
 				'}';
+	}
+
+	public Optional<DiscordBan> getBanForGuild(long guildId) {
+		for (DiscordBan ban : bans) {
+			if (ban.getGuild().getGuildId() == guildId) {
+				return Optional.of(ban);
+			}
+		}
+
+		return Optional.empty();
 	}
 }
