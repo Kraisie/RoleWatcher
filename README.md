@@ -393,9 +393,8 @@ SPRING_PROFILES_ACTIVE=dev
 
 The same effect can be achieved by changing the run configuration of your IDE to use that profile.
 
-The database creation process in the `dev` profile will try to import a file called `data.sql` in the `resources` folder
-on startup. It will crash if that file is not present so either disable the auto import in `application.yml` or create
-the file yourself. The file can be used for sample data.
+The database creation process of hibernate will try to import a file called `import.sql` in the `resources`
+folder on startup which can be used for sample data. However, each SQL statement needs to be in one line!
 
 ### Adding commands
 
