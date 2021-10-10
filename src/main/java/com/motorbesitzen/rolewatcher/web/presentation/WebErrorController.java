@@ -21,10 +21,4 @@ public class WebErrorController implements ErrorController {
 	private String showErrorPage() {
 		return "error.html";
 	}
-
-	@Deprecated
-	@Override
-	public String getErrorPath() {
-		return null;
-	}
 }
