@@ -187,7 +187,8 @@ class ImportBans extends CommandImpl {
 		final Guild guild = channel.getGuild();
 		for (DiscordBan ban : importedBans) {
 			guild.retrieveMemberById(ban.getBannedUser().getDiscordId()).queue(
-					member -> member.ban(0, ban.getReason()).queue()
+					member -> member.ban(0, ban.getReason()).queue(),
+					throwable -> LogUtil.logDebug("Banned member not present in guild.")
 			);
 		}
 
