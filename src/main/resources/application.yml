@@ -59,18 +59,19 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create-drop   # none = (default) DB does not get changed, create = creates DB, create-drop = creates DB and drops on shutdown, update = DB gets updated to match code entities
-    #    show-sql: true            # prints the used SQL statement
-    #    properties:
-    #      hibernate:
-    #        format_sql: true      # formats the used SQL statement
-    # generate_statistics: true   # generates statistics (access times, lanes, etc). mostly not needed
+  #    show-sql: true            # prints the used SQL statement
+  #    properties:
+  #      hibernate:
+  #        format_sql: true      # formats the used SQL statement
+  #      generate_statistics: true   # generates statistics (access times, lanes, etc). mostly not needed
   h2:
     console:
       enabled: true
       path: /h2
-  datasource:
-    initialization-mode: always # always import data
-    data: classpath:/data.sql   # location with the sample data to import
+  sql:
+    init:
+      data-locations: classpath:/data.sql
+      mode: always
 # logging for hibernate activities
 logging:
   level:
