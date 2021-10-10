@@ -38,7 +38,7 @@ class UpdateGuildPerms extends CommandImpl {
 	 */
 	@Override
 	public boolean needsAuthorization() {
-		return true;
+		return false;
 	}
 
 	/**
