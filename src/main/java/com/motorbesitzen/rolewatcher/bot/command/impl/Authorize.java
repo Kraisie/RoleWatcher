@@ -112,7 +112,8 @@ class Authorize extends CommandImpl {
 
 		long guildId = event.getGuild().getIdLong();
 		final Optional<DiscordGuild> dcGuildOpt = discordGuildRepo.findById(guildId);
-		dcGuildOpt.ifPresent(guild -> authorize(channel, guild, mentionedChannels, mentionedRoles));
+		final DiscordGuild dcGuild = dcGuildOpt.orElseGet(() -> createDiscordGuild(guildId));
+		authorize(channel, dcGuild, mentionedChannels, mentionedRoles);
 	}
 
 	/**
@@ -167,5 +168,17 @@ class Authorize extends CommandImpl {
 			final AuthedRole authedRole = new AuthedRole(role.getIdLong(), guild);
 			roleRepo.save(authedRole);
 		}
+	}
+
+	/**
+	 * Creates a default guild with the given guild ID.
+	 *
+	 * @param guildId The guild ID to create a guild with.
+	 * @return The database entry for the guild.
+	 */
+	private DiscordGuild createDiscordGuild(final long guildId) {
+		final DiscordGuild dcGuild = DiscordGuild.createDefault(guildId);
+		discordGuildRepo.save(dcGuild);
+		return dcGuild;
 	}
 }

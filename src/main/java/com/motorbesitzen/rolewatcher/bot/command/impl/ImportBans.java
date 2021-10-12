@@ -128,12 +128,7 @@ class ImportBans extends CommandImpl {
 	private void importBans(final GuildMessageReceivedEvent event, final DiscordGuild discordGuild) {
 		final Guild guild = event.getGuild();
 		final Optional<DiscordGuild> callerDcGuildOpt = discordGuildRepo.findById(guild.getIdLong());
-		if (callerDcGuildOpt.isEmpty()) {
-			LogUtil.logWarning("Ignoring ban import on unknown guild \"" + guild.getName() + "\" (" + guild.getId() + ").");
-			return;
-		}
-
-		final DiscordGuild callerDcGuild = callerDcGuildOpt.get();
+		final DiscordGuild callerDcGuild = callerDcGuildOpt.orElseGet(() -> createDiscordGuild(guild.getIdLong()));
 		final Set<DiscordBan> importedBans = getImportedBans(callerDcGuild, discordGuild);
 		callerDcGuild.addBans(importedBans);
 		discordGuildRepo.save(callerDcGuild);
@@ -193,5 +188,17 @@ class ImportBans extends CommandImpl {
 		}
 
 		message.editMessage("Banned all members in the imported ban list who were in this guild.").queue();
+	}
+
+	/**
+	 * Creates a default guild with the given guild ID.
+	 *
+	 * @param guildId The guild ID to create a guild with.
+	 * @return The database entry for the guild.
+	 */
+	private DiscordGuild createDiscordGuild(final long guildId) {
+		final DiscordGuild dcGuild = DiscordGuild.createDefault(guildId);
+		discordGuildRepo.save(dcGuild);
+		return dcGuild;
 	}
 }
