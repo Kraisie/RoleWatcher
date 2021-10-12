@@ -35,7 +35,7 @@ public final class RoleUtil {
 
 			Role matchingRole = matchingRoles.get(0);
 			if (!me.canInteract(matchingRole)) {
-				LogUtil.logWarning("Can not assign role \"" + matchingRole.getName() + "\" to members. Move bot role above that role!");
+				LogUtil.logDebug("Can not assign role \"" + matchingRole.getName() + "\" to members. Move bot role above that role!");
 				continue;
 			}
 
@@ -110,7 +110,7 @@ public final class RoleUtil {
 							"Added role \"" + role.getName() + "\" to member \"" +
 									member.getUser().getAsTag() + "\" (" + member.getId() + ")."
 					),
-					throwable -> LogUtil.logDebug(
+					throwable -> LogUtil.logWarning(
 							"Could not add role \"" + role.getName() + "\" to member \"" +
 									member.getUser().getAsTag() + "\" (" + member.getId() + ")  due to \"" + throwable.getMessage() + "\"."
 					)
@@ -135,7 +135,7 @@ public final class RoleUtil {
 					v -> LogUtil.logDebug("Removed role \"" + role.getName() + "\" from member \"" +
 							member.getUser().getAsTag() + "\" (" + member.getId() + ")."
 					),
-					throwable -> LogUtil.logDebug(
+					throwable -> LogUtil.logWarning(
 							"Could not remove role \"" + role.getName() + "\" from member \"" +
 									member.getUser().getAsTag() + "\" (" + member.getId() + ")  due to \"" + throwable.getMessage() + "\"."
 					)
