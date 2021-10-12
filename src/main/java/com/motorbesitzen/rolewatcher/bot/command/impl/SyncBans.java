@@ -278,7 +278,7 @@ class SyncBans extends CommandImpl {
 	}
 
 	/**
-	 * Creates a default database with the given guild ID.
+	 * Creates a default guild with the given guild ID.
 	 *
 	 * @param guildId The guild ID to create a guild with.
 	 * @return The database entry for the guild.
