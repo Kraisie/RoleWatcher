@@ -110,7 +110,7 @@ public final class RoleUtil {
 							"Added role \"" + role.getName() + "\" to member \"" +
 									member.getUser().getAsTag() + "\" (" + member.getId() + ")."
 					),
-					throwable -> LogUtil.logWarning(
+					throwable -> LogUtil.logDebug(
 							"Could not add role \"" + role.getName() + "\" to member \"" +
 									member.getUser().getAsTag() + "\" (" + member.getId() + ")  due to \"" + throwable.getMessage() + "\"."
 					)
@@ -135,7 +135,7 @@ public final class RoleUtil {
 					v -> LogUtil.logDebug("Removed role \"" + role.getName() + "\" from member \"" +
 							member.getUser().getAsTag() + "\" (" + member.getId() + ")."
 					),
-					throwable -> LogUtil.logWarning(
+					throwable -> LogUtil.logDebug(
 							"Could not remove role \"" + role.getName() + "\" from member \"" +
 									member.getUser().getAsTag() + "\" (" + member.getId() + ")  due to \"" + throwable.getMessage() + "\"."
 					)
