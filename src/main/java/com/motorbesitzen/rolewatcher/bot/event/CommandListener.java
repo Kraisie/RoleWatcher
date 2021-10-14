@@ -10,6 +10,7 @@ import com.motorbesitzen.rolewatcher.data.repo.AuthedRoleRepo;
 import com.motorbesitzen.rolewatcher.data.repo.DiscordGuildRepo;
 import com.motorbesitzen.rolewatcher.util.LogUtil;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.HierarchyException;
@@ -199,7 +200,7 @@ public class CommandListener extends ListenerAdapter {
 			return false;
 		}
 
-		if (author.isOwner()) {
+		if (author.isOwner() || author.hasPermission(Permission.ADMINISTRATOR)) {
 			return true;
 		}
 
