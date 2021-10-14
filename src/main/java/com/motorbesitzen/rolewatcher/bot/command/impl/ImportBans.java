@@ -155,7 +155,7 @@ class ImportBans extends CommandImpl {
 		for (DiscordBan ban : importedBans) {
 			String reason = ban.getReason();
 			if (reason.startsWith("[IB")) {
-				reason = reason.substring(reason.indexOf(':')).trim(); // "[IB123456789012345678]: reason"
+				reason = reason.substring(reason.indexOf(':') + 1).trim(); // "[IB123456789012345678]: reason"
 			}
 
 			final DiscordBan newBan = DiscordBan.createDiscordBan(
