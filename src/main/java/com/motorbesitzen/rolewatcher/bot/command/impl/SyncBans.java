@@ -107,6 +107,11 @@ class SyncBans extends CommandImpl {
 		final Guild guild = event.getGuild();
 		final Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guild.getIdLong());
 		final DiscordGuild dcGuild = dcGuildOpt.orElseGet(() -> createDiscordGuild(guild.getIdLong()));
+		if (!dcGuild.hasBanSyncPerm()) {
+			sendErrorMessage(event.getChannel(), "Your guild does not have the required permission!");
+			return;
+		}
+
 		guild.retrieveBanList().queue(
 				banList -> syncBanList(event, dcGuild, banList),
 				throwable -> {

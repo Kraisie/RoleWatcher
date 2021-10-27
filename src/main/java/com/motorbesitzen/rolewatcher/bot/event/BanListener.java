@@ -47,8 +47,20 @@ public class BanListener extends ListenerAdapter {
 	 */
 	@Override
 	public void onGuildBan(final GuildBanEvent event) {
-		final User bannedUser = event.getUser();
 		final Guild guild = event.getGuild();
+		final Optional<DiscordGuild> dcGuildOpt = discordGuildRepo.findById(guild.getIdLong());
+		if (dcGuildOpt.isEmpty()) {
+			LogUtil.logWarning("Ignoring ban event on unknown guild \"" + guild.getName() + "\" (" + guild.getId() + ").");
+			return;
+		}
+
+		final DiscordGuild dcGuild = dcGuildOpt.get();
+		if (!dcGuild.hasBanSyncPerm()) {
+			// bans for this guild do not get synced
+			return;
+		}
+
+		final User bannedUser = event.getUser();
 		if (discordBanRepo.existsByBannedUser_DiscordIdAndGuild_GuildId(bannedUser.getIdLong(), guild.getIdLong())) {
 			// ban already in database e.g. by importing other bans -> ignore
 			return;
