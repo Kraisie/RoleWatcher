@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Syncs the guild bans to the database and removes lifted bans if found.
+ * Syncs the guild bans to the database.
  */
 @Service("syncbans")
 class SyncBans extends CommandImpl {
@@ -122,50 +122,26 @@ class SyncBans extends CommandImpl {
 	}
 
 	/**
-	 * Synchronises the ban list of the guild with the one saved in the database. Removes any database entries
-	 * that are not in the guild ban list and adds all bans that are not yet saved in the database.
+	 * Synchronises the ban list of the guild with the one saved in the database. Adds all bans that are not yet
+	 * saved in the database.
 	 *
 	 * @param event   The event provided by JDA that a guild message got received.
 	 * @param banList The list of bans of that guild provided by Discord.
 	 */
 	private void syncBanList(final GuildMessageReceivedEvent event, final List<Guild.Ban> banList) {
 		final List<DiscordBan> dcBans = (List<DiscordBan>) banRepo.findAll();
-		final List<DiscordBan> toRemove = getBansToRemove(dcBans, banList);
 		final List<Guild.Ban> toAdd = getBansToAdd(dcBans, banList);
-		banRepo.deleteAll(toRemove);
 		event.getGuild().retrieveAuditLogs().type(ActionType.BAN).queue(
 				auditLogEntries -> {
 					addBans(auditLogEntries, toAdd);
-					sendSummary(event.getChannel(), toRemove.size(), toAdd.size());
+					sendSummary(event.getChannel(), toAdd.size());
 				},
 				throwable -> {
 					LogUtil.logError("Could not request audit log:", throwable);
 					addBans(new ArrayList<>(), toAdd);
-					sendSummary(event.getChannel(), toRemove.size(), toAdd.size());
+					sendSummary(event.getChannel(), toAdd.size());
 				}
 		);
-	}
-
-	/**
-	 * Collects all ban entries in the database that can be removed as they are not backed with a guild ban in Discord.
-	 *
-	 * @param dcBans  The list of bans saved in the database for the guild.
-	 * @param banList The list of bans of that guild provided by Discord.
-	 * @return The list of bans to remove from the database.
-	 */
-	private List<DiscordBan> getBansToRemove(final List<DiscordBan> dcBans, final List<Guild.Ban> banList) {
-		final List<DiscordBan> toRemove = new ArrayList<>();
-		for (DiscordBan dcBan : dcBans) {
-			final long bannedUserId = dcBan.getBannedUser().getDiscordId();
-			if (isDiscordBan(banList, bannedUserId)) {
-				continue;
-			}
-
-			toRemove.add(dcBan);
-			LogUtil.logInfo("[SYNC] Remove " + dcBan);
-		}
-
-		return toRemove;
 	}
 
 	/**
@@ -187,23 +163,6 @@ class SyncBans extends CommandImpl {
 		}
 
 		return toAdd;
-	}
-
-	/**
-	 * Checks if a user of a ban entry in the database also has a ban entry in the guild.
-	 *
-	 * @param banList      The list of bans of that guild provided by Discord.
-	 * @param bannedUserId The Discord ID of the user which has a database ban entry.
-	 * @return {@code true} if the user is banned in the guild.
-	 */
-	private boolean isDiscordBan(final List<Guild.Ban> banList, final long bannedUserId) {
-		for (Guild.Ban ban : banList) {
-			if (ban.getUser().getIdLong() == bannedUserId) {
-				return true;
-			}
-		}
-
-		return false;
 	}
 
 	/**
@@ -268,16 +227,14 @@ class SyncBans extends CommandImpl {
 	}
 
 	/**
-	 * Sends a summary of how many bans got added and removed.
+	 * Sends a summary of how many bans got added to the database.
 	 *
-	 * @param channel    The channel to send the summary in.
-	 * @param removeSize The amount of removed bans.
-	 * @param addSize    The amount of added bans.
+	 * @param channel The channel to send the summary in.
+	 * @param addSize The amount of added bans.
 	 */
-	private void sendSummary(final TextChannel channel, final int removeSize, final int addSize) {
-		final String removed = removeSize > 0 ? "Removed " + removeSize + " " + (removeSize > 1 ? "bans" : "ban") : "";
-		final String added = addSize > 0 ? (removed.isBlank() ? "A" : " and a") + "dded " + addSize + " " + (addSize > 1 ? "bans" : "ban") : "";
-		final String answer = removed.isBlank() && added.isBlank() ? "Bans are already in sync." : removed + added + ".";
+	private void sendSummary(final TextChannel channel, final int addSize) {
+		final String added = addSize > 0 ? "Added " + addSize + " " + (addSize > 1 ? "bans" : "ban") : "";
+		final String answer = added.isBlank() ? "Bans are already in sync." : added + ".";
 		answer(channel, answer);
 	}
 
