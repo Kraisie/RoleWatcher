@@ -15,7 +15,6 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +32,7 @@ class SyncBans extends CommandImpl {
 
 	// public to be able to use @Transactional on execute()
 	@Autowired
-	public SyncBans(final DiscordGuildRepo guildRepo, final DiscordUserRepo userRepo, final DiscordBanRepo banRepo) {
+	SyncBans(final DiscordGuildRepo guildRepo, final DiscordUserRepo userRepo, final DiscordBanRepo banRepo) {
 		this.guildRepo = guildRepo;
 		this.userRepo = userRepo;
 		this.banRepo = banRepo;
@@ -101,7 +100,6 @@ class SyncBans extends CommandImpl {
 	 *
 	 * @param event The event provided by JDA that a guild message got received.
 	 */
-	@Transactional
 	@Override
 	public void execute(final GuildMessageReceivedEvent event) {
 		final Guild guild = event.getGuild();
