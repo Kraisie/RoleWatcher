@@ -134,8 +134,7 @@ class DeleteUser extends CommandImpl {
 		}
 
 		final long discordId = user.getLinkedDiscordUser().getDiscordId();
-		final long guildId = event.getGuild().getIdLong();
-		final Optional<DiscordBan> dcBanOpt = banRepo.findDiscordBanByBannedUser_DiscordIdAndGuild_GuildId(discordId, guildId);
+		final Optional<DiscordBan> dcBanOpt = banRepo.findByBannedUser_DiscordId(discordId);
 		dcBanOpt.ifPresentOrElse(
 				dcBan -> informOfUserBan(event.getChannel(), dcBan.getReason(), user),
 				() -> event.getGuild().retrieveBanById(discordId).queue(

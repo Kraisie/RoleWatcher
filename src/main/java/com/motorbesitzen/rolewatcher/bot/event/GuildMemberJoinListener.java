@@ -10,7 +10,6 @@ import com.motorbesitzen.rolewatcher.data.repo.ForumRoleRepo;
 import com.motorbesitzen.rolewatcher.data.repo.ForumUserRepo;
 import com.motorbesitzen.rolewatcher.util.LogUtil;
 import com.motorbesitzen.rolewatcher.util.RoleUtil;
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -52,10 +51,8 @@ public class GuildMemberJoinListener extends ListenerAdapter {
 	 */
 	@Override
 	public void onGuildMemberJoin(final GuildMemberJoinEvent event) {
-		final Guild guild = event.getGuild();
 		final Member member = event.getMember();
-
-		final Optional<DiscordBan> banOpt = discordBanRepo.findDiscordBanByBannedUser_DiscordIdAndGuild_GuildId(member.getIdLong(), guild.getIdLong());
+		final Optional<DiscordBan> banOpt = discordBanRepo.findByBannedUser_DiscordId(member.getIdLong());
 		banOpt.ifPresentOrElse(
 				ban -> member.ban(0, "User found on ban list. Reason: " + ban.getReason()).queue(),
 				() -> {

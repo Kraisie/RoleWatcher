@@ -113,7 +113,7 @@ class SyncBans extends CommandImpl {
 		}
 
 		guild.retrieveBanList().queue(
-				banList -> syncBanList(event, dcGuild, banList),
+				banList -> syncBanList(event, banList),
 				throwable -> {
 					LogUtil.logError("Could not request ban list of " + guild.getName(), throwable);
 					sendErrorMessage(event.getChannel(), "Could not request ban list of this guild!");
@@ -126,11 +126,10 @@ class SyncBans extends CommandImpl {
 	 * that are not in the guild ban list and adds all bans that are not yet saved in the database.
 	 *
 	 * @param event   The event provided by JDA that a guild message got received.
-	 * @param dcGuild The database entry for the guild where the command got used.
 	 * @param banList The list of bans of that guild provided by Discord.
 	 */
-	private void syncBanList(final GuildMessageReceivedEvent event, final DiscordGuild dcGuild, final List<Guild.Ban> banList) {
-		final List<DiscordBan> dcBans = banRepo.findAllByGuild_GuildId(dcGuild.getGuildId());
+	private void syncBanList(final GuildMessageReceivedEvent event, final List<Guild.Ban> banList) {
+		final List<DiscordBan> dcBans = (List<DiscordBan>) banRepo.findAll();
 		final List<DiscordBan> toRemove = getBansToRemove(dcBans, banList);
 		final List<Guild.Ban> toAdd = getBansToAdd(dcBans, banList);
 		banRepo.deleteAll(toRemove);

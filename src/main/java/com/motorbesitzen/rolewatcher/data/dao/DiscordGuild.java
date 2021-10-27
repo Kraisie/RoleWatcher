@@ -33,9 +33,6 @@ public class DiscordGuild {
 	@OneToMany(mappedBy = "guild", cascade = CascadeType.ALL)
 	private Set<AuthedRole> authedRoles;
 
-	@OneToMany(mappedBy = "guild", cascade = CascadeType.ALL)
-	private Set<DiscordBan> bans;
-
 	protected DiscordGuild() {
 	}
 
@@ -46,7 +43,6 @@ public class DiscordGuild {
 		this.autokickHourDelay = autokickHourDelay;
 		this.authedChannels = new HashSet<>();
 		this.authedRoles = new HashSet<>();
-		this.bans = new HashSet<>();
 	}
 
 	public static DiscordGuild createDefault(long guildId) {
@@ -131,18 +127,6 @@ public class DiscordGuild {
 
 	public void setAuthedRoles(Set<AuthedRole> authedRoles) {
 		this.authedRoles = authedRoles;
-	}
-
-	public Set<DiscordBan> getBans() {
-		return bans;
-	}
-
-	public void setBans(Set<DiscordBan> bans) {
-		this.bans = bans;
-	}
-
-	public void addBans(Set<DiscordBan> bans) {
-		this.bans.addAll(bans);
 	}
 
 	public String getPermissionText() {

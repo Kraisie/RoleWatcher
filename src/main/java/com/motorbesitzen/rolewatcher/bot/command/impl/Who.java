@@ -5,7 +5,6 @@ import com.motorbesitzen.rolewatcher.bot.service.EnvSettings;
 import com.motorbesitzen.rolewatcher.data.dao.DiscordBan;
 import com.motorbesitzen.rolewatcher.data.dao.DiscordUser;
 import com.motorbesitzen.rolewatcher.data.dao.ForumUser;
-import com.motorbesitzen.rolewatcher.data.repo.DiscordBanRepo;
 import com.motorbesitzen.rolewatcher.data.repo.DiscordUserRepo;
 import com.motorbesitzen.rolewatcher.data.repo.ForumUserRepo;
 import com.motorbesitzen.rolewatcher.util.DiscordMessageUtil;
@@ -15,7 +14,6 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -28,16 +26,12 @@ class Who extends CommandImpl {
 	private final EnvSettings envSettings;
 	private final DiscordUserRepo dcUserRepo;
 	private final ForumUserRepo fUserRepo;
-	private final DiscordBanRepo banRepo;
 
-	// public to be able to use @Transactional on execute()
 	@Autowired
-	public Who(final EnvSettings envSettings, final DiscordUserRepo dcUserRepo, final ForumUserRepo fUserRepo,
-			   final DiscordBanRepo banRepo) {
+	private Who(final EnvSettings envSettings, final DiscordUserRepo dcUserRepo, final ForumUserRepo fUserRepo) {
 		this.envSettings = envSettings;
 		this.dcUserRepo = dcUserRepo;
 		this.fUserRepo = fUserRepo;
-		this.banRepo = banRepo;
 	}
 
 	/**
@@ -102,7 +96,6 @@ class Who extends CommandImpl {
 	 *
 	 * @param event The event provided by JDA that a guild message got received.
 	 */
-	@Transactional
 	@Override
 	public void execute(final GuildMessageReceivedEvent event) {
 		final TextChannel channel = event.getChannel();
@@ -153,9 +146,8 @@ class Who extends CommandImpl {
 	 * @param fUserOpt An {@code Optional} that may contain a forum user if found in the database for an ID.
 	 */
 	private void setUserInfo(final TextChannel channel, final EmbedBuilder eb, final DiscordUser dcUser, final Optional<ForumUser> fUserOpt) {
-		final long guildId = channel.getGuild().getIdLong();
 		setDiscordUserInfo(eb, dcUser);
-		setBanInfo(eb, dcUser, guildId);
+		setBanInfo(eb, dcUser);
 		eb.addBlankField(false);
 		setForumUserInfo(eb, fUserOpt);
 		answer(channel, eb.build());
@@ -198,15 +190,14 @@ class Who extends CommandImpl {
 	/**
 	 * Adds the ban reason to the info of the user if there is one for this guild.
 	 *
-	 * @param eb      The EmbedBuilder for the message.
-	 * @param dcUser  The Discord user to show info about.
-	 * @param guildId The ID of the guild in which the info got requested.
+	 * @param eb     The EmbedBuilder for the message.
+	 * @param dcUser The Discord user to show info about.
 	 */
-	private void setBanInfo(final EmbedBuilder eb, final DiscordUser dcUser, final long guildId) {
-		final Optional<DiscordBan> banOpt = dcUser.getBanForGuild(guildId);
-		banOpt.ifPresent(
-				ban -> eb.addField("Banned for:", ban.getReason(), false)
-		);
+	private void setBanInfo(final EmbedBuilder eb, final DiscordUser dcUser) {
+		final DiscordBan ban = dcUser.getBan();
+		if (ban != null) {
+			eb.addField("Banned for:", ban.getReason(), false);
+		}
 	}
 
 	/**

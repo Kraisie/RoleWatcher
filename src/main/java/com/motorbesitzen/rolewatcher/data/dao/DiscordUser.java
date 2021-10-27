@@ -2,12 +2,12 @@ package com.motorbesitzen.rolewatcher.data.dao;
 
 import org.hibernate.annotations.ColumnDefault;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.OneToOne;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
 
 @Entity
 public class DiscordUser {
@@ -23,8 +23,8 @@ public class DiscordUser {
 	@OneToOne(mappedBy = "linkedDiscordUser", cascade = CascadeType.ALL)
 	private ForumUser linkedForumUser;
 
-	@OneToMany(mappedBy = "bannedUser", cascade = CascadeType.ALL)
-	private Set<DiscordBan> bans;
+	@OneToOne(mappedBy = "bannedUser", cascade = CascadeType.ALL)
+	private DiscordBan ban;
 
 	protected DiscordUser() {
 	}
@@ -33,14 +33,14 @@ public class DiscordUser {
 		this.discordId = discordId;
 		this.whitelisted = whitelisted;
 		this.linkedForumUser = null;
-		this.bans = new HashSet<>();
+		this.ban = null;
 	}
 
 	private DiscordUser(long discordId, ForumUser forumUser) {
 		this.discordId = discordId;
 		this.whitelisted = false;
 		this.linkedForumUser = forumUser;
-		this.bans = new HashSet<>();
+		this.ban = null;
 	}
 
 	public static DiscordUser createDiscordUser(long discordId) {
@@ -79,12 +79,12 @@ public class DiscordUser {
 		this.linkedForumUser = linkedForumUser;
 	}
 
-	public Set<DiscordBan> getBans() {
-		return bans;
+	public DiscordBan getBan() {
+		return ban;
 	}
 
-	public void setBans(Set<DiscordBan> bans) {
-		this.bans = bans;
+	public void setBan(DiscordBan ban) {
+		this.ban = ban;
 	}
 
 	@Override
@@ -93,15 +93,5 @@ public class DiscordUser {
 				"discordId=" + discordId +
 				", whitelisted=" + whitelisted +
 				'}';
-	}
-
-	public Optional<DiscordBan> getBanForGuild(long guildId) {
-		for (DiscordBan ban : bans) {
-			if (ban.getGuild().getGuildId() == guildId) {
-				return Optional.of(ban);
-			}
-		}
-
-		return Optional.empty();
 	}
 }

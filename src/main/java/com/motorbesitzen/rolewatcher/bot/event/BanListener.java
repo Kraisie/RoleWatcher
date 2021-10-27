@@ -61,8 +61,8 @@ public class BanListener extends ListenerAdapter {
 		}
 
 		final User bannedUser = event.getUser();
-		if (discordBanRepo.existsByBannedUser_DiscordIdAndGuild_GuildId(bannedUser.getIdLong(), guild.getIdLong())) {
-			// ban already in database e.g. by importing other bans -> ignore
+		if (discordBanRepo.existsByBannedUser_DiscordId(bannedUser.getIdLong())) {
+			// ban already in database e.g. already banned on another guild
 			return;
 		}
 
@@ -204,7 +204,7 @@ public class BanListener extends ListenerAdapter {
 		}
 
 		final User unbannedUser = event.getUser();
-		final Optional<DiscordBan> banOpt = discordBanRepo.findDiscordBanByBannedUser_DiscordIdAndGuild_GuildId(unbannedUser.getIdLong(), guild.getIdLong());
+		final Optional<DiscordBan> banOpt = discordBanRepo.findByBannedUser_DiscordId(unbannedUser.getIdLong());
 		banOpt.ifPresentOrElse(
 				ban -> removeBan(event, ban),
 				() -> LogUtil.logWarning("\"" + unbannedUser.getAsTag() + "\" got unbanned on \"" +

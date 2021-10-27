@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -145,8 +144,8 @@ public class ForumUserController {
 
 		final ForumUser forumUser = forumUserOpt.get();
 		final DiscordUser dcUser = forumUser.getLinkedDiscordUser();
-		final List<DiscordBan> dcBans = banRepo.findAllByBannedUser_DiscordId(dcUser.getDiscordId());
-		if (dcBans.size() > 0) {
+		final Optional<DiscordBan> dcBans = banRepo.findByBannedUser_DiscordId(dcUser.getDiscordId());
+		if (dcBans.isPresent()) {
 			return ResponseEntity.status(HttpStatus.CONFLICT).body(
 					"Can not unlink banned user!"
 			);
@@ -217,10 +216,10 @@ public class ForumUserController {
 
 		final ForumUser forumUser = forumUserOpt.get();
 		final DiscordUser dcUser = forumUser.getLinkedDiscordUser();
-		final List<DiscordBan> dcBans = banRepo.findAllByBannedUser_DiscordId(dcUser.getDiscordId());
+		final Optional<DiscordBan> dcBansOpt = banRepo.findByBannedUser_DiscordId(dcUser.getDiscordId());
 		return ResponseEntity.status(HttpStatus.OK).body(
 				"F_ID: " + forumUser.getForumId() + ", D_ID: " + dcUser.getDiscordId() + ", " +
-						"BAN: " + (dcBans.size() > 0 ? dcBans.get(0).getReason() : "none")
+						"BAN: " + (dcBansOpt.isPresent() ? dcBansOpt.get().getReason() : "none")
 		);
 	}
 }

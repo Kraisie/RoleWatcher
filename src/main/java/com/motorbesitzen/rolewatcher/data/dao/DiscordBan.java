@@ -22,8 +22,8 @@ public class DiscordBan {
 	@NotBlank
 	private String reason;
 
-	@ManyToOne
-	@JoinColumn(name = "bannedDiscordUserId")
+	@OneToOne
+	@JoinColumn(name = "bannedUserId")
 	private DiscordUser bannedUser;
 
 	protected DiscordBan() {
