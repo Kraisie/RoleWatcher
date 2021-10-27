@@ -20,6 +20,14 @@ class UpdateGuildPerms extends CommandImpl {
 
 	private final DiscordGuildRepo guildRepo;
 
+	private static final String[] VALID_PERMISSIONS = {
+			"read",
+			"write",
+			"sync",
+			"autokick",
+			"bansync"
+	};
+
 	@Autowired
 	private UpdateGuildPerms(final DiscordGuildRepo guildRepo) {
 		this.guildRepo = guildRepo;
@@ -117,7 +125,7 @@ class UpdateGuildPerms extends CommandImpl {
 				permissionName -> saveGuildPermission(event, dcGuild, permissionName, permissionState),
 				() -> sendErrorMessage(
 						event.getChannel(),
-						"Please provide one of the following permission names in quotation marks: \"read\", \"write\", \"sync\", or \"autokick\"."
+						"Please provide one of the following permission names in quotation marks: " + getValidPermissionsText() + "."
 				)
 		);
 	}
@@ -146,7 +154,7 @@ class UpdateGuildPerms extends CommandImpl {
 	 */
 	private void saveGuildPermission(final GuildMessageReceivedEvent event, final DiscordGuild dcGuild, final String permissionName, final boolean permissionState) {
 		if (!isValidPermission(permissionName)) {
-			sendErrorMessage(event.getChannel(), "Unknown permission! Please use \"read\", \"write\", \"sync\", or \"autokick\".");
+			sendErrorMessage(event.getChannel(), "Unknown permission! Please use " + getValidPermissionsText() + ".");
 			return;
 		}
 
@@ -167,15 +175,13 @@ class UpdateGuildPerms extends CommandImpl {
 	 * @return {@code true} if the permission is valid, {@code false} otherwise.
 	 */
 	private boolean isValidPermission(final String permissionName) {
-		switch (permissionName.toLowerCase()) {
-			case "read":
-			case "write":
-			case "sync":
-			case "autokick":
+		for (String perm : VALID_PERMISSIONS) {
+			if (perm.equalsIgnoreCase(permissionName)) {
 				return true;
-			default:
-				return false;
+			}
 		}
+
+		return false;
 	}
 
 	/**
@@ -199,8 +205,11 @@ class UpdateGuildPerms extends CommandImpl {
 			case "autokick":
 				dcGuild.setAutokick(permissionState);
 				break;
+			case "bansync":
+				dcGuild.setBanSyncPerm(permissionState);
+				break;
 			default:
-				LogUtil.logDebug("Permission name \"" + permissionName + "\" marked as valid but can not be updated!");
+				LogUtil.logWarning("Permission name \"" + permissionName + "\" marked as valid but can not be updated!");
 		}
 	}
 
@@ -215,5 +224,21 @@ class UpdateGuildPerms extends CommandImpl {
 		guildRepo.save(newGuild);
 		answer(event.getChannel(), "Added mentioned guild to database.");
 		updateGuildPermission(event, newGuild);
+	}
+
+	/**
+	 * Builds a String which lists all valid permissions. Each separated by a comma except the last one
+	 * which also has an "or".
+	 *
+	 * @return The list of valid permissions.
+	 */
+	private String getValidPermissionsText() {
+		final StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < VALID_PERMISSIONS.length - 1; i++) {
+			sb.append("\"").append(VALID_PERMISSIONS[i]).append("\", ");
+		}
+
+		sb.append("or \"").append(VALID_PERMISSIONS[VALID_PERMISSIONS.length - 1]).append("\"");
+		return sb.toString();
 	}
 }
