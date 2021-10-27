@@ -144,4 +144,10 @@ public class DiscordGuild {
 	public void addBans(Set<DiscordBan> bans) {
 		this.bans.addAll(bans);
 	}
+
+	public String getPermissionText() {
+		return "Read: " + (hasReadPerm() ? "Yes" : "No") + "\n" +
+				"Write: " + (hasWritePerm() ? "Yes" : "No") + "\n" +
+				"RoleSync: " + (hasRoleSyncPerm() ? "Yes" : "No");
+	}
 }
