@@ -3,10 +3,7 @@ package com.motorbesitzen.rolewatcher.data.dao;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.validator.constraints.Range;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.util.HashSet;
@@ -19,24 +16,11 @@ public class DiscordGuild {
 	@Min(value = 10000000000000000L)
 	private long guildId;
 
-	@NotNull
-	@ColumnDefault("false")
-	private boolean writePerm;
-
-	@NotNull
-	@ColumnDefault("false")
-	private boolean readPerm;
-
-	@NotNull
-	@ColumnDefault("false")
-	private boolean roleSyncPerm;
+	@Embedded
+	private GuildPermission perms;
 
 	@ColumnDefault("0")
 	private long verificationChannelId;
-
-	@NotNull
-	@ColumnDefault("false")
-	private boolean autokick;
 
 	@NotNull
 	@ColumnDefault("24")
@@ -55,12 +39,9 @@ public class DiscordGuild {
 	protected DiscordGuild() {
 	}
 
-	public DiscordGuild(long guildId, boolean writePerm, boolean readPerm, boolean roleSyncPerm, boolean autokick, long verificationChannelId, int autokickHourDelay) {
+	public DiscordGuild(long guildId, GuildPermission perms, long verificationChannelId, int autokickHourDelay) {
 		this.guildId = guildId;
-		this.writePerm = writePerm;
-		this.readPerm = readPerm;
-		this.roleSyncPerm = roleSyncPerm;
-		this.autokick = autokick;
+		this.perms = perms;
 		this.verificationChannelId = verificationChannelId;
 		this.autokickHourDelay = autokickHourDelay;
 		this.authedChannels = new HashSet<>();
@@ -69,7 +50,7 @@ public class DiscordGuild {
 	}
 
 	public static DiscordGuild createDefault(long guildId) {
-		return new DiscordGuild(guildId, false, false, false, false, 0, 24);
+		return new DiscordGuild(guildId, GuildPermission.allOff(), 0, 24);
 	}
 
 	public long getGuildId() {
@@ -81,27 +62,43 @@ public class DiscordGuild {
 	}
 
 	public boolean hasWritePerm() {
-		return writePerm;
+		return perms.hasWritePerm();
 	}
 
 	public void setWritePerm(boolean writePerm) {
-		this.writePerm = writePerm;
+		this.perms.setWritePerm(writePerm);
 	}
 
 	public boolean hasReadPerm() {
-		return readPerm;
+		return perms.hasReadPerm();
 	}
 
 	public void setReadPerm(boolean readPerm) {
-		this.readPerm = readPerm;
+		this.perms.setReadPerm(readPerm);
 	}
 
 	public boolean hasRoleSyncPerm() {
-		return roleSyncPerm;
+		return perms.hasRoleSyncPerm();
 	}
 
 	public void setRoleSyncPerm(boolean roleSyncPerm) {
-		this.roleSyncPerm = roleSyncPerm;
+		this.perms.setRoleSyncPerm(roleSyncPerm);
+	}
+
+	public boolean hasBanSyncPerm() {
+		return perms.hasBanSyncPerm();
+	}
+
+	public void setBanSyncPerm(boolean banSyncPerm) {
+		this.perms.setBanSyncPerm(banSyncPerm);
+	}
+
+	public boolean canAutokick() {
+		return perms.canAutokick();
+	}
+
+	public void setAutokick(boolean autokick) {
+		this.perms.setAutokick(autokick);
 	}
 
 	public long getVerificationChannelId() {
@@ -110,14 +107,6 @@ public class DiscordGuild {
 
 	public void setVerificationChannelId(long verificationChannelId) {
 		this.verificationChannelId = verificationChannelId;
-	}
-
-	public boolean canAutokick() {
-		return autokick;
-	}
-
-	public void setAutokick(boolean autokick) {
-		this.autokick = autokick;
 	}
 
 	public int getAutokickHourDelay() {
