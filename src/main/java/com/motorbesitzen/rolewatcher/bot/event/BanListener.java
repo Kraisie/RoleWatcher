@@ -193,8 +193,19 @@ public class BanListener extends ListenerAdapter {
 	@Override
 	public void onGuildUnban(final GuildUnbanEvent event) {
 		final Guild guild = event.getGuild();
-		final User unbannedUser = event.getUser();
+		final Optional<DiscordGuild> dcGuildOpt = discordGuildRepo.findById(guild.getIdLong());
+		if (dcGuildOpt.isEmpty()) {
+			LogUtil.logWarning("Ignoring unban event on unknown guild \"" + guild.getName() + "\" (" + guild.getId() + ").");
+			return;
+		}
 
+		final DiscordGuild dcGuild = dcGuildOpt.get();
+		if (!dcGuild.hasBanSyncPerm()) {
+			// unbans for this guild do not get synced
+			return;
+		}
+
+		final User unbannedUser = event.getUser();
 		final Optional<DiscordBan> banOpt = discordBanRepo.findDiscordBanByBannedUser_DiscordIdAndGuild_GuildId(unbannedUser.getIdLong(), guild.getIdLong());
 		banOpt.ifPresentOrElse(
 				ban -> removeBan(event, ban),
