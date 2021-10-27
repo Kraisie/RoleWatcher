@@ -23,7 +23,7 @@ public class DiscordBan {
 	private String reason;
 
 	@OneToOne
-	@JoinColumn(name = "bannedUserId")
+	@JoinColumn(name = "bannedDiscordUserId")
 	private DiscordUser bannedUser;
 
 	protected DiscordBan() {
