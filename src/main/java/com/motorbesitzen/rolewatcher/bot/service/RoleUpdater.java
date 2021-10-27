@@ -1,9 +1,6 @@
 package com.motorbesitzen.rolewatcher.bot.service;
 
-import com.motorbesitzen.rolewatcher.data.dao.DiscordGuild;
-import com.motorbesitzen.rolewatcher.data.dao.DiscordUser;
-import com.motorbesitzen.rolewatcher.data.dao.ForumRole;
-import com.motorbesitzen.rolewatcher.data.dao.ForumUser;
+import com.motorbesitzen.rolewatcher.data.dao.*;
 import com.motorbesitzen.rolewatcher.data.repo.DiscordGuildRepo;
 import com.motorbesitzen.rolewatcher.data.repo.DiscordUserRepo;
 import com.motorbesitzen.rolewatcher.data.repo.ForumRoleRepo;
@@ -240,7 +237,19 @@ public class RoleUpdater {
 	 * @param member The member to check.
 	 */
 	private void checkForKick(final Member member) {
-		if (shouldKick(member)) {
+		final Optional<DiscordUser> dcUserOpt = discordUserRepo.findById(member.getIdLong());
+		if (dcUserOpt.isEmpty()) {
+			return;
+		}
+
+		final DiscordUser dcUser = dcUserOpt.get();
+		final DiscordBan dcBan = dcUser.getBan();
+		if (dcBan != null) {
+			member.ban(0, "Database contains a ban for this user, reason: \"" + dcBan.getReason() + "\".").queue();
+			return;
+		}
+
+		if (shouldKick(member, dcUser)) {
 			final Duration memberTime = Duration.between(member.getTimeJoined(), OffsetDateTime.now());
 			final long days = memberTime.toDays();
 			final long hours = memberTime.toHoursPart();
@@ -267,7 +276,7 @@ public class RoleUpdater {
 	 * @return {@code true} if the guild has autokick permissions, the member isn't a bot or the owner and if the user
 	 * joined x hours ago, {@code false} otherwise.
 	 */
-	private boolean shouldKick(final Member member) {
+	private boolean shouldKick(final Member member, final DiscordUser dcUser) {
 		final Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(member.getGuild().getIdLong());
 		if (dcGuildOpt.isEmpty()) {
 			return false;
@@ -278,11 +287,8 @@ public class RoleUpdater {
 			return false;
 		}
 
-		final Optional<DiscordUser> dcUserOpt = discordUserRepo.findById(member.getIdLong());
-		if (dcUserOpt.isPresent()) {
-			if (dcUserOpt.get().isWhitelisted()) {
-				return false;
-			}
+		if (dcUser.isWhitelisted()) {
+			return false;
 		}
 
 		if (member.getUser().isBot()) {
