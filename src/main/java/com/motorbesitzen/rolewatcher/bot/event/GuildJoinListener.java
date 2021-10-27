@@ -128,11 +128,11 @@ public class GuildJoinListener extends ListenerAdapter {
 
 		final Optional<DiscordUser> dcBannedUserOpt = discordUserRepo.findById(bannedUserId);
 		dcBannedUserOpt.ifPresentOrElse(
-				dcBannedUser -> discordBanRepo.save(DiscordBan.createDiscordBan(actorId, reason, dcGuild, dcBannedUser)),
+				dcBannedUser -> discordBanRepo.save(DiscordBan.createDiscordBan(actorId, reason, dcBannedUser)),
 				() -> {
 					final DiscordUser dcUser = DiscordUser.createDiscordUser(bannedUserId);
 					discordUserRepo.save(dcUser);
-					discordBanRepo.save(DiscordBan.createDiscordBan(actorId, reason, dcGuild, dcUser));
+					discordBanRepo.save(DiscordBan.createDiscordBan(actorId, reason, dcUser));
 				}
 		);
 		LogUtil.logDebug("Imported ban for \"" + ban.getUser().getAsTag() + "\" (" + ban.getUser().getId() + ").");
@@ -156,11 +156,11 @@ public class GuildJoinListener extends ListenerAdapter {
 			if (!discordBanRepo.existsByBannedUser_DiscordIdAndGuild_GuildId(bannedUserId, dcGuild.getGuildId())) {
 				final Optional<DiscordUser> dcBannedUserOpt = discordUserRepo.findById(bannedUserId);
 				dcBannedUserOpt.ifPresentOrElse(
-						dcBannedUser -> discordBanRepo.save(DiscordBan.withUnknownActor(reason, dcGuild, dcBannedUser)),
+						dcBannedUser -> discordBanRepo.save(DiscordBan.withUnknownActor(reason, dcBannedUser)),
 						() -> {
 							DiscordUser dcUser = DiscordUser.createDiscordUser(bannedUserId);
 							discordUserRepo.save(dcUser);
-							discordBanRepo.save(DiscordBan.withUnknownActor(reason, dcGuild, dcUser));
+							discordBanRepo.save(DiscordBan.withUnknownActor(reason, dcUser));
 						}
 				);
 				LogUtil.logDebug("Imported ban for \"" + ban.getUser().getAsTag() + "\" (" + ban.getUser().getId() + ") with unknown actor.");

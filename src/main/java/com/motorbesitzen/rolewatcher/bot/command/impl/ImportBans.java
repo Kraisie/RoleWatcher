@@ -129,7 +129,7 @@ class ImportBans extends CommandImpl {
 		final Guild guild = event.getGuild();
 		final Optional<DiscordGuild> callerDcGuildOpt = discordGuildRepo.findById(guild.getIdLong());
 		final DiscordGuild callerDcGuild = callerDcGuildOpt.orElseGet(() -> createDiscordGuild(guild.getIdLong()));
-		final Set<DiscordBan> importedBans = getImportedBans(callerDcGuild, discordGuild);
+		final Set<DiscordBan> importedBans = getImportedBans(discordGuild);
 		callerDcGuild.addBans(importedBans);
 		discordGuildRepo.save(callerDcGuild);
 
@@ -145,11 +145,10 @@ class ImportBans extends CommandImpl {
 	 * Retrieves the ban list of the given guild. If that guild already imported a ban the reason gets updated
 	 * to identify the guild the ban was last imported from.
 	 *
-	 * @param callerDcGuild The Discord guild the command got triggered in.
-	 * @param discordGuild  The Discord guild to import the bans of.
+	 * @param discordGuild The Discord guild to import the bans of.
 	 * @return A {@code Set<{@link DiscordBan}>} of the old guild.
 	 */
-	private Set<DiscordBan> getImportedBans(final DiscordGuild callerDcGuild, final DiscordGuild discordGuild) {
+	private Set<DiscordBan> getImportedBans(final DiscordGuild discordGuild) {
 		final Set<DiscordBan> newBans = new HashSet<>();
 		final Set<DiscordBan> importedBans = discordGuild.getBans();
 		for (DiscordBan ban : importedBans) {
@@ -161,7 +160,6 @@ class ImportBans extends CommandImpl {
 			final DiscordBan newBan = DiscordBan.createDiscordBan(
 					ban.getActorDiscordId(),
 					"[IB" + discordGuild.getGuildId() + "]: " + reason,
-					callerDcGuild,
 					ban.getBannedUser()
 			);
 			newBans.add(newBan);

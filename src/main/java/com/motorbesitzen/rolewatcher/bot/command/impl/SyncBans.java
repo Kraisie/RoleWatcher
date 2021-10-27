@@ -136,12 +136,12 @@ class SyncBans extends CommandImpl {
 		banRepo.deleteAll(toRemove);
 		event.getGuild().retrieveAuditLogs().type(ActionType.BAN).queue(
 				auditLogEntries -> {
-					addBans(dcGuild, auditLogEntries, toAdd);
+					addBans(auditLogEntries, toAdd);
 					sendSummary(event.getChannel(), toRemove.size(), toAdd.size());
 				},
 				throwable -> {
 					LogUtil.logError("Could not request audit log:", throwable);
-					addBans(dcGuild, new ArrayList<>(), toAdd);
+					addBans(new ArrayList<>(), toAdd);
 					sendSummary(event.getChannel(), toRemove.size(), toAdd.size());
 				}
 		);
@@ -227,10 +227,10 @@ class SyncBans extends CommandImpl {
 	/**
 	 * Adds a list of missing bans to the database.
 	 *
-	 * @param dcGuild The Discord guild database entry to add the bans to.
-	 * @param toAdd   The bans to add to the database.
+	 * @param auditLogEntries The audit log information.
+	 * @param toAdd           The bans to add to the database.
 	 */
-	private void addBans(final DiscordGuild dcGuild, final List<AuditLogEntry> auditLogEntries, final List<Guild.Ban> toAdd) {
+	private void addBans(final List<AuditLogEntry> auditLogEntries, final List<Guild.Ban> toAdd) {
 		final List<DiscordBan> dcBans = new ArrayList<>();
 		for (Guild.Ban ban : toAdd) {
 			final long bannedUserId = ban.getUser().getIdLong();
@@ -238,11 +238,11 @@ class SyncBans extends CommandImpl {
 			final DiscordUser bannedUser = bannedUserOpt.orElseGet(() -> createDiscordUser(bannedUserId));
 			final AuditLogEntry matchingEntry = findMatchingEntry(auditLogEntries, bannedUserId);
 			final DiscordBan dcBan = matchingEntry == null ?
-					DiscordBan.withUnknownActor(ban.getReason(), dcGuild, bannedUser) :
+					DiscordBan.withUnknownActor(ban.getReason(), bannedUser) :
 					(
 							matchingEntry.getUser() == null ?
-									DiscordBan.withUnknownActor(ban.getReason(), dcGuild, bannedUser) :
-									DiscordBan.createDiscordBan(matchingEntry.getUser().getIdLong(), ban.getReason(), dcGuild, bannedUser)
+									DiscordBan.withUnknownActor(ban.getReason(), bannedUser) :
+									DiscordBan.createDiscordBan(matchingEntry.getUser().getIdLong(), ban.getReason(), bannedUser)
 					);
 			dcBans.add(dcBan);
 			LogUtil.logInfo("[SYNC] Add " + dcBan);

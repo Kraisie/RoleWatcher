@@ -8,7 +8,6 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"guildId", "bannedDiscordUserId"}))
 public class DiscordBan {
 
 	@Id
@@ -24,29 +23,24 @@ public class DiscordBan {
 	private String reason;
 
 	@ManyToOne
-	@JoinColumn(name = "guildId")
-	private DiscordGuild guild;
-
-	@ManyToOne
 	@JoinColumn(name = "bannedDiscordUserId")
 	private DiscordUser bannedUser;
 
 	protected DiscordBan() {
 	}
 
-	private DiscordBan(long actorDiscordId, String reason, DiscordGuild guild, DiscordUser bannedUser) {
+	private DiscordBan(long actorDiscordId, String reason, DiscordUser bannedUser) {
 		this.actorDiscordId = actorDiscordId;
 		this.reason = reason;
-		this.guild = guild;
 		this.bannedUser = bannedUser;
 	}
 
-	public static DiscordBan createDiscordBan(long actorDiscordId, String reason, DiscordGuild guild, DiscordUser bannedUser) {
-		return new DiscordBan(actorDiscordId, reason, guild, bannedUser);
+	public static DiscordBan createDiscordBan(long actorDiscordId, String reason, DiscordUser bannedUser) {
+		return new DiscordBan(actorDiscordId, reason, bannedUser);
 	}
 
-	public static DiscordBan withUnknownActor(String reason, DiscordGuild guild, DiscordUser bannedUser) {
-		return new DiscordBan(0, reason, guild, bannedUser);
+	public static DiscordBan withUnknownActor(String reason, DiscordUser bannedUser) {
+		return new DiscordBan(0, reason, bannedUser);
 	}
 
 	public long getBanId() {
@@ -73,14 +67,6 @@ public class DiscordBan {
 		this.reason = reason;
 	}
 
-	public DiscordGuild getGuild() {
-		return guild;
-	}
-
-	public void setGuild(DiscordGuild guild) {
-		this.guild = guild;
-	}
-
 	public DiscordUser getBannedUser() {
 		return bannedUser;
 	}
@@ -95,7 +81,6 @@ public class DiscordBan {
 				"banId=" + banId +
 				", actorDiscordId=" + actorDiscordId +
 				", reason='" + reason + '\'' +
-				", guild=" + guild +
 				", bannedUser=" + bannedUser +
 				'}';
 	}

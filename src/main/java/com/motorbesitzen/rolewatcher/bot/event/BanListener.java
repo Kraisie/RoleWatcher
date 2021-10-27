@@ -121,15 +121,14 @@ public class BanListener extends ListenerAdapter {
 			return;
 		}
 
-		final DiscordGuild dcGuild = dcGuildOpt.get();
 		final User bannedUser = ban.getUser();
 		final Optional<DiscordUser> bannedDiscordUserOpt = discordUserRepo.findById(bannedUser.getIdLong());
 		bannedDiscordUserOpt.ifPresentOrElse(
-				bannedDiscordUser -> saveBan(DiscordBan.withUnknownActor(ban.getReason(), dcGuild, bannedDiscordUser)),
+				bannedDiscordUser -> saveBan(DiscordBan.withUnknownActor(ban.getReason(), bannedDiscordUser)),
 				() -> {
 					DiscordUser bannedDiscordUser = DiscordUser.createDiscordUser(bannedUser.getIdLong());
 					discordUserRepo.save(bannedDiscordUser);
-					saveBan(DiscordBan.withUnknownActor(ban.getReason(), dcGuild, bannedDiscordUser));
+					saveBan(DiscordBan.withUnknownActor(ban.getReason(), bannedDiscordUser));
 				}
 		);
 
@@ -159,16 +158,15 @@ public class BanListener extends ListenerAdapter {
 			LogUtil.logWarning("Received ban event for user (" + ban.getUser().getId() + ") but author is null!");
 		}
 
-		final DiscordGuild dcGuild = dcGuildOpt.get();
 		final User bannedUser = ban.getUser();
 		final String banReason = ban.getReason() == null ? (entry.getReason() == null ? "No reason given." : entry.getReason()) : ban.getReason();
 		final Optional<DiscordUser> bannedDiscordUserOpt = discordUserRepo.findById(bannedUser.getIdLong());
 		bannedDiscordUserOpt.ifPresentOrElse(
-				bannedDiscordUser -> saveBan(DiscordBan.createDiscordBan(actorId, banReason, dcGuild, bannedDiscordUser)),
+				bannedDiscordUser -> saveBan(DiscordBan.createDiscordBan(actorId, banReason, bannedDiscordUser)),
 				() -> {
 					DiscordUser bannedDiscordUser = DiscordUser.createDiscordUser(bannedUser.getIdLong());
 					discordUserRepo.save(bannedDiscordUser);
-					saveBan(DiscordBan.createDiscordBan(actorId, banReason, dcGuild, bannedDiscordUser));
+					saveBan(DiscordBan.createDiscordBan(actorId, banReason, bannedDiscordUser));
 				}
 		);
 
