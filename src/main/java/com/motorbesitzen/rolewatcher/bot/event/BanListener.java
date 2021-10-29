@@ -258,8 +258,11 @@ public class BanListener extends ListenerAdapter {
 	 */
 	private void handleMissingAuditLog(final GuildUnbanEvent event, final DiscordBan ban) {
 		final Guild guild = event.getGuild();
-		discordBanRepo.deleteById(ban.getBanId());
-		LogUtil.logWarning("Received unban event for user ID " + ban.getBannedUser().getDiscordId() + " in guild \"" +
+		final DiscordUser bannedUser = ban.getBannedUser();
+		ban.setBannedUser(null);    // unlinking from discord user, otherwise won't delete entry
+		discordBanRepo.save(ban);
+		discordBanRepo.delete(ban);
+		LogUtil.logWarning("Received unban event for user ID " + bannedUser.getDiscordId() + " in guild \"" +
 				guild.getName() + "\" (" + guild.getId() + ") but could not find matching audit log entry!");
 	}
 
@@ -273,8 +276,11 @@ public class BanListener extends ListenerAdapter {
 		final Guild guild = entry.getGuild();
 		final String authorTag = entry.getUser() != null ? entry.getUser().getAsTag() : "UnknownUser";
 		final String authorId = entry.getUser() != null ? entry.getUser().getId() : "0";
-		discordBanRepo.deleteById(ban.getBanId());
-		LogUtil.logDebug(ban.getBannedUser().getDiscordId() + " got unbanned on \"" + guild.getName() + "\" (" + guild.getId() +
+		final DiscordUser bannedUser = ban.getBannedUser();
+		ban.setBannedUser(null);    // unlinking from discord user, otherwise won't delete entry
+		discordBanRepo.save(ban);
+		discordBanRepo.delete(ban);
+		LogUtil.logDebug(bannedUser.getDiscordId() + " got unbanned on \"" + guild.getName() + "\" (" + guild.getId() +
 				") by \"" + authorTag + "\" (" + authorId + ").");
 	}
 }
