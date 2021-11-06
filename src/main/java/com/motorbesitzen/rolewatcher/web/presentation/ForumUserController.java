@@ -59,19 +59,21 @@ public class ForumUserController {
 	 * @return A response with the status code representing the result of the addition (204 = success, 422 = Invalid
 	 * entity, 409 = the user already exists, 400 = duplicate code, 500 = some internal error).
 	 */
-	@RequestMapping(value = "/users", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.TEXT_PLAIN_VALUE)
+	@RequestMapping(value = "/users", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> addMember(@ValidApiKey @RequestParam(value = "key", required = false) final String key,
 									   @Valid @RequestBody final LinkingInformation linkingInformation,
 									   final BindingResult bindingResult) {
 		// key does not get used as it gets validated before any of this code below even starts, DO NOT REMOVE KEY
 		if (bindingResult.hasErrors()) {
-			return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body("Invalid/corrupted data!");
+			return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(
+					"{\"error\": \"Invalid/corrupted data!\"}"
+			);
 		}
 
 		final Optional<ForumUser> forumUserOpt = forumUserRepo.findById(linkingInformation.getUid());
 		if (forumUserOpt.isPresent()) {
 			return ResponseEntity.status(HttpStatus.CONFLICT).body(
-					"Your forum account is already linked! Contact a staff if you want to get unlinked."
+					"{\"error\": \"Your forum account is already linked! Contact a staff if you want to get unlinked.!\"}"
 			);
 		}
 
@@ -83,7 +85,9 @@ public class ForumUserController {
 			final long savedInfoIdUid = savedInfoId.getUid();
 			final long savedInfoCodeUid = savedInfoCode.getUid();
 			if (savedInfoIdUid != savedInfoCodeUid) {
-				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+						"{\"error\": \"Duplicated code!\"}"
+				);
 			}
 		}
 
@@ -132,18 +136,20 @@ public class ForumUserController {
 	 * @return A response with the status code representing the result of the addition (204 = success, 422 = Invalid
 	 * entity, 409 = the user already exists, 400 = duplicate code, 500 = some internal error).
 	 */
-	@RequestMapping(value = "/users/{id}", method = RequestMethod.DELETE, produces = MediaType.TEXT_PLAIN_VALUE)
+	@RequestMapping(value = "/users/{id}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> delMember(@ValidApiKey @RequestParam(value = "key", required = false) final String key,
 									   @PathVariable("id") final Long id, final HttpServletRequest request) {
 		if (id == null) {
 			LogUtil.logDebug(request.getRequestURI());
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Missing ID!");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+					"{\"error\": \"Missing ID!\"}"
+			);
 		}
 
 		final Optional<ForumUser> forumUserOpt = forumUserRepo.findByForumIdOrLinkedDiscordUser_DiscordId(id, id);
 		if (forumUserOpt.isEmpty()) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-					"No user found with that ID!"
+					"{\"error\": \"No user found with that ID!\"}"
 			);
 		}
 
@@ -152,7 +158,7 @@ public class ForumUserController {
 		final Optional<DiscordBan> dcBans = banRepo.findByBannedUser_DiscordId(dcUser.getDiscordId());
 		if (dcBans.isPresent()) {
 			return ResponseEntity.status(HttpStatus.CONFLICT).body(
-					"Can not unlink banned user!"
+					"{\"error\": \"Can not unlink banned user!\"}"
 			);
 		}
 
