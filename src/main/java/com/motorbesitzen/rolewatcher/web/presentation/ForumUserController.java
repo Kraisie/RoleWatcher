@@ -205,20 +205,24 @@ public class ForumUserController {
 										@PathVariable("id") final Long id, final HttpServletRequest request) {
 		if (id == null) {
 			LogUtil.logDebug(request.getRequestURI());
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Missing ID!");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+					"{\"error\": \"Missing ID!\"}"
+			);
 		}
 
 		final Optional<ForumUser> forumUserOpt = forumUserRepo.findByForumIdOrLinkedDiscordUser_DiscordId(id, id);
 		if (forumUserOpt.isEmpty()) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-					"No user found with that ID!"
+					"{\"error\": \"No user found with that ID!\"}"
 			);
 		}
 
 		final ForumUser forumUser = forumUserOpt.get();
 		final String replyJson = buildUserData(forumUser);
 		if (replyJson == null) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+					"{\"error\": \"Could not generate data!\"}"
+			);
 		}
 
 		return ResponseEntity.status(HttpStatus.OK).body(replyJson);
