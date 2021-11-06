@@ -1,5 +1,8 @@
 package com.motorbesitzen.rolewatcher.web.presentation;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.motorbesitzen.rolewatcher.data.dao.*;
 import com.motorbesitzen.rolewatcher.data.repo.DiscordBanRepo;
 import com.motorbesitzen.rolewatcher.data.repo.DiscordGuildRepo;
@@ -199,7 +202,7 @@ public class ForumUserController {
 	 * @return A response with the status code representing the result of the request (200 = success
 	 * 400 = No ID found, 404 = user not found, 500 = some internal error) and the information in the body on success.
 	 */
-	@RequestMapping(value = "/users/{id}", method = RequestMethod.GET, produces = MediaType.TEXT_PLAIN_VALUE)
+	@RequestMapping(value = "/users/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> memberInfo(@ValidApiKey @RequestParam(value = "key", required = false) final String key,
 										@PathVariable("id") final Long id, final HttpServletRequest request) {
 		if (id == null) {
@@ -215,11 +218,30 @@ public class ForumUserController {
 		}
 
 		final ForumUser forumUser = forumUserOpt.get();
+		final String replyJson = buildUserData(forumUser);
+		if (replyJson == null) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+		}
+
+		return ResponseEntity.status(HttpStatus.OK).body(replyJson);
+	}
+
+	private String buildUserData(final ForumUser forumUser) {
 		final DiscordUser dcUser = forumUser.getLinkedDiscordUser();
-		final Optional<DiscordBan> dcBansOpt = banRepo.findByBannedUser_DiscordId(dcUser.getDiscordId());
-		return ResponseEntity.status(HttpStatus.OK).body(
-				"F_ID: " + forumUser.getForumId() + ", D_ID: " + dcUser.getDiscordId() + ", " +
-						"BAN: " + (dcBansOpt.isPresent() ? dcBansOpt.get().getReason() : "none")
-		);
+		final Optional<DiscordBan> dcBanOpt = banRepo.findByBannedUser_DiscordId(dcUser.getDiscordId());
+		final ObjectMapper mapper = new ObjectMapper();
+		final ObjectNode userData = mapper.createObjectNode();
+		userData.put("forum_id", forumUser.getForumId());
+		userData.put("discord_id", dcUser.getDiscordId());
+		userData.put("whitelisted", dcUser.isWhitelisted());
+		userData.put("banned", dcBanOpt.isPresent());
+		userData.put("ban_reason", dcBanOpt.map(DiscordBan::getReason).orElse(null));
+
+		try {
+			return mapper.writer().writeValueAsString(userData);
+		} catch (JsonProcessingException e) {
+			LogUtil.logError("Could not generate JSON user data!", e);
+			return null;
+		}
 	}
 }
