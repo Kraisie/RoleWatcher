@@ -100,6 +100,14 @@ public class ForumRoleApiRequest {
 			throw new IllegalArgumentException("Could not convert role ID JSON to integer array! JSON is null.");
 		}
 
+		if (roleIdsJson.isBlank()) {
+			throw new IllegalArgumentException("Could not convert role ID JSON to integer array! JSON is blank.");
+		}
+
+		if (roleIdsJson.startsWith("<html>")) {
+			throw new IllegalArgumentException("Received HTML instead of JSON.");
+		}
+
 		try {
 			final ObjectMapper mapper = new ObjectMapper();
 			final long[] roleIds = mapper.readValue(roleIdsJson, long[].class);
