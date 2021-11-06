@@ -13,6 +13,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.exceptions.HierarchyException;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
+import org.apache.http.conn.ConnectTimeoutException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -182,7 +183,7 @@ public class RoleUpdater {
 		final List<ForumRole> forumRoles;
 		try {
 			forumRoles = apiRequest.getRolesOfForumUser(forumUser);
-		} catch (SocketTimeoutException e) {
+		} catch (ConnectTimeoutException | SocketTimeoutException e) {
 			LogUtil.logError("Skipping user due to API timeout. Could not get roles of " + forumUser);
 			return;
 		} catch (IOException | IllegalArgumentException e) {
