@@ -4,11 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.motorbesitzen.rolewatcher.data.dao.*;
-import com.motorbesitzen.rolewatcher.data.repo.DiscordBanRepo;
-import com.motorbesitzen.rolewatcher.data.repo.DiscordGuildRepo;
-import com.motorbesitzen.rolewatcher.data.repo.ForumUserRepo;
-import com.motorbesitzen.rolewatcher.data.repo.LinkingInformationRepo;
+import com.motorbesitzen.rolewatcher.data.repo.*;
 import com.motorbesitzen.rolewatcher.util.LogUtil;
+import com.motorbesitzen.rolewatcher.util.RoleUtil;
 import com.motorbesitzen.rolewatcher.web.entity.validation.ValidApiKey;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
@@ -23,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.Optional;
 
 /**
@@ -36,15 +35,18 @@ public class ForumUserController {
 	private final LinkingInformationRepo linkingRepo;
 	private final DiscordBanRepo banRepo;
 	private final DiscordGuildRepo guildRepo;
+	private final ForumRoleRepo forumRoleRepo;
 	private final JDA jda;
 
 	@Autowired
 	public ForumUserController(final ForumUserRepo forumUserRepo, final LinkingInformationRepo linkingRepo,
-							   final DiscordBanRepo banRepo, final DiscordGuildRepo guildRepo, final JDA jda) {
+							   final DiscordBanRepo banRepo, final DiscordGuildRepo guildRepo,
+							   final ForumRoleRepo forumRoleRepo, final JDA jda) {
 		this.forumUserRepo = forumUserRepo;
 		this.linkingRepo = linkingRepo;
 		this.banRepo = banRepo;
 		this.guildRepo = guildRepo;
+		this.forumRoleRepo = forumRoleRepo;
 		this.jda = jda;
 	}
 
@@ -154,19 +156,19 @@ public class ForumUserController {
 			);
 		}
 
-		kickUser(forumUser);
 		forumUser.setLinkedDiscordUser(null);
 		forumUserRepo.save(forumUser);    // unlinking from discord user, otherwise won't delete entry
 		forumUserRepo.delete(forumUser);
+		removeUserRoles(forumUser);
 		return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
 	}
 
 	/**
-	 * Kicks an unlinked user from the Discord.
+	 * Removes forum roles from an unlinked user.
 	 *
-	 * @param forumUser The user to kick.
+	 * @param forumUser The unlinked user.
 	 */
-	private void kickUser(final ForumUser forumUser) {
+	private void removeUserRoles(final ForumUser forumUser) {
 		final DiscordUser dcUser = forumUser.getLinkedDiscordUser();
 		if (dcUser.isWhitelisted()) {
 			return;
@@ -180,14 +182,10 @@ public class ForumUserController {
 
 			final Guild guild = jda.getGuildById(dcGuild.getGuildId());
 			if (guild != null) {
-				final long forumId = forumUser.getForumId();
 				final long discordId = dcUser.getDiscordId();
-				guild.kick(
-						String.valueOf(dcUser.getDiscordId()),
-						"Kicked due to self-unlink (" + forumId + " <-> " + discordId + ")."
-				).queue(
-						v -> LogUtil.logDebug("Kicked member due to self-unlink."),
-						throwable -> LogUtil.logDebug("Could not kick self-unlinked user!", throwable)
+				guild.retrieveMemberById(discordId).queue(
+						member -> RoleUtil.updateRoles(member, new ArrayList<>(), forumRoleRepo.findAll()),
+						throwable -> LogUtil.logDebug("Could not remove roles from user with ID " + discordId + ".")
 				);
 			}
 		}
